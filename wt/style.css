@@ -216,6 +216,11 @@ input::placeholder {
   text-align: right;
 }
 
+/* Link */
+.downloadlink {
+  color: var(--accent);
+}
+
 /* Button */
 .btn-calculate {
   display: block;
