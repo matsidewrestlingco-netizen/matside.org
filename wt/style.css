@@ -47,6 +47,11 @@ h1 {
   color: var(--white);
 }
 
+a {
+  color: var(--accent);
+  text-decoration: none; 
+}
+
 .subtitle {
   color: var(--text-muted);
   margin-top: 0.25rem;
@@ -214,11 +219,6 @@ input::placeholder {
   color: var(--text-muted);
   min-width: 30px;
   text-align: right;
-}
-
-/* Link */
-.downloadlink {
-  color: var(--accent);
 }
 
 /* Button */
