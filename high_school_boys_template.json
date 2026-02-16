@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "tournamentName": "High School Template",
+  "numDays": "1",
+  "startTimeDay1": "09:00",
+  "endTimeDay1": "18:00",
+  "startTimeDay2": "09:00",
+  "numMats": "4",
+  "level": "hs",
+  "boutsPerHour": "10",
+  "placing": "top8",
+  "numWeights": "13",
+  "weights": [
+    {
+      "name": "107",
+      "wrestlers": ""
+    },
+    {
+      "name": "114",
+      "wrestlers": ""
+    },
+    {
+      "name": "121",
+      "wrestlers": ""
+    },
+    {
+      "name": "127",
+      "wrestlers": ""
+    },
+    {
+      "name": "133",
+      "wrestlers": ""
+    },
+    {
+      "name": "139",
+      "wrestlers": ""
+    },
+    {
+      "name": "145",
+      "wrestlers": ""
+    },
+    {
+      "name": "152",
+      "wrestlers": ""
+    },
+    {
+      "name": "160",
+      "wrestlers": ""
+    },
+    {
+      "name": "172",
+      "wrestlers": ""
+    },
+    {
+      "name": "189",
+      "wrestlers": ""
+    },
+    {
+      "name": "215",
+      "wrestlers": ""
+    },
+    {
+      "name": "285",
+      "wrestlers": ""
+    }
+  ],
+  "actuals": [],
+  "numLocations": "2",
+  "locations": [
+    {
+      "name": "",
+      "mats": "2"
+    },
+    {
+      "name": "",
+      "mats": "2"
+    }
+  ],
+  "splitterAssignments": {},
+  "roundMapDayCutoff": -1
+}
