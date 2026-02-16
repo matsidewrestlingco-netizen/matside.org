@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "tournamentName": "Junior High Girls Template",
+  "numDays": "1",
+  "startTimeDay1": "09:00",
+  "endTimeDay1": "18:00",
+  "startTimeDay2": "09:00",
+  "numMats": "4",
+  "level": "jh",
+  "boutsPerHour": "12",
+  "placing": "top8",
+  "numWeights": "14",
+  "weights": [
+    {
+      "name": "80",
+      "wrestlers": ""
+    },
+    {
+      "name": "87",
+      "wrestlers": ""
+    },
+    {
+      "name": "94",
+      "wrestlers": ""
+    },
+    {
+      "name": "100",
+      "wrestlers": ""
+    },
+    {
+      "name": "105",
+      "wrestlers": ""
+    },
+    {
+      "name": "110",
+      "wrestlers": ""
+    },
+    {
+      "name": "115",
+      "wrestlers": ""
+    },
+    {
+      "name": "120",
+      "wrestlers": ""
+    },
+    {
+      "name": "125",
+      "wrestlers": ""
+    },
+    {
+      "name": "131",
+      "wrestlers": ""
+    },
+    {
+      "name": "138",
+      "wrestlers": ""
+    },
+    {
+      "name": "148",
+      "wrestlers": ""
+    },
+    {
+      "name": "180",
+      "wrestlers": ""
+    },
+    {
+      "name": "220",
+      "wrestlers": ""
+    }
+  ],
+  "actuals": [],
+  "numLocations": "2",
+  "locations": [
+    {
+      "name": "",
+      "mats": "2"
+    },
+    {
+      "name": "",
+      "mats": "2"
+    }
+  ],
+  "splitterAssignments": {},
+  "roundMapDayCutoff": -1
+}
