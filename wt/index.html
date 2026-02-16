@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wrestling Tournament Time Estimator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Wrestling Tournament Time Estimator</h1>
+      <p class="subtitle">Estimate when rounds finish so you can keep parents and coaches informed.</p>
+      <div class="session-buttons">
+        <button type="button" id="btn-save" class="btn-session">Save Session</button>
+        <label class="btn-session btn-load-label">
+          Load Session
+          <input type="file" id="btn-load" accept=".json" hidden>
+        </label>
+      </div>
+    </header>
+
+    <form id="estimator-form" autocomplete="off">
+
+      <!-- Row 1: Tournament basics -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="tournament-name">Tournament Name <span class="optional">(optional)</span></label>
+          <input type="text" id="tournament-name" placeholder="e.g. Matside Invitational">
+        </div>
+
+        <div class="form-group">
+          <label for="num-days">Number of Days</label>
+          <select id="num-days">
+            <option value="1">1 Day</option>
+            <option value="2">2 Days</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="start-time-day1">Start Time — Day 1</label>
+          <input type="time" id="start-time-day1" value="09:00" required>
+        </div>
+
+        <div class="form-group" id="end-time-day1-group">
+          <label for="end-time-day1">End Time — Day 1 <span class="hint">(2-day only)</span></label>
+          <input type="time" id="end-time-day1" value="18:00" disabled>
+        </div>
+
+        <div class="form-group" id="start-time-day2-group">
+          <label for="start-time-day2">Start Time — Day 2 <span class="hint">(2-day only)</span></label>
+          <input type="time" id="start-time-day2" value="09:00" disabled>
+        </div>
+
+        <div class="form-group">
+          <label for="num-mats">Number of Mats</label>
+          <input type="number" id="num-mats" min="1" max="20" value="4" required>
+        </div>
+
+        <div class="form-group">
+          <label for="level">Level</label>
+          <select id="level">
+            <option value="youth">Youth (1:00 periods)</option>
+            <option value="jh">Junior High (1:30 periods)</option>
+            <option value="hs" selected>High School (2:00 periods)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="bouts-per-hour">
+            Bouts / Hour / Mat
+            <span class="hint" id="default-hint"></span>
+          </label>
+          <input type="number" id="bouts-per-hour" min="1" max="30" step="0.5" required>
+        </div>
+
+        <div class="form-group">
+          <label for="placing">Placing Format</label>
+          <select id="placing">
+            <option value="top4">Top 4</option>
+            <option value="top6">Top 6</option>
+            <option value="top8" selected>Top 8</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="num-weights">Number of Weight Classes</label>
+          <input type="number" id="num-weights" min="1" max="50" value="10" required>
+        </div>
+      </div>
+
+      <!-- Weight class entry -->
+      <div class="weight-section">
+        <div class="weight-section-header">
+          <h3>Wrestlers per Weight Class</h3>
+          <div class="weight-total">
+            Total Bouts: <strong id="total-bouts-display">0</strong>
+          </div>
+        </div>
+        <div id="weight-inputs" class="weight-grid"></div>
+      </div>
+
+      <button type="submit" class="btn-calculate">Calculate</button>
+    </form>
+
+    <section id="results" class="results hidden">
+      <h2>Estimate</h2>
+      <div id="tournament-label" class="tournament-label"></div>
+
+      <div class="results-grid">
+        <div class="result-card">
+          <div class="result-value" id="result-total-bouts">—</div>
+          <div class="result-label">Total Bouts</div>
+        </div>
+        <div class="result-card">
+          <div class="result-value" id="result-total-time">—</div>
+          <div class="result-label">Total Wrestling Time</div>
+        </div>
+        <div class="result-card highlight">
+          <div class="result-value" id="result-end-time">—</div>
+          <div class="result-label">Estimated Finish</div>
+        </div>
+      </div>
+
+      <div id="day-breakdown" class="day-breakdown hidden"></div>
+
+      <div id="weight-breakdown" class="weight-breakdown"></div>
+
+      <div class="summary" id="summary-text"></div>
+    </section>
+
+    <section id="hourly-section" class="hourly-section hidden">
+      <h2>Hourly Breakdown</h2>
+      <div id="hourly-label" class="tournament-label"></div>
+      <div id="hourly-table-container"></div>
+    </section>
+
+    <section id="splitter-section" class="splitter-section hidden">
+      <h2>Venue Splitter</h2>
+      <p class="subtitle">Split weight classes across locations so venues finish at the same time.</p>
+
+      <div class="splitter-inputs">
+        <div class="form-group">
+          <label for="num-locations">Number of Locations</label>
+          <select id="num-locations">
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+        <div id="location-inputs" class="location-inputs"></div>
+        <button type="button" id="btn-split" class="btn-calculate">Split Weight Classes</button>
+      </div>
+
+      <div id="splitter-results" class="splitter-results hidden"></div>
+    </section>
+
+    <section id="roundmap-section" class="roundmap-section hidden">
+      <h2>Round Map</h2>
+      <p class="subtitle">Click a round column header to set the Day 1 / Day 2 cutoff.</p>
+      <div id="roundmap-day-summary" class="roundmap-day-summary hidden"></div>
+      <div id="roundmap-table-container" class="roundmap-table-container"></div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
