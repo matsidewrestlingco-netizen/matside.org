@@ -14,7 +14,7 @@
   --border-light: #2a2a3a;
   --text: #e4e4e7;
   --text-muted: #71717a;
-  --accent: #3d82c4;
+  --accent: #5eb8d6;
   --accent-bright: #7dd3f0;
   --accent-dim: rgba(94, 184, 214, 0.1);
   --accent-focus: rgba(94, 184, 214, 0.2);
@@ -45,11 +45,6 @@ h1 {
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--white);
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none; 
 }
 
 .subtitle {
@@ -580,6 +575,69 @@ input::placeholder {
 .venue-assign:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-focus);
+}
+
+/* Round Schedule */
+.round-schedule-section {
+  margin-top: 2rem;
+  background: var(--bg-raised);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.round-schedule-section.hidden {
+  display: none;
+}
+
+.round-schedule-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+  color: var(--white);
+}
+
+.round-schedule-section .subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.round-schedule-section table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.round-schedule-section th,
+.round-schedule-section td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.round-schedule-section th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-card);
+}
+
+.round-schedule-section td {
+  text-align: left;
+}
+
+.round-schedule-section td.num {
+  text-align: right;
+}
+
+.round-schedule-section th.num {
+  text-align: right;
+}
+
+.round-schedule-section tr.total-row td {
+  font-weight: 600;
+  background: var(--accent-dim);
+  color: var(--accent-bright);
+  border-top: 2px solid var(--border-light);
 }
 
 /* Round Map */
