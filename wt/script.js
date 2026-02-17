@@ -310,6 +310,58 @@ placingSelect.addEventListener("change", updateTotalBouts);
 buildWeightInputs();
 
 // ============================================================
+// Ticker Sync (localStorage)
+// ============================================================
+let tickerState = {};
+
+function syncTicker(updates) {
+  Object.assign(tickerState, updates);
+  tickerState.updatedAt = Date.now();
+  try {
+    localStorage.setItem("wrestlingTicker", JSON.stringify(tickerState));
+  } catch (e) { /* localStorage unavailable */ }
+}
+
+function syncTickerFromHourly() {
+  // Compute completed bouts and actual run rate from hourly actuals
+  let completedBouts = 0;
+  let actualMinutes = 0;
+  let hasActuals = false;
+
+  for (const block of hourlyBlocks) {
+    if (block.actual !== null) {
+      hasActuals = true;
+      completedBouts += block.actual;
+      actualMinutes += block.blockFraction * 60;
+    }
+  }
+
+  const remaining = Math.max(0, hourlyTotalBouts - completedBouts);
+  const actualRate = hasActuals && actualMinutes > 0
+    ? Math.round((completedBouts / (actualMinutes / 60)) * 10) / 10
+    : null;
+
+  // Estimate finish using actual rate if available, else configured rate
+  const effectiveRate = actualRate || hourlyTotalBoutsPerHour;
+  const remainingHours = remaining / effectiveRate;
+  const now = new Date();
+  const finishMs = now.getTime() + remainingHours * 60 * 60 * 1000;
+  const finishDate = new Date(finishMs);
+  const finishH = finishDate.getHours();
+  const finishM = finishDate.getMinutes();
+  const period = finishH >= 12 ? "PM" : "AM";
+  const displayH = finishH % 12 === 0 ? 12 : finishH % 12;
+  const liveFinish = `${displayH}:${finishM.toString().padStart(2, "0")} ${period}`;
+
+  syncTicker({
+    completedBouts,
+    remaining,
+    actualRate,
+    liveFinish: hasActuals ? liveFinish : null,
+  });
+}
+
+// ============================================================
 // Calculate
 // ============================================================
 form.addEventListener("submit", function (e) {
@@ -463,8 +515,27 @@ form.addEventListener("submit", function (e) {
   // ============================================================
   buildHourlyBreakdown(totalBouts, mats, boutsPerHourPerMat, numDays, startDay1, endDay1, startDay2);
 
+  // Round schedule
+  buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, startDay1);
+
   // Round map
   buildRoundMap(weightData, placing);
+
+  // Sync ticker
+  const placingLabel = placing === "top8" ? "Top 8" : placing === "top6" ? "Top 6" : "Top 4";
+  syncTicker({
+    tournamentName: name,
+    totalBouts,
+    mats,
+    boutsPerHourPerMat,
+    totalBoutsPerHour,
+    configuredRate: totalBoutsPerHour,
+    estimatedFinish: document.getElementById("result-end-time").textContent,
+    completedBouts: 0,
+    remaining: totalBouts,
+    actualRate: null,
+    liveFinish: null,
+  });
 
   resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
 });
@@ -633,6 +704,7 @@ function renderHourlyTable() {
       const val = this.value.trim();
       hourlyBlocks[idx].actual = val === "" ? null : parseInt(val) || 0;
       renderHourlyTable();
+      syncTickerFromHourly();
       // Re-focus and set cursor position on the input that was just edited
       const refocused = container.querySelector(`.actual-input[data-block="${idx}"]`);
       if (refocused) {
@@ -853,6 +925,108 @@ function renderSplitterResults() {
       renderSplitterResults();
     });
   });
+}
+
+// ============================================================
+// Round Schedule
+// ============================================================
+function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, startTime) {
+  const section = document.getElementById("round-schedule-section");
+  const container = document.getElementById("round-schedule-container");
+  const label = document.getElementById("round-schedule-label");
+  const fmt = ROUND_DATA[placing];
+
+  // Only include weights that are in the ROUND_DATA range (6–64)
+  const validWeights = weightData.filter((w) => w.wrestlers >= 6 && w.wrestlers <= 64);
+
+  if (validWeights.length === 0 || !fmt) {
+    section.classList.add("hidden");
+    return;
+  }
+
+  section.classList.remove("hidden");
+
+  const rounds = fmt.rounds;
+  const totalBoutsPerHour = boutsPerHourPerMat * mats;
+
+  // Sum bouts across all weights for each round
+  const roundTotals = rounds.map((_, r) => {
+    let total = 0;
+    for (const w of validWeights) {
+      const roundBouts = fmt.data[w.wrestlers];
+      if (roundBouts) total += roundBouts[r];
+    }
+    return total;
+  });
+
+  // Filter to rounds that have bouts
+  const activeRounds = [];
+  for (let r = 0; r < rounds.length; r++) {
+    if (roundTotals[r] > 0) {
+      activeRounds.push({ index: r, name: rounds[r], bouts: roundTotals[r] });
+    }
+  }
+
+  if (activeRounds.length === 0) {
+    section.classList.add("hidden");
+    return;
+  }
+
+  label.textContent = `${mats} mat${mats > 1 ? "s" : ""} at ${boutsPerHourPerMat} bouts/hr/mat (${totalBoutsPerHour} bouts/hr total)`;
+
+  // Calculate timing for each round
+  let currentMin = timeToMinutes(startTime);
+  let cumulativeBouts = 0;
+  const totalBouts = activeRounds.reduce((sum, r) => sum + r.bouts, 0);
+
+  let rowsHtml = "";
+  for (const round of activeRounds) {
+    const roundMinutes = (round.bouts / totalBoutsPerHour) * 60;
+    const startMinForRound = currentMin;
+    const endMinForRound = currentMin + roundMinutes;
+    cumulativeBouts += round.bouts;
+    const remaining = totalBouts - cumulativeBouts;
+
+    rowsHtml += `<tr>
+      <td>${round.name}</td>
+      <td class="num">${round.bouts}</td>
+      <td class="num">${formatDuration(roundMinutes)}</td>
+      <td class="num">${minutesToTime(startMinForRound)}</td>
+      <td class="num">${minutesToTime(endMinForRound)}</td>
+      <td class="num">${cumulativeBouts}</td>
+      <td class="num">${remaining}</td>
+    </tr>`;
+
+    currentMin = endMinForRound;
+  }
+
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Round</th>
+          <th class="num">Bouts</th>
+          <th class="num">Duration</th>
+          <th class="num">Est. Start</th>
+          <th class="num">Est. End</th>
+          <th class="num">Cumulative</th>
+          <th class="num">Remaining</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsHtml}
+        <tr class="total-row">
+          <td>Total</td>
+          <td class="num">${totalBouts}</td>
+          <td class="num">${formatDuration((totalBouts / totalBoutsPerHour) * 60)}</td>
+          <td class="num">${minutesToTime(timeToMinutes(startTime))}</td>
+          <td class="num">${minutesToTime(currentMin)}</td>
+          <td class="num">${totalBouts}</td>
+          <td class="num">0</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
 }
 
 // ============================================================
