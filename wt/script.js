@@ -522,7 +522,6 @@ form.addEventListener("submit", function (e) {
   buildRoundMap(weightData, placing);
 
   // Sync ticker
-  const placingLabel = placing === "top8" ? "Top 8" : placing === "top6" ? "Top 6" : "Top 4";
   syncTicker({
     tournamentName: name,
     totalBouts,
