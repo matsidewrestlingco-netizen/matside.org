@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournament Ticker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg-bar: #101018;
+      --border: #1e1e2a;
+      --text: #e4e4e7;
+      --text-muted: #71717a;
+      --accent: #3d82c4;
+      --accent-bright: #3d82c4;
+      --green: #4ade80;
+      --yellow: #facc15;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    .ticker-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      width: 180px;
+      background: var(--bg-bar);
+      border-left: 1px solid var(--border);
+      padding: 0;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ticker-item:last-child {
+      border-bottom: none;
+    }
+
+    .ticker-item.name-item {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--accent-bright);
+      letter-spacing: 0.02em;
+      justify-content: center;
+      padding: 0.75rem 1rem;
+      text-align: center;
+    }
+
+    .ticker-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .ticker-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .ticker-value.highlight {
+      color: var(--accent-bright);
+    }
+
+    .ticker-value.finish {
+      color: var(--green);
+    }
+
+    .ticker-value.live {
+      color: var(--yellow);
+    }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-pct {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      min-width: 32px;
+      text-align: right;
+    }
+
+    .waiting {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 180px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.03em;
+      text-align: center;
+      padding: 1rem;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      writing-mode: horizontal-tb;
+    }
+
+    .dot-pulse {
+      display: inline-block;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="ticker" class="waiting">
+    <span class="dot-pulse">Waiting for tournament data...</span>
+  </div>
+
+  <script>
+    const tickerEl = document.getElementById("ticker");
+    let lastUpdatedAt = 0;
+
+    function readTicker() {
+      try {
+        const raw = localStorage.getItem("wrestlingTicker");
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function render(data) {
+      if (!data || !data.totalBouts) {
+        tickerEl.className = "waiting";
+        tickerEl.innerHTML = '<span class="dot-pulse">Waiting for tournament data...</span>';
+        return;
+      }
+
+      lastUpdatedAt = data.updatedAt || 0;
+
+      const completed = data.completedBouts || 0;
+      const total = data.totalBouts || 0;
+      const remaining = data.remaining ?? (total - completed);
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      // Rate display
+      const configuredRate = data.configuredRate || data.totalBoutsPerHour || 0;
+      const actualRate = data.actualRate;
+      const rateDisplay = actualRate
+        ? `${actualRate}/hr`
+        : `${configuredRate}/hr`;
+      const rateIsActual = actualRate !== null && actualRate !== undefined;
+
+      // Finish time
+      const liveFinish = data.liveFinish;
+      const estimatedFinish = data.estimatedFinish || "—";
+      const finishDisplay = liveFinish || estimatedFinish;
+      const finishIsLive = !!liveFinish;
+
+      // Tournament name
+      const name = data.tournamentName || "";
+
+      let html = '<div class="ticker-bar">';
+
+      if (name) {
+        html += `<div class="ticker-item name-item">${escapeHtml(name)}</div>`;
+      }
+
+      html += `
+        <div class="ticker-item">
+          <span class="ticker-label">Total Bouts:</span>
+          <span class="ticker-value">${total}</span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-label">Completed Bouts:</span>
+          <span class="ticker-value highlight">${completed}</span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-label">Remaining Bouts:</span>
+          <span class="ticker-value">${remaining}</span>
+        </div>
+        <div class="ticker-item">
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <span class="progress-pct">${pct}%</span>
+          </div>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-label">Rate</span>
+          <span class="ticker-value${rateIsActual ? ' live' : ''}">${rateDisplay}</span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-label">Est. Finish</span>
+          <span class="ticker-value${finishIsLive ? ' live' : ' finish'}">${finishDisplay}</span>
+        </div>
+      `;
+
+      html += '</div>';
+      tickerEl.className = "";
+      tickerEl.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return
