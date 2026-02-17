@@ -12,16 +12,8 @@
 <body>
   <div class="container">
     <header>
-      <img src="/assets/images/mswc.png" alt="Matside Wrestling Co." width="300">
       <h1>Wrestling Tournament Time Estimator</h1>
       <p class="subtitle">Estimate when rounds finish so you can keep parents and coaches informed.</p>
-      <p class="subtitle">Template Downloads</p>
-  <div class="downloadlink">
-      <p><a href="/assets/high_school_boys_template.json" download>PA High School Boys Template</a></p>
-      <p><a href="/assets/high_school_girls_template.json" download>PA High School Girls Template</a></p>
-      <p><a href="/assets/junior_high_boys_template.json" download>PA Junior High Boys Template</a></p>
-      <p><a href="/assets/junior_high_girls_template.json" download>PA Junior High Girls Template</a></p>
-  </div>
       <div class="session-buttons">
         <button type="button" id="btn-save" class="btn-session">Save Session</button>
         <label class="btn-session btn-load-label">
@@ -164,6 +156,13 @@
       </div>
 
       <div id="splitter-results" class="splitter-results hidden"></div>
+    </section>
+
+    <section id="round-schedule-section" class="round-schedule-section hidden">
+      <h2>Round Schedule</h2>
+      <p class="subtitle">Estimated time to complete each round across all weight classes.</p>
+      <div id="round-schedule-label" class="tournament-label"></div>
+      <div id="round-schedule-container"></div>
     </section>
 
     <section id="roundmap-section" class="roundmap-section hidden">
