@@ -248,4 +248,17 @@
     function escapeHtml(str) {
       const div = document.createElement("div");
       div.textContent = str;
-      return
+      return div.innerHTML;
+    }
+
+    // Poll localStorage every 2 seconds
+    function poll() {
+      const data = readTicker();
+      render(data);
+    }
+
+    poll();
+    setInterval(poll, 2000);
+  </script>
+</body>
+</html>
