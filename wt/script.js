@@ -310,7 +310,7 @@ placingSelect.addEventListener("change", updateTotalBouts);
 buildWeightInputs();
 
 // ============================================================
-// Ticker Sync (localStorage)
+// Ticker Sync (localStorage + Firebase Realtime Database)
 // ============================================================
 let tickerState = {};
 
@@ -320,6 +320,9 @@ function syncTicker(updates) {
   try {
     localStorage.setItem("wrestlingTicker", JSON.stringify(tickerState));
   } catch (e) { /* localStorage unavailable */ }
+  try {
+    firebase.database().ref("ticker").set(tickerState);
+  } catch (e) { /* Firebase unavailable */ }
 }
 
 function syncTickerFromHourly() {
