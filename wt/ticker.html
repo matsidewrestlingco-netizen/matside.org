@@ -160,19 +160,21 @@
     <span class="dot-pulse">Waiting for tournament data...</span>
   </div>
 
+  <!-- Firebase compat SDK (no bundler needed) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script>
-    const tickerEl = document.getElementById("ticker");
-    let lastUpdatedAt = 0;
+    firebase.initializeApp({
+      apiKey: "AIzaSyArEEKlW_YTURBDKWC756rRNVSE7m338js",
+      authDomain: "matsidesystems---ticker.firebaseapp.com",
+      projectId: "matsidesystems---ticker",
+      storageBucket: "matsidesystems---ticker.firebasestorage.app",
+      messagingSenderId: "872289388964",
+      appId: "1:872289388964:web:e0fb95b23fefd1ef979931",
+      databaseURL: "https://matsidesystems---ticker-default-rtdb.firebaseio.com",
+    });
 
-    function readTicker() {
-      try {
-        const raw = localStorage.getItem("wrestlingTicker");
-        if (!raw) return null;
-        return JSON.parse(raw);
-      } catch (e) {
-        return null;
-      }
-    }
+    const tickerEl = document.getElementById("ticker");
 
     function render(data) {
       if (!data || !data.totalBouts) {
@@ -180,8 +182,6 @@
         tickerEl.innerHTML = '<span class="dot-pulse">Waiting for tournament data...</span>';
         return;
       }
-
-      lastUpdatedAt = data.updatedAt || 0;
 
       const completed = data.completedBouts || 0;
       const total = data.totalBouts || 0;
@@ -251,14 +251,10 @@
       return div.innerHTML;
     }
 
-    // Poll localStorage every 2 seconds
-    function poll() {
-      const data = readTicker();
-      render(data);
-    }
-
-    poll();
-    setInterval(poll, 2000);
+    // Listen for real-time updates from Firebase
+    firebase.database().ref("ticker").on("value", function (snapshot) {
+      render(snapshot.val());
+    });
   </script>
 </body>
 </html>
