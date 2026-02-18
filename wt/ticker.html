@@ -179,7 +179,7 @@
     function render(data) {
       if (!data || !data.totalBouts) {
         tickerEl.className = "waiting";
-        tickerEl.innerHTML = '<span class="dot-pulse">Waiting for tournament data...</span>';
+        tickerEl.innerHTML = '<img src="/assets/images/mswc.png" alt="Matside Wrestling Co." style="width:120px;opacity:0.5;margin-bottom:1rem;"><br><span class="dot-pulse">Waiting for tournament data...</span>';
         return;
       }
 
@@ -207,10 +207,12 @@
 
       let html = '<div class="ticker-bar">';
 
+      html += `<div class="ticker-item" style="justify-content:center;padding:0.75rem 1rem;border-bottom:1px solid var(--border);"><img src="/assets/images/mswc.png" alt="Matside Wrestling Co." style="width:120px;"></div>`;
+
       if (name) {
         html += `<div class="ticker-item name-item">${escapeHtml(name)}</div>`;
       }
-      
+
       html += `
         <div class="ticker-item">
           <span class="ticker-label">Total Bouts:</span>
@@ -231,12 +233,15 @@
           </div>
         </div>
         <div class="ticker-item">
-          <span class="ticker-label">Current Rate (Bouts per hr)</span>
+          <span class="ticker-label">Rate</span>
           <span class="ticker-value${rateIsActual ? ' live' : ''}">${rateDisplay}</span>
         </div>
         <div class="ticker-item">
           <span class="ticker-label">Est. Finish</span>
           <span class="ticker-value${finishIsLive ? ' live' : ' finish'}">${finishDisplay}</span>
+        </div>
+        <div class="ticker-item" style="justify-content:center;padding:0.6rem 1rem;">
+          <span style="font-size:0.6rem;color:var(--text-muted);text-align:center;line-height:1.4;letter-spacing:0.03em;">Information updated hourly</span>
         </div>
       `;
 
