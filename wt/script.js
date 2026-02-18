@@ -205,6 +205,29 @@ function getBouts(placing, wrestlers) {
   return table[clamped] || 0;
 }
 
+// Set of round names excluded from time calculations
+let excludedRounds = new Set();
+
+function getBoutsFiltered(placing, wrestlers) {
+  if (wrestlers < 2) return 0;
+  if (wrestlers < 6) {
+    const smallBouts = { 2: 1, 3: 3, 4: 5, 5: 7 };
+    return smallBouts[wrestlers] || 0;
+  }
+  const fmt = ROUND_DATA[placing];
+  if (!fmt) return getBouts(placing, wrestlers);
+  const clamped = Math.min(wrestlers, 64);
+  const roundBouts = fmt.data[clamped];
+  if (!roundBouts) return BOUT_TABLE[placing][clamped] || 0;
+  let total = 0;
+  for (let r = 0; r < roundBouts.length; r++) {
+    if (!excludedRounds.has(fmt.rounds[r])) {
+      total += roundBouts[r];
+    }
+  }
+  return total;
+}
+
 // ============================================================
 // Level → default bouts/hour
 // ============================================================
@@ -291,7 +314,7 @@ function updateTotalBouts() {
 
   inputs.forEach((inp, i) => {
     const wrestlers = parseInt(inp.value) || 0;
-    const bouts = getBouts(placing, wrestlers);
+    const bouts = getBoutsFiltered(placing, wrestlers);
     total += bouts;
     const span = document.getElementById(`bout-count-${i}`);
     if (span) {
@@ -302,12 +325,70 @@ function updateTotalBouts() {
   totalBoutsDisplay.textContent = total;
 }
 
+function buildRoundFilterCheckboxes() {
+  const placing = placingSelect.value;
+  const fmt = ROUND_DATA[placing];
+  const container = document.getElementById("round-filter-checkboxes");
+  if (!fmt || !container) return;
+
+  container.innerHTML = "";
+
+  for (const roundName of fmt.rounds) {
+    const isExcluded = excludedRounds.has(roundName);
+    const id = `round-cb-${roundName.replace(/[^a-zA-Z0-9]/g, "-")}`;
+
+    const item = document.createElement("div");
+    item.className = "round-filter-item" + (isExcluded ? " excluded" : "");
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = id;
+    cb.checked = !isExcluded;
+    cb.dataset.round = roundName;
+
+    const lbl = document.createElement("label");
+    lbl.htmlFor = id;
+    lbl.textContent = roundName;
+
+    cb.addEventListener("change", function () {
+      if (this.checked) {
+        excludedRounds.delete(this.dataset.round);
+      } else {
+        excludedRounds.add(this.dataset.round);
+      }
+      item.classList.toggle("excluded", !this.checked);
+      updateTotalBouts();
+    });
+
+    item.appendChild(cb);
+    item.appendChild(lbl);
+    container.appendChild(item);
+  }
+}
+
 numWeightsInput.addEventListener("change", buildWeightInputs);
 numWeightsInput.addEventListener("input", buildWeightInputs);
-placingSelect.addEventListener("change", updateTotalBouts);
+placingSelect.addEventListener("change", function () {
+  buildRoundFilterCheckboxes();
+  updateTotalBouts();
+});
 
-// Build initial weight inputs
+// Build initial weight inputs and round filter
 buildWeightInputs();
+buildRoundFilterCheckboxes();
+
+document.getElementById("btn-rounds-all").addEventListener("click", function () {
+  excludedRounds.clear();
+  buildRoundFilterCheckboxes();
+  updateTotalBouts();
+});
+
+document.getElementById("btn-rounds-none").addEventListener("click", function () {
+  const fmt = ROUND_DATA[placingSelect.value];
+  if (fmt) fmt.rounds.forEach((r) => excludedRounds.add(r));
+  buildRoundFilterCheckboxes();
+  updateTotalBouts();
+});
 
 // ============================================================
 // Ticker Sync (localStorage + Firebase Realtime Database)
@@ -387,7 +468,7 @@ form.addEventListener("submit", function (e) {
 
   inputs.forEach((inp, i) => {
     const wrestlers = parseInt(inp.value) || 0;
-    const bouts = getBouts(placing, wrestlers);
+    const bouts = getBoutsFiltered(placing, wrestlers);
     const weightName = nameInputs[i]?.value.trim() || `Weight ${i + 1}`;
     totalBouts += bouts;
     weightData.push({ name: weightName, wrestlers, bouts });
@@ -961,10 +1042,10 @@ function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, start
     return total;
   });
 
-  // Filter to rounds that have bouts
+  // Filter to rounds that have bouts and are not excluded
   const activeRounds = [];
   for (let r = 0; r < rounds.length; r++) {
-    if (roundTotals[r] > 0) {
+    if (roundTotals[r] > 0 && !excludedRounds.has(rounds[r])) {
       activeRounds.push({ index: r, name: rounds[r], bouts: roundTotals[r] });
     }
   }
@@ -1228,6 +1309,7 @@ function gatherSession() {
     locations,
     splitterAssignments: { ...splitterAssignments },
     roundMapDayCutoff,
+    excludedRounds: Array.from(excludedRounds),
   };
 }
 
@@ -1243,6 +1325,8 @@ function restoreSession(data) {
   boutsPerHourInput.value = data.boutsPerHour || DEFAULTS[data.level || "hs"];
   defaultHint.textContent = `(default: ${DEFAULTS[levelSelect.value]})`;
   placingSelect.value = data.placing || "top8";
+  excludedRounds = new Set(Array.isArray(data.excludedRounds) ? data.excludedRounds : []);
+  buildRoundFilterCheckboxes();
   numWeightsInput.value = data.numWeights || "10";
 
   // Build weight inputs and fill values
