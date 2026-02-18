@@ -211,6 +211,8 @@
         html += `<div class="ticker-item name-item">${escapeHtml(name)}</div>`;
       }
 
+      <img src="assets/images/mswc.png" alt="MatSide Wrestling Co." width="150">
+      
       html += `
         <div class="ticker-item">
           <span class="ticker-label">Total Bouts:</span>
@@ -231,7 +233,7 @@
           </div>
         </div>
         <div class="ticker-item">
-          <span class="ticker-label">Rate</span>
+          <span class="ticker-label">Current Rate (Bouts per hr)</span>
           <span class="ticker-value${rateIsActual ? ' live' : ''}">${rateDisplay}</span>
         </div>
         <div class="ticker-item">
