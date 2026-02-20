@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournament Ticker – Full Screen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0a0a0f;
+      --bg-card:      #12121a;
+      --border:       #1e1e2a;
+      --text:         #e4e4e7;
+      --text-muted:   #71717a;
+      --accent:       #3d82c4;
+      --accent-bright:#7dd3f0;
+      --green:        #4ade80;
+      --yellow:       #facc15;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── WAITING STATE ─────────────────────────────────── */
+    #ticker.waiting {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    #ticker.waiting img {
+      width: 160px;
+      opacity: 0.4;
+    }
+
+    #ticker.waiting .dot-pulse {
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      letter-spacing: 0.04em;
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.35; }
+      50%       { opacity: 1; }
+    }
+
+    /* ── FULL SCREEN LAYOUT ────────────────────────────── */
+    .fs-wrap {
+      flex: 1;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      gap: 0;
+      padding: 3vw 4vw;
+      min-height: 0;
+    }
+
+    /* Header row */
+    .fs-header {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding-bottom: 2.5vw;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5vw;
+    }
+
+    .fs-logo {
+      height: clamp(40px, 5vw, 72px);
+      opacity: 0.9;
+      flex-shrink: 0;
+    }
+
+    .fs-tournament-name {
+      font-size: clamp(1.4rem, 3.5vw, 3.5rem);
+      font-weight: 800;
+      color: var(--accent-bright);
+      letter-spacing: 0.01em;
+      line-height: 1.1;
+      flex: 1;
+    }
+
+    .fs-live-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: clamp(0.7rem, 1vw, 1rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .fs-live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+      animation: livepulse 2s ease-in-out infinite;
+    }
+
+    @keyframes livepulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    /* Stat cards */
+    .fs-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2vw;
+      align-items: center;
+    }
+
+    .fs-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3vw 2vw;
+      gap: 0.75rem;
+    }
+
+    .fs-card-label {
+      font-size: clamp(0.65rem, 1.1vw, 1.1rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .fs-card-value {
+      font-size: clamp(3rem, 10vw, 10rem);
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .fs-card-value.highlight  { color: var(--accent-bright); }
+    .fs-card-value.remaining  { color: var(--text); }
+
+    /* Progress section */
+    .fs-progress-section {
+      padding: 2.5vw 0 2vw;
+    }
+
+    .fs-pct-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.25vw;
+    }
+
+    .fs-pct-value {
+      font-size: clamp(2.5rem, 7vw, 7rem);
+      font-weight: 900;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+    }
+
+    .fs-pct-label {
+      font-size: clamp(1rem, 2.5vw, 2.5rem);
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .fs-bar-track {
+      width: 100%;
+      height: clamp(16px, 2.5vw, 36px);
+      background: var(--border);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .fs-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-bright) 100%);
+      border-radius: 100px;
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Footer row: rate + finish */
+    .fs-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2vw;
+      padding-top: 2vw;
+      border-top: 1px solid var(--border);
+    }
+
+    .fs-footer-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .fs-footer-label {
+      font-size: clamp(0.6rem, 1vw, 1rem);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .fs-footer-value {
+      font-size: clamp(1.5rem, 4vw, 4rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .fs-footer-value.live   { color: var(--yellow); }
+    .fs-footer-value.finish { color: var(--green); }
+
+    .fs-update-note {
+      text-align: center;
+      font-size: clamp(0.55rem, 0.8vw, 0.8rem);
+      color: var(--text-muted);
+      padding-top: 1.5vw;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+  <div id="ticker" class="waiting">
+    <img src="/assets/images/mswc.png" alt="Matside Wrestling Co.">
+    <span class="dot-pulse">Waiting for tournament data...</span>
+  </div>
+
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyArEEKlW_YTURBDKWC756rRNVSE7m338js",
+      authDomain: "matsidesystems---ticker.firebaseapp.com",
+      projectId: "matsidesystems---ticker",
+      storageBucket: "matsidesystems---ticker.firebasestorage.app",
+      messagingSenderId: "872289388964",
+      appId: "1:872289388964:web:e0fb95b23fefd1ef979931",
+      databaseURL: "https://matsidesystems---ticker-default-rtdb.firebaseio.com",
+    });
+
+    const tickerEl = document.getElementById("ticker");
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function render(data) {
+      if (!data || !data.totalBouts) {
+        tickerEl.className = "waiting";
+        tickerEl.innerHTML = `
+          <img src="/assets/images/mswc.png" alt="Matside Wrestling Co.">
+          <span class="dot-pulse">Waiting for tournament data...</span>`;
+        return;
+      }
+
+      const completed  = data.completedBouts || 0;
+      const total      = data.totalBouts || 0;
+      const remaining  = data.remaining ?? (total - completed);
+      const pct        = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      const configuredRate = data.configuredRate || data.totalBoutsPerHour || 0;
+      const actualRate     = data.actualRate;
+      const rateDisplay    = actualRate ? `${actualRate}/hr` : `${configuredRate}/hr`;
+      const rateIsActual   = actualRate !== null && actualRate !== undefined;
+
+      const liveFinish      = data.liveFinish;
+      const estimatedFinish = data.estimatedFinish || "—";
+      const finishDisplay   = liveFinish || estimatedFinish;
+      const finishIsLive    = !!liveFinish;
+
+      const name = data.tournamentName || "";
+
+      tickerEl.className = "";
+      tickerEl.innerHTML = `
+        <div class="fs-wrap">
+
+          <div class="fs-header">
+            <img class="fs-logo" src="/assets/images/mswc.png" alt="Matside Wrestling Co.">
+            ${name ? `<div class="fs-tournament-name">${escapeHtml(name)}</div>` : '<div class="fs-tournament-name" style="color:var(--text-muted)">Tournament</div>'}
+            <div class="fs-live-badge">
+              <div class="fs-live-dot"></div>
+              Live
+            </div>
+          </div>
+
+          <div class="fs-stats">
+            <div class="fs-card">
+              <span class="fs-card-label">Total Bouts</span>
+              <span class="fs-card-value">${total}</span>
+            </div>
+            <div class="fs-card" style="border-color: var(--accent); background: #0d1a2a;">
+              <span class="fs-card-label" style="color: var(--accent-bright);">Completed</span>
+              <span class="fs-card-value highlight">${completed}</span>
+            </div>
+            <div class="fs-card">
+              <span class="fs-card-label">Remaining</span>
+              <span class="fs-card-value remaining">${remaining}</span>
+            </div>
+          </div>
+
+          <div class="fs-progress-section">
+            <div class="fs-pct-row">
+              <span class="fs-pct-value">${pct}%</span>
+              <span class="fs-pct-label">Complete</span>
+            </div>
+            <div class="fs-bar-track">
+              <div class="fs-bar-fill" style="width: ${pct}%"></div>
+            </div>
+          </div>
+
+          <div class="fs-footer">
+            <div class="fs-footer-item">
+              <span class="fs-footer-label">Bout Rate</span>
+              <span class="fs-footer-value ${rateIsActual ? 'live' : ''}">${rateDisplay}</span>
+            </div>
+            <div class="fs-footer-item">
+              <span class="fs-footer-label">Est. Finish</span>
+              <span class="fs-footer-value ${finishIsLive ? 'live' : 'finish'}">${finishDisplay}</span>
+            </div>
+          </div>
+
+          <div class="fs-update-note">Information updated hourly</div>
+
+        </div>`;
+    }
+
+    firebase.database().ref("ticker").on("value", function (snapshot) {
+      render(snapshot.val());
+    });
+  </script>
+</body>
+</html>
