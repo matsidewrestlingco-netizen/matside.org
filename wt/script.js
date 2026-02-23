@@ -639,6 +639,7 @@ function buildHourlyBreakdown(totalBouts, mats, boutsPerHourPerMat, numDays, sta
   }
 
   section.classList.remove("hidden");
+  document.getElementById("floarena-section").classList.remove("hidden");
 
   const totalBoutsPerHour = boutsPerHourPerMat * mats;
   hourlyTotalBouts = totalBouts;
@@ -1415,4 +1416,168 @@ document.getElementById("btn-load").addEventListener("change", function (e) {
 
   // Reset the input so the same file can be loaded again
   e.target.value = "";
+});
+
+// ============================================================
+// FloArena Live Feed
+// ============================================================
+const floArena = {
+  active: false,
+  guid: null,
+  proxyBase: null,
+  intervalId: null,
+  seenIds: new Set(),
+  totalCompleted: 0,
+  lastPollTime: null,
+  lastError: null,
+};
+
+function extractFloArenaGuid(input) {
+  const s = input.trim();
+  // Accept full URL: https://arena.flowrestling.org/event/{guid}[/...]
+  const match = s.match(/event\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+  if (match) return match[1];
+  // Accept bare GUID
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) return s;
+  return null;
+}
+
+async function floArenaPoll() {
+  if (!floArena.active) return;
+  const url = `${floArena.proxyBase}/event/${floArena.guid}/recent-results`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const bouts = Array.isArray(json)
+      ? json
+      : Array.isArray(json.response) ? json.response : [];
+
+    let changed = false;
+    for (const bout of bouts) {
+      const id = String(bout.guid || bout.boutNumber || "");
+      if (id && !floArena.seenIds.has(id)) {
+        floArena.seenIds.add(id);
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      floArena.totalCompleted = floArena.seenIds.size;
+      applyFloArenaTotal(floArena.totalCompleted);
+    }
+
+    floArena.lastPollTime = new Date();
+    floArena.lastError = null;
+  } catch (err) {
+    floArena.lastError = err.message;
+  }
+  renderFloArenaStatus();
+}
+
+function applyFloArenaTotal(totalCompleted) {
+  if (hourlyBlocks.length === 0) return;
+
+  // Distribute completed bouts across hourly blocks in order
+  let remaining = totalCompleted;
+  for (let i = 0; i < hourlyBlocks.length; i++) {
+    if (remaining <= 0) {
+      hourlyBlocks[i].actual = null;
+    } else {
+      const cap = Math.round(hourlyTotalBoutsPerHour * hourlyBlocks[i].blockFraction);
+      const actual = Math.min(remaining, cap);
+      hourlyBlocks[i].actual = actual;
+      remaining -= actual;
+    }
+  }
+
+  renderHourlyTable();
+  syncTickerFromHourly();
+
+  // Lock inputs so they read-only while FloArena is driving them
+  const container = document.getElementById("hourly-table-container");
+  if (container) {
+    container.querySelectorAll(".actual-input").forEach((inp) => {
+      inp.disabled = true;
+    });
+  }
+}
+
+function renderFloArenaStatus() {
+  const statusEl = document.getElementById("floarena-status");
+  const textEl = document.getElementById("floarena-status-text");
+  if (!statusEl || !textEl) return;
+
+  statusEl.className = "floarena-status";
+
+  if (!floArena.active) {
+    statusEl.classList.add("floarena-idle");
+    textEl.textContent = "Not connected";
+    return;
+  }
+
+  if (floArena.lastError) {
+    statusEl.classList.add("floarena-error");
+    textEl.textContent = `Error: ${floArena.lastError}`;
+    return;
+  }
+
+  statusEl.classList.add("floarena-live");
+  const timeStr = floArena.lastPollTime
+    ? floArena.lastPollTime.toLocaleTimeString()
+    : "connecting…";
+  textEl.textContent = `Live — ${floArena.totalCompleted} bouts detected · last updated ${timeStr}`;
+}
+
+document.getElementById("btn-floarena-connect").addEventListener("click", function () {
+  const proxyInput = document.getElementById("floarena-proxy-url").value.trim().replace(/\/$/, "");
+  const eventInput = document.getElementById("floarena-event-input").value;
+  const guid = extractFloArenaGuid(eventInput);
+
+  if (!proxyInput) {
+    alert("Please enter your Cloudflare Worker URL.");
+    return;
+  }
+  if (!guid) {
+    alert("Could not find a valid FloArena event GUID.\nPaste the full event URL or just the GUID.");
+    return;
+  }
+
+  floArena.active = true;
+  floArena.guid = guid;
+  floArena.proxyBase = proxyInput;
+  floArena.seenIds = new Set();
+  floArena.totalCompleted = 0;
+  floArena.lastError = null;
+  floArena.lastPollTime = null;
+
+  document.getElementById("btn-floarena-connect").classList.add("hidden");
+  document.getElementById("btn-floarena-disconnect").classList.remove("hidden");
+  document.getElementById("floarena-proxy-url").disabled = true;
+  document.getElementById("floarena-event-input").disabled = true;
+
+  renderFloArenaStatus();
+  floArenaPoll(); // immediate first poll
+  floArena.intervalId = setInterval(floArenaPoll, 30000); // every 30 seconds
+});
+
+document.getElementById("btn-floarena-disconnect").addEventListener("click", function () {
+  floArena.active = false;
+  clearInterval(floArena.intervalId);
+  floArena.intervalId = null;
+
+  document.getElementById("btn-floarena-connect").classList.remove("hidden");
+  document.getElementById("btn-floarena-disconnect").classList.add("hidden");
+  document.getElementById("floarena-proxy-url").disabled = false;
+  document.getElementById("floarena-event-input").disabled = false;
+
+  // Unlock hourly inputs for manual editing
+  const container = document.getElementById("hourly-table-container");
+  if (container) {
+    container.querySelectorAll(".actual-input").forEach((inp) => {
+      inp.disabled = false;
+    });
+  }
+
+  renderFloArenaStatus();
 });
