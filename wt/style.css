@@ -891,6 +891,124 @@ input::placeholder {
   color: var(--text-muted);
 }
 
+/* FloArena Live Feed */
+.floarena-section {
+  margin-top: 2rem;
+  background: var(--bg-raised);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.floarena-section.hidden {
+  display: none;
+}
+
+.floarena-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+  color: var(--white);
+}
+
+.floarena-section .subtitle {
+  margin-bottom: 1rem;
+}
+
+.floarena-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+}
+
+.floarena-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-floarena {
+  padding: 0.55rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--accent);
+  color: var(--bg);
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.btn-floarena:hover {
+  background: var(--accent-bright);
+}
+
+.btn-floarena-disconnect {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+}
+
+.btn-floarena-disconnect:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.floarena-status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.floarena-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.floarena-idle {
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.floarena-idle .floarena-dot {
+  background: var(--text-muted);
+}
+
+.floarena-live {
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.floarena-live .floarena-dot {
+  background: #10b981;
+  animation: fa-pulse 2s ease-in-out infinite;
+}
+
+.floarena-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.floarena-error .floarena-dot {
+  background: #ef4444;
+}
+
+@keyframes fa-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .form-grid {
@@ -907,5 +1025,17 @@ input::placeholder {
 
   .location-inputs {
     grid-template-columns: 1fr;
+  }
+
+  .floarena-config {
+    grid-template-columns: 1fr;
+  }
+
+  .floarena-actions {
+    flex-direction: row;
+  }
+
+  .btn-floarena {
+    flex: 1;
   }
 }
