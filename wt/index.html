@@ -159,6 +159,29 @@
       <div id="hourly-table-container"></div>
     </section>
 
+    <section id="floarena-section" class="floarena-section hidden">
+      <h2>FloArena Live Feed</h2>
+      <p class="subtitle">Auto-pull completed bout counts from a live FloArena event every 30 seconds.</p>
+      <div class="floarena-config">
+        <div class="form-group">
+          <label for="floarena-proxy-url">Cloudflare Worker URL</label>
+          <input type="url" id="floarena-proxy-url" placeholder="https://floarena-proxy.yourname.workers.dev">
+        </div>
+        <div class="form-group">
+          <label for="floarena-event-input">FloArena Event URL or GUID</label>
+          <input type="text" id="floarena-event-input" placeholder="https://arena.flowrestling.org/event/...">
+        </div>
+        <div class="floarena-actions">
+          <button type="button" id="btn-floarena-connect" class="btn-floarena">Connect</button>
+          <button type="button" id="btn-floarena-disconnect" class="btn-floarena btn-floarena-disconnect hidden">Disconnect</button>
+        </div>
+      </div>
+      <div id="floarena-status" class="floarena-status floarena-idle">
+        <span class="floarena-dot"></span>
+        <span id="floarena-status-text">Not connected</span>
+      </div>
+    </section>
+
     <section id="splitter-section" class="splitter-section hidden">
       <h2>Venue Splitter</h2>
       <p class="subtitle">Split weight classes across locations so venues finish at the same time.</p>
