@@ -1430,7 +1430,39 @@ const floArena = {
   totalCompleted: 0,
   lastPollTime: null,
   lastError: null,
+  lastDebugInfo: null, // summary of last raw response for display
 };
+
+// Walk common response shapes to find the array of bouts.
+// Tries root array, then single-level keys, then two-level nesting.
+function extractBoutsFromResponse(json) {
+  if (Array.isArray(json)) return { bouts: json, path: "root[]" };
+
+  const keys = ["response", "data", "bouts", "results", "matches", "items", "records"];
+
+  for (const k of keys) {
+    if (Array.isArray(json[k])) return { bouts: json[k], path: k };
+  }
+
+  for (const outer of keys) {
+    const val = json[outer];
+    if (val && typeof val === "object" && !Array.isArray(val)) {
+      for (const inner of keys) {
+        if (Array.isArray(val[inner])) return { bouts: val[inner], path: `${outer}.${inner}` };
+      }
+    }
+  }
+
+  return { bouts: [], path: null };
+}
+
+// Extract the best available unique ID from a bout object.
+function extractBoutId(bout) {
+  return String(
+    bout.guid ?? bout.boutNumber ?? bout.id ?? bout.boutId ??
+    bout.matchId ?? bout.matchNumber ?? bout.match_id ?? bout.bout_id ?? ""
+  );
+}
 
 function extractFloArenaGuid(input) {
   const s = input.trim();
@@ -1449,13 +1481,30 @@ async function floArenaPoll() {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    const bouts = Array.isArray(json)
-      ? json
-      : Array.isArray(json.response) ? json.response : [];
+
+    // Log full raw response to console for debugging
+    console.log("[FloArena] raw response:", JSON.stringify(json, null, 2));
+
+    const { bouts, path } = extractBoutsFromResponse(json);
+
+    // Build a debug summary: top-level keys + where bouts were found
+    const topKeys = Array.isArray(json) ? ["(array)"] : Object.keys(json);
+    const sampleId = bouts.length > 0 ? extractBoutId(bouts[0]) : null;
+    const sampleIdField = bouts.length > 0
+      ? Object.keys(bouts[0]).filter(k =>
+          ["guid","boutNumber","id","boutId","matchId","matchNumber","match_id","bout_id"].includes(k)
+        ).join(", ") || "(no known id field)"
+      : "(no bouts found)";
+    floArena.lastDebugInfo =
+      `Response keys: [${topKeys.join(", ")}] | ` +
+      `Bouts found at: ${path || "none"} | ` +
+      `Count: ${bouts.length} | ` +
+      `ID field(s): ${sampleIdField}`;
+    console.log("[FloArena] debug:", floArena.lastDebugInfo);
 
     let changed = false;
     for (const bout of bouts) {
-      const id = String(bout.guid || bout.boutNumber || "");
+      const id = extractBoutId(bout);
       if (id && !floArena.seenIds.has(id)) {
         floArena.seenIds.add(id);
         changed = true;
@@ -1471,6 +1520,7 @@ async function floArenaPoll() {
     floArena.lastError = null;
   } catch (err) {
     floArena.lastError = err.message;
+    console.error("[FloArena] poll error:", err);
   }
   renderFloArenaStatus();
 }
@@ -1527,6 +1577,21 @@ function renderFloArenaStatus() {
     ? floArena.lastPollTime.toLocaleTimeString()
     : "connecting…";
   textEl.textContent = `Live — ${floArena.totalCompleted} bouts detected · last updated ${timeStr}`;
+
+  // Show debug info beneath status when 0 bouts detected (helps diagnose response shape issues)
+  let debugEl = document.getElementById("floarena-debug-info");
+  if (!debugEl) {
+    debugEl = document.createElement("div");
+    debugEl.id = "floarena-debug-info";
+    debugEl.style.cssText = "font-size:0.75em;color:#888;margin-top:4px;word-break:break-all;";
+    statusEl.parentNode.insertBefore(debugEl, statusEl.nextSibling);
+  }
+  if (floArena.totalCompleted === 0 && floArena.lastDebugInfo) {
+    debugEl.textContent = "Debug: " + floArena.lastDebugInfo;
+    debugEl.style.display = "";
+  } else {
+    debugEl.style.display = "none";
+  }
 }
 
 document.getElementById("btn-floarena-connect").addEventListener("click", function () {
