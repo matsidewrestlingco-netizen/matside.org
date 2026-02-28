@@ -1474,60 +1474,30 @@ function extractFloArenaGuid(input) {
   return null;
 }
 
-// Fetch one page of recent-results and return { bouts, pageCount }.
-async function floArenaFetchPage(page) {
-  const url = `${floArena.proxyBase}/event/${floArena.guid}/recent-results?page=${page}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = await res.json();
-
-  const { bouts } = extractBoutsFromResponse(json);
-
-  // Pull pageCount out of the pager object wherever it lives
-  const pager =
-    json?.response?.pager ??
-    json?.pager ??
-    json?.data?.pager ??
-    null;
-  const pageCount = pager?.pageCount ?? pager?.last ?? 1;
-
-  return { bouts, pageCount };
-}
-
 async function floArenaPoll() {
   if (!floArena.active) return;
+  const url = `${floArena.proxyBase}/event/${floArena.guid}/recent-results`;
   try {
-    // Always fetch page 1 first to learn the total page count
-    const { bouts: page1Bouts, pageCount } = await floArenaFetchPage(1);
-    console.log(`[FloArena] page 1 of ${pageCount}, ${page1Bouts.length} bouts`);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
 
-    const allBouts = [...page1Bouts];
-
-    // Fetch remaining pages in parallel if there are more than 1
-    if (pageCount > 1) {
-      const pageNums = Array.from({ length: pageCount - 1 }, (_, i) => i + 2);
-      const results = await Promise.all(pageNums.map(p => floArenaFetchPage(p)));
-      for (const { bouts } of results) {
-        allBouts.push(...bouts);
-      }
-      console.log(`[FloArena] fetched ${pageCount} pages, ${allBouts.length} total bouts`);
-    }
+    // The API is a sliding window of the ~20 most recent bouts.
+    // pager.totalCount is the authoritative count of ALL completed bouts.
+    const pager =
+      json?.response?.pager ??
+      json?.pager ??
+      json?.data?.pager ??
+      null;
+    const totalCount = pager?.totalCount ?? null;
 
     floArena.lastDebugInfo =
-      `Pages: ${pageCount} | Total bouts from API: ${allBouts.length} | Seen so far: ${floArena.seenIds.size}`;
+      `pager.totalCount: ${totalCount} | recent window: ${json?.response?.bouts?.length ?? "?"}`;
+    console.log("[FloArena] raw response:", json);
     console.log("[FloArena] debug:", floArena.lastDebugInfo);
 
-    let changed = false;
-    for (const bout of allBouts) {
-      const id = extractBoutId(bout);
-      if (id && !floArena.seenIds.has(id)) {
-        floArena.seenIds.add(id);
-        changed = true;
-      }
-    }
-
-    if (changed) {
-      floArena.totalCompleted = floArena.seenIds.size;
+    if (totalCount !== null && totalCount !== floArena.totalCompleted) {
+      floArena.totalCompleted = totalCount;
       applyFloArenaTotal(floArena.totalCompleted);
     }
 
