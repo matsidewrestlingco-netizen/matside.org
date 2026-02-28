@@ -1474,36 +1474,51 @@ function extractFloArenaGuid(input) {
   return null;
 }
 
+// Fetch one page of recent-results and return { bouts, pageCount }.
+async function floArenaFetchPage(page) {
+  const url = `${floArena.proxyBase}/event/${floArena.guid}/recent-results?page=${page}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+
+  const { bouts } = extractBoutsFromResponse(json);
+
+  // Pull pageCount out of the pager object wherever it lives
+  const pager =
+    json?.response?.pager ??
+    json?.pager ??
+    json?.data?.pager ??
+    null;
+  const pageCount = pager?.pageCount ?? pager?.last ?? 1;
+
+  return { bouts, pageCount };
+}
+
 async function floArenaPoll() {
   if (!floArena.active) return;
-  const url = `${floArena.proxyBase}/event/${floArena.guid}/recent-results`;
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
+    // Always fetch page 1 first to learn the total page count
+    const { bouts: page1Bouts, pageCount } = await floArenaFetchPage(1);
+    console.log(`[FloArena] page 1 of ${pageCount}, ${page1Bouts.length} bouts`);
 
-    // Log full raw response to console for debugging
-    console.log("[FloArena] raw response:", JSON.stringify(json, null, 2));
+    const allBouts = [...page1Bouts];
 
-    const { bouts, path } = extractBoutsFromResponse(json);
+    // Fetch remaining pages in parallel if there are more than 1
+    if (pageCount > 1) {
+      const pageNums = Array.from({ length: pageCount - 1 }, (_, i) => i + 2);
+      const results = await Promise.all(pageNums.map(p => floArenaFetchPage(p)));
+      for (const { bouts } of results) {
+        allBouts.push(...bouts);
+      }
+      console.log(`[FloArena] fetched ${pageCount} pages, ${allBouts.length} total bouts`);
+    }
 
-    // Build a debug summary: top-level keys + where bouts were found
-    const topKeys = Array.isArray(json) ? ["(array)"] : Object.keys(json);
-    const sampleId = bouts.length > 0 ? extractBoutId(bouts[0]) : null;
-    const sampleIdField = bouts.length > 0
-      ? Object.keys(bouts[0]).filter(k =>
-          ["guid","boutNumber","id","boutId","matchId","matchNumber","match_id","bout_id"].includes(k)
-        ).join(", ") || "(no known id field)"
-      : "(no bouts found)";
     floArena.lastDebugInfo =
-      `Response keys: [${topKeys.join(", ")}] | ` +
-      `Bouts found at: ${path || "none"} | ` +
-      `Count: ${bouts.length} | ` +
-      `ID field(s): ${sampleIdField}`;
+      `Pages: ${pageCount} | Total bouts from API: ${allBouts.length} | Seen so far: ${floArena.seenIds.size}`;
     console.log("[FloArena] debug:", floArena.lastDebugInfo);
 
     let changed = false;
-    for (const bout of bouts) {
+    for (const bout of allBouts) {
       const id = extractBoutId(bout);
       if (id && !floArena.seenIds.has(id)) {
         floArena.seenIds.add(id);
