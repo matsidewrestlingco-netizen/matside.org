@@ -891,3 +891,21 @@ body {
   letter-spacing: 0.02em;
   font-style: italic;
 }
+
+/* ─── Footer credential footnote ─────────────────────────── */
+.footer-credential {
+  margin-top: 0.625rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-style: italic;
+}
+.footer-credential a {
+  color: var(--accent-bright);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-style: normal;
+}
+.footer-credential a:hover {
+  color: var(--accent);
+}
