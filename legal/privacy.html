@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy · Matside Wrestling Co.</title>
+  <meta name="description" content="How Matside Wrestling Co. collects, uses, stores, and discloses personal information across all Matside products and services.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">MATSIDE</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#products">Products</a></li>
+        <li><a href="/#tournaments">Tournaments</a></li>
+        <li><a href="/#leadership">Leadership</a></li>
+        <li><a href="/legal/">Legal</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="legal-prose">
+    <h1>Privacy Policy</h1>
+    <div class="legal-meta">
+      <strong>Last updated:</strong> 2026-06-22 &middot; <strong>Version:</strong> 1.0 &mdash; pending Sept 1, 2026 attorney review<br>
+      <a href="/legal/">&larr; Back to Legal index</a>
+    </div>
+
+    <p>
+      This Privacy Policy describes how <strong>Matside Wrestling Co.</strong> (&ldquo;Matside,&rdquo; &ldquo;we,&rdquo; &ldquo;our&rdquo;) collects, uses, stores, and discloses personal information across our portfolio of products and services. Matside Wrestling Co. is a Pennsylvania single-member limited liability company, headquartered in Glenshaw, PA. This policy applies to our tournament-management services and to all five products in the Matside Software portfolio: <strong>MatRecruit</strong>, <strong>MatTime</strong>, <strong>MatPass</strong>, <strong>WrestleFA</strong>, and <strong>SignupSignin</strong>.
+    </p>
+
+    <h2>1. Scope and Applicability</h2>
+    <p>
+      Matside Wrestling Co. is the operator of all the products and services listed above. Each product has its own user base and data flows, but they are all operated under this single corporate Privacy Policy. Product-specific privacy disclosures, where they exist, supplement (but do not replace) this corporate policy.
+    </p>
+
+    <h2>2. Information We Collect</h2>
+    <h3>Information you provide directly</h3>
+    <ul>
+      <li><strong>Account information:</strong> email address (across all products); first and last name (most products); class year and other recruiting-relevant fields (MatRecruit only)</li>
+      <li><strong>Profile information:</strong> in MatRecruit, athletes provide recruiting-profile data they choose to publish (weight class, accolades, schedule, coaches, highlight video links, social links); in MatTime, coaches provide privates-booking schedule and availability; in MatPass, program administrators provide compliance records about their athletes</li>
+      <li><strong>Payment information:</strong> in MatRecruit, subscription payment information is collected and processed by Stripe; we do not store credit card numbers on our servers</li>
+      <li><strong>Communication content:</strong> emails and messages you send to <code>support@matside.org</code> or to a Matside leader directly</li>
+    </ul>
+    <h3>Information collected automatically</h3>
+    <ul>
+      <li><strong>Authentication tokens:</strong> session cookies issued by Supabase Auth (MatRecruit, MatTime, WrestleFA) or Firebase Auth (MatPass, SignupSignin) to keep you signed in</li>
+      <li><strong>Server logs:</strong> standard web-server logs (IP address, user-agent, request paths, timestamps) are captured by our hosting providers (Vercel for the Matside Software products; GitHub Pages for matside.org)</li>
+      <li><strong>Error monitoring:</strong> on MatRecruit and MatTime, application errors are reported to Sentry. Sentry is configured with <code>sendDefaultPii: false</code> to suppress automatic personal-information capture, and our error metadata is scrubbed via a runtime guard (<code>scrubMetadataPii</code>) before transmission</li>
+    </ul>
+    <h3>Information NOT collected</h3>
+    <p>
+      Matside operates with a deliberately minimal third-party tracker footprint. As of 2026-06-22, matside.org and all five Matside Software products carry <strong>zero</strong> third-party analytics services (no Google Analytics, Plausible, PostHog, Mixpanel, Segment, Vercel Analytics, or Firebase Analytics), <strong>zero</strong> advertising or marketing pixels (no Meta, LinkedIn, X, TikTok, Google Ads), and <strong>zero</strong> behavioral profiling tools. This posture is documented in our <a href="https://github.com/matsidewrestlingco-netizen/matside-hq/blob/main/docs/legal/third-party-tracker-inventory-v1.md" target="_blank" rel="noopener">third-party tracker inventory</a>.
+    </p>
+
+    <h2>3. How We Use Your Information</h2>
+    <ul>
+      <li><strong>To operate the service:</strong> render your profile, manage your subscription, send you transactional emails (sign-in links, receipts, etc.)</li>
+      <li><strong>To communicate with you:</strong> respond to support inquiries; notify you of service changes; send launch announcements if you opted in via a waitlist</li>
+      <li><strong>To comply with legal obligations:</strong> respond to lawful requests from authorities; preserve information subject to legal hold</li>
+      <li><strong>To improve our products:</strong> in aggregate, in a way that does not identify you individually; we do not currently run any analytics or behavioral profiling on individual users</li>
+    </ul>
+
+    <h2>4. How We Share Your Information</h2>
+    <p>
+      We do not sell your personal information. We share personal information only with the service providers (subprocessors) listed below, who process data on our behalf under data processing agreements:
+    </p>
+    <ul>
+      <li><strong>Supabase</strong> &mdash; database + auth for MatRecruit, MatTime, WrestleFA, and our internal HQ tooling</li>
+      <li><strong>Firebase / Google Cloud</strong> &mdash; database + auth for MatPass and SignupSignin</li>
+      <li><strong>Vercel</strong> &mdash; hosting for the Matside Software products</li>
+      <li><strong>Stripe</strong> &mdash; payment processing for MatRecruit subscriptions</li>
+      <li><strong>Square</strong> &mdash; payment processing for WrestleFA, internal forms, and tournament-related transactions</li>
+      <li><strong>Resend</strong> &mdash; transactional email delivery for MatRecruit; expansion to other products in progress</li>
+      <li><strong>Sentry</strong> &mdash; error monitoring (MatRecruit, MatTime); configured with <code>sendDefaultPii: false</code></li>
+      <li><strong>Anthropic</strong> &mdash; AI inference for MatRecruit's recruiting-assistant feature; structured outputs only, no behavioral profiling</li>
+      <li><strong>Cloudflare R2</strong> &mdash; off-platform backup storage for internal HQ tooling</li>
+    </ul>
+    <p>
+      Each of these subprocessors operates under a published or counterparty-signed Data Processing Agreement. The full set of DPAs is filed at <a href="https://github.com/matsidewrestlingco-netizen/matside-hq/tree/main/docs/legal/dpa" target="_blank" rel="noopener">matside-hq/docs/legal/dpa/</a>.
+    </p>
+    <p>
+      We may also share personal information when required by law, when necessary to investigate or prevent fraud, or as part of a business transaction (sale, merger, acquisition); in that last case, we will notify affected users in advance to the extent we are legally able.
+    </p>
+
+    <h2>5. Children's Privacy</h2>
+    <p>
+      Matside's approach to children's privacy is documented in detail in our <a href="/legal/coppa.html">Children's Privacy / COPPA Policy</a>. In summary: <strong>MatRecruit</strong>, <strong>MatTime</strong>, <strong>MatPass</strong>, and <strong>SignupSignin</strong> do not knowingly collect personal information from children under 13. <strong>WrestleFA</strong>'s data model materially involves data about minor wrestlers, with parental consent required before any non-parent user can view a wrestler's profile; see the COPPA policy for the full disclosure.
+    </p>
+
+    <h2>6. Data Retention</h2>
+    <p>
+      Matside retains personal information for varying lengths of time depending on the product, the type of data, and applicable legal obligations. Full retention windows by product are documented in our <a href="/legal/retention.html">Data Retention Policy</a>.
+    </p>
+
+    <h2>7. Security</h2>
+    <p>
+      Our information security practices are documented in detail in our <a href="/legal/information-security.html">Information Security Program</a>. This includes our access controls, vendor management, incident response procedures, and per-product security addenda.
+    </p>
+
+    <h2>8. Your Rights</h2>
+    <p>
+      You can:
+    </p>
+    <ul>
+      <li><strong>Access your information:</strong> view all the data we hold about you by signing in to the relevant product</li>
+      <li><strong>Correct your information:</strong> edit your profile, settings, and data directly in each product</li>
+      <li><strong>Delete your information:</strong> email <a href="mailto:support@matside.org">support@matside.org</a> or use the in-product account-deletion path where available. Account deletion is reversible for 30 days, then permanent</li>
+      <li><strong>Object to processing:</strong> email <a href="mailto:support@matside.org">support@matside.org</a> if you believe we are processing your information in a way you object to</li>
+      <li><strong>Lodge a complaint with a supervisory authority</strong> if you are in a jurisdiction where one exists</li>
+    </ul>
+
+    <h2>9. International Users</h2>
+    <p>
+      Matside is operated from the United States. If you are accessing our services from outside the United States, your information will be transferred to, stored in, and processed in the United States. By using our services, you consent to this transfer.
+    </p>
+
+    <h2>10. Changes to This Policy</h2>
+    <p>
+      We will update this policy from time to time. The &ldquo;Last updated&rdquo; date at the top of this page reflects the most recent change. Material changes will be announced via in-product notification or email where appropriate.
+    </p>
+
+    <h2>11. Contact</h2>
+    <p>
+      Questions about this policy? Contact <a href="mailto:support@matside.org">support@matside.org</a>.
+    </p>
+
+  </main>
+
+  <footer class="footer">
+    <div class="section-inner">
+      <div class="footer-corporate">
+        <strong>Matside Wrestling Co.</strong> &mdash; Pennsylvania single-member LLC, headquartered in Glenshaw, PA<br>
+        Contact: <a href="mailto:support@matside.org">support@matside.org</a><br>
+        &copy; 2026 Matside Wrestling Co. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Retention Policy · Matside Wrestling Co.</title>
+  <meta name="description" content="Matside Wrestling Co. Data Retention Policy v1.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">MATSIDE</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#products">Products</a></li>
+        <li><a href="/#tournaments">Tournaments</a></li>
+        <li><a href="/#leadership">Leadership</a></li>
+        <li><a href="/legal/">Legal</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="legal-prose">
+    <h1>Data Retention Policy</h1>
+    <div class="legal-meta">
+      <strong>Last updated:</strong> 2026-06-22 &middot; <strong>Version:</strong> 1.0 &mdash; pending Sept 1, 2026 attorney review<br>
+      <a href="/legal/">&larr; Back to Legal index</a>
+    </div>
+
+    <h2>Why This Document Exists</h2>
+    <p>Step 2 of the FTC's Six-Step COPPA Compliance Plan requires each product's privacy policy to state &ldquo;the business need to retain personal information, and a timeframe for deletion. You cannot retain personal information collected from a child indefinitely.&rdquo; Step 6 reinforces: &ldquo;Hold on to personal information only as long as is reasonably necessary.&rdquo;</p>
+    <p>This document is the <strong>single source of truth</strong> for retention windows across the Matside portfolio. Each product's privacy policy mirrors the window for that product.</p>
+
+    <h2>Per-Product Retention Windows</h2>
+
+    <h3>WrestleFA</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9375rem;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Data class</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Active retention</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Deletion trigger</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Grace</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Parent account</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">While account active</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">User-initiated OR 24 months of inactivity</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">30 days</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Wrestler profile (under-13)</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Linked to parent account</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Same as parent account</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">30 days</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Confirmed placements</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Anonymized + retained for TD history</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Anonymization on parent-account deletion</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">n/a</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Consent records</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">While wrestler profile exists</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Deleted alongside wrestler profile</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">30 days</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Square payment records</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">~7 years per tax law</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Legal-hold exception</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">n/a</td></tr>
+        <tr><td style="padding: 0.5rem;">Audit log entries</td><td style="padding: 0.5rem;">24 months rolling</td><td style="padding: 0.5rem;">Automatic at 24 months</td><td style="padding: 0.5rem;">n/a</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Rationale for the 24-month inactivity window:</strong> WrestleFA is a free-agent marketplace tied to a wrestling season cadence. A parent who hasn't logged in or updated a profile across two full seasons is functionally inactive; the window is conservative enough that families taking a season off don't lose data immediately. A notification email is sent at 22 months of inactivity with a 60-day grace before deletion.</p>
+    <p><strong>COPPA implication:</strong> WrestleFA is the only product in COPPA scope. A 24-month inactive timer plus notification plus grace is materially stronger than &ldquo;indefinite retention&rdquo; and satisfies the COPPA Six-Step Steps 2 and 6 explicitly.</p>
+
+    <h3>MatRecruit</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9375rem;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Data class</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Active retention</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Deletion trigger</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Athlete account</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">While subscription active OR logged in within 18 months</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">User-initiated OR 18 months past stated class year</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Profile data</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Same as account</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Deleted with account</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Tracker data (private)</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Same as account; subscription cancellation does NOT delete</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Deleted with account</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Profile photos</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Same as profile</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Immediate on user action</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Audit log entries</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">24 months rolling</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Automatic</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Sentry error reports</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">90 days (per Sentry)</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Per provider</td></tr>
+        <tr><td style="padding: 0.5rem;">Stripe payment records</td><td style="padding: 0.5rem;">~7 years per tax law</td><td style="padding: 0.5rem;">Legal-hold exception</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Rationale for the 18-months-past-class-year window:</strong> A wrestler who graduates in class year X uses MatRecruit through the recruiting cycle ending ~spring of year X. Eighteen months past graduation covers the late-recruiting JUCO/transfer window. After that, the profile has functionally aged out of the recruiting market. Notification email sent at 16 months past class year with a 60-day grace.</p>
+
+    <h3>MatPass</h3>
+    <p><strong>Critical FERPA dependency:</strong> When the wrestling program using MatPass is school-affiliated (high-school, college, or other educational institution), athlete compliance records are likely <strong>education records under FERPA</strong>, which has its own retention requirements that <strong>supersede</strong> MatPass's default. <strong>MatPass acts as a data processor; the wrestling program is the data controller.</strong> The organization owner is responsible for configuring MatPass to align with the program's institutional retention obligations.</p>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9375rem;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Data class</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Retention</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">User account (coach, admin, parent)</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">24 months of inactivity or user-initiated deletion</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Organization records</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">While org is active</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Athlete records</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Per the wrestling program's institutional retention policy</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Compliance documents</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Per institutional + governing-body requirements</td></tr>
+        <tr><td style="padding: 0.5rem;">Audit log entries</td><td style="padding: 0.5rem;">24 months rolling (org owners may extend)</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Default for non-FERPA programs</strong> (club programs, private programs): athlete records retained for <strong>24 months past the end of the season they were created in</strong>. Notification to the org admin at 22 months with a 60-day grace.</p>
+
+    <h3>MatTime</h3>
+    <p>MatTime uses a <strong>7-year anonymization sweep</strong>, materially stronger than the cross-product default. This window aligns with typical state-level coaching-credential retention requirements and provides a clean audit trail for any post-booking dispute. The anonymization sweep is already implemented at the scheduled-cron layer.</p>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9375rem;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Data class</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Retention</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Coach account + profile</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">7 years of inactivity or user-initiated</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Parent account + bookings</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">7 years of inactivity or user-initiated</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Booking confirmation records</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">7 years past booking date (automatic anonymization)</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">USAW credential submissions</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">7 years past expiration</td></tr>
+        <tr><td style="padding: 0.5rem;">Audit log entries</td><td style="padding: 0.5rem;">7 years rolling</td></tr>
+      </tbody>
+    </table>
+
+    <h3>SignupSignin</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9375rem;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Data class</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Retention</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">User account (volunteer or admin)</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">12 months past last login or user-initiated</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Event signup records</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">At the organization's discretion; recommend &le;12 months past event</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Audit / activity records</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">12 months rolling</td></tr>
+        <tr><td style="padding: 0.5rem;">Mobile push notification tokens</td><td style="padding: 0.5rem;">Removed on logout or account deletion</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Rationale for the 12-month inactivity window:</strong> SignupSignin is event-driven; volunteers typically sign up around a tournament cadence. 12 months covers a full off-season plus the next year's early-season cadence. Past that, the user is functionally inactive. Notification email sent at 10 months of inactivity with a 60-day grace.</p>
+
+    <h2>Cross-Product Applicable Items</h2>
+
+    <h3>Audit Log Retention</h3>
+    <p>All products: audit-log entries retained for <strong>24 months rolling</strong> (MatTime is 7 years per its stronger policy). Standardized to support security investigations and dispute resolution without indefinite storage.</p>
+
+    <h3>Service-Provider Logs</h3>
+    <p>Per the respective provider's retention schedule:</p>
+    <ul>
+      <li>Supabase (database + auth logs): per project configuration</li>
+      <li>Firebase / Google Cloud (Cloud Functions logs, Firestore audit logs): per provider retention</li>
+      <li>Vercel (web request logs): per platform retention (currently 7&ndash;30 days depending on plan)</li>
+      <li>Sentry (error reports): 90 days on current plan</li>
+      <li>Resend (email delivery logs): per Resend account retention</li>
+      <li>Stripe (payment records): per Stripe + applicable tax law (typically 7 years)</li>
+      <li>Square (payment records): per Square + applicable tax law (typically 7 years)</li>
+    </ul>
+
+    <h3>Legal-Hold Exception</h3>
+    <p>Any retention window above is <strong>superseded</strong> when records are subject to:</p>
+    <ul>
+      <li>A pending or reasonably anticipated legal proceeding</li>
+      <li>A regulatory investigation or audit</li>
+      <li>A subpoena, court order, or other valid legal process</li>
+      <li>A bona fide preservation request from a party with legal authority</li>
+    </ul>
+    <p>Legal-hold records are retained until the hold is released.</p>
+
+    <h2>Notification and Grace Pattern</h2>
+    <p>For every product where inactivity triggers deletion, the following pattern applies:</p>
+    <ol>
+      <li><strong>Inactivity warning email</strong> sent at (retention window) minus 2 months, to the user's account email, with: explanation that the account is approaching the deletion timer; link to log in and reset the timer; link to export data before deletion; link to confirm immediate deletion if preferred.</li>
+      <li><strong>60-day grace period</strong> between the warning email and final deletion.</li>
+      <li><strong>Final deletion email</strong> sent at the deletion moment confirming the deletion occurred.</li>
+    </ol>
+    <p>This pattern satisfies the COPPA spirit (&ldquo;hold on to personal information only as long as is reasonably necessary&rdquo;) and provides users with meaningful warning and an opportunity to preserve their data.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>The Sept 1, 2026 attorney review will redline retention windows where appropriate; the change happens here first, then per-product privacy policies update to match. After the Oct 1, 2026 launch, this document is reviewed quarterly alongside the per-product COPPA compliance checklists.</p>
+
+    <hr>
+
+    <p style="font-size: 0.9375rem; color: var(--text-muted);">
+      Questions about this Data Retention Policy? Contact <a href="mailto:support@matside.org">support@matside.org</a>.
+    </p>
+
+  </main>
+
+  <footer class="footer">
+    <div class="section-inner">
+      <div class="footer-corporate">
+        <strong>Matside Wrestling Co.</strong> &mdash; Pennsylvania single-member LLC, headquartered in Glenshaw, PA<br>
+        Contact: <a href="mailto:support@matside.org">support@matside.org</a><br>
+        &copy; 2026 Matside Wrestling Co. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

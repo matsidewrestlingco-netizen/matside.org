@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Children's Privacy / COPPA Policy · Matside Wrestling Co.</title>
+  <meta name="description" content="How Matside Wrestling Co. addresses the Children's Online Privacy Protection Act (COPPA) across each Matside product.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">MATSIDE</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#products">Products</a></li>
+        <li><a href="/#tournaments">Tournaments</a></li>
+        <li><a href="/#leadership">Leadership</a></li>
+        <li><a href="/legal/">Legal</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="legal-prose">
+    <h1>Children's Privacy / COPPA Policy</h1>
+    <div class="legal-meta">
+      <strong>Last updated:</strong> 2026-06-22 &middot; <strong>Version:</strong> 1.0 &mdash; pending Sept 1, 2026 attorney review<br>
+      <a href="/legal/">&larr; Back to Legal index</a>
+    </div>
+
+    <p>
+      <strong>Matside Wrestling Co.</strong> takes the privacy of children seriously. This policy explains how the Children's Online Privacy Protection Act (&ldquo;COPPA&rdquo;) applies to each of our products and what we do to comply with it. Matside has conducted a formal Six-Step COPPA self-audit (per the FTC's recommended methodology) across all five products in the Matside Software portfolio; the full audit is documented at <a href="https://github.com/matsidewrestlingco-netizen/matside-hq/blob/main/planning/coppa-six-step-self-audit-v1.md" target="_blank" rel="noopener">matside-hq/planning/coppa-six-step-self-audit-v1.md</a>.
+    </p>
+
+    <h2>Summary of COPPA Scope by Product</h2>
+    <p>Matside's COPPA posture differs by product. The summary below explains why each product is in or out of scope:</p>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 0.625rem; border-bottom: 1px solid var(--border); color: var(--white); font-weight: 600;">Product</th>
+          <th style="text-align: left; padding: 0.625rem; border-bottom: 1px solid var(--border); color: var(--white); font-weight: 600;">COPPA Status</th>
+          <th style="text-align: left; padding: 0.625rem; border-bottom: 1px solid var(--border); color: var(--white); font-weight: 600;">Why</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">MatRecruit</td>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">Out of scope</td>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">Class-year gate excludes accounts for users younger than rising 9th grade. Account creation is structurally not available to children under 13.</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">MatTime</td>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">Out of scope</td>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">Account holders are adult coaches only. Wrestlers and parents do not have accounts in MatTime. No personal information is collected from children.</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">MatPass</td>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">Out of scope (processor model)</td>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">Account holders are adult coaches, program administrators, and parents. Athlete records are input by adults about minor athletes; Matside acts as a data processor for the wrestling program, which is the data controller. School-affiliated programs may impose FERPA obligations that supersede defaults.</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">SignupSignin</td>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">Out of scope</td>
+          <td style="padding: 0.625rem; border-bottom: 1px solid var(--border);">Self-only signup model. Account holders are adult volunteers and event organizers. No mechanism exists for an adult to create or register an account on behalf of a child.</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.625rem;">WrestleFA</td>
+          <td style="padding: 0.625rem; color: var(--accent-bright); font-weight: 600;">In scope</td>
+          <td style="padding: 0.625rem;">WrestleFA's core data model involves data about minor wrestlers (free-agent listings). Parents post listings describing their wrestlers; coaches and tournament directors view those listings.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>WrestleFA: COPPA Compliance in Detail</h2>
+    <p>Because WrestleFA is the only Matside product where COPPA materially applies, this section describes our compliance posture in detail.</p>
+
+    <h3>The data we collect about minors</h3>
+    <p>WrestleFA collects only the data necessary to operate the free-agent board: wrestler first name and last initial, age group, weight class, hometown / state, parent/guardian contact information, and (optionally) parent-provided commentary. We do not collect: full date of birth (only age group), street address (only state), school name, photographs, or any unique identifier beyond a randomly assigned database ID.</p>
+
+    <h3>Parental consent</h3>
+    <p>WrestleFA requires parental consent before a wrestler profile becomes visible to non-parent users (coaches, tournament directors). Our consent mechanism is currently &ldquo;email plus&rdquo; (per FTC guidance), implemented with versioned consent records and a database-layer Row-Level Security policy that hides wrestler profiles from non-parent users unless their consent record matches the current consent text version. A policy text bump forces re-consent before disclosure is re-enabled.</p>
+    <p>We are working with a Safe Harbor program (an FTC-approved COPPA Safe Harbor) to confirm that this consent mechanism is appropriate for WrestleFA's specific disclosure pattern. The Safe Harbor engagement is in progress as of June 2026.</p>
+
+    <h3>Parental rights</h3>
+    <p>Parents of children with data in WrestleFA can:</p>
+    <ul>
+      <li><strong>Review</strong> their child's data by signing in</li>
+      <li><strong>Refuse to permit further collection or use</strong> by deleting their account or revoking consent</li>
+      <li><strong>Request deletion</strong> of all data about their child via the in-product deletion path or by emailing <a href="mailto:support@matside.org">support@matside.org</a></li>
+    </ul>
+    <p>Account deletion is reversible for 30 days; after that, all child-related data is permanently deleted.</p>
+
+    <h3>No third-party tracking</h3>
+    <p>WrestleFA's wrestler-profile pages carry <strong>zero</strong> third-party trackers (no analytics, no advertising, no marketing pixels, no behavioral profiling). This is verified by Matside's <a href="https://github.com/matsidewrestlingco-netizen/matside-hq/blob/main/docs/legal/third-party-tracker-inventory-v1.md" target="_blank" rel="noopener">cross-product tracker inventory</a> (2026-06-19). The page renders with no third-party requests beyond the same-origin application code itself.</p>
+
+    <h3>Disclosures to third parties</h3>
+    <p>WrestleFA does not sell, rent, or otherwise transfer information about children to third parties for marketing purposes. The only third-party processors that touch WrestleFA data are: Supabase (database + auth), Vercel (hosting), Resend (parent-facing transactional email), and Square (payment for the $99 verified-tournament-board and $10 coach-led-tournament-board SKUs). Each processor operates under a Data Processing Agreement.</p>
+
+    <h2>Other Products: Structural-Exclusion Detail</h2>
+
+    <h3>MatRecruit</h3>
+    <p>MatRecruit's onboarding flow enforces a class-year gate that excludes any user who is younger than rising 9th grade (typically age 13&ndash;14). The class-year window is documented in our COPPA scope-determination memo at <a href="https://github.com/matsidewrestlingco-netizen/matrecruit/blob/main/docs/legal/coppa-scope-determination.md" target="_blank" rel="noopener">matrecruit/docs/legal/coppa-scope-determination.md</a>. We do not collect date of birth and we frame eligibility positively (&ldquo;you must be in the eligible class-year window&rdquo;) rather than as a minimum-age gate (&ldquo;you must be 13+&rdquo;) to maintain the structural exclusion under the COPPA definition.</p>
+
+    <h3>MatTime</h3>
+    <p>MatTime is a coach-only product. Wrestlers and parents do not create MatTime accounts. Coaches book their own privates schedule and manage their own client lists. No personal information is collected from children. Coach-account holders self-attest to being adult professionals.</p>
+
+    <h3>MatPass</h3>
+    <p>MatPass is a wrestling-program compliance tool. Account holders are program staff (coaches, administrators) and parents of athletes. The data model is &ldquo;adult-input-data-about-child&rdquo;: athlete records are created and maintained by adult program staff; data about minors is provided by the adult input layer, not by children themselves. Matside operates as a data processor for the wrestling program; the program is the data controller and is responsible for parental notice and consent under FERPA where applicable. Our processor model is documented in our COPPA scope-determination memo at <a href="https://github.com/matsidewrestlingco-netizen/matpass-app/blob/main/docs/legal/coppa-scope-determination.md" target="_blank" rel="noopener">matpass-app/docs/legal/coppa-scope-determination.md</a>.</p>
+
+    <h3>SignupSignin</h3>
+    <p>SignupSignin enforces a self-only signup model: each account is for the person creating it, with no mechanism to register or sign up a child. Account holders are adult volunteers and event organizers. Our COPPA scope-determination memo for SignupSignin is at <a href="https://github.com/matsidewrestlingco-netizen/signupsignin-web-/blob/main/docs/legal/coppa-scope-determination.md" target="_blank" rel="noopener">signupsignin-web-/docs/legal/coppa-scope-determination.md</a>.</p>
+
+    <h2>Direct Notice to Parents</h2>
+    <p>For WrestleFA specifically, the in-product consent flow provides direct notice to parents covering each of the seven &sect;312.4(c) elements required by COPPA: (1) the operator's name and contact information, (2) the types of personal information collected, (3) the operator's practices for use and disclosure, (4) that the parent's consent is required, (5) that the operator must terminate access if consent is not provided, (6) the parent's right to review and delete the information, and (7) the operator's procedures to ensure confidentiality, security, and integrity of the information collected. The exact consent text is versioned in our database and a parent's consent of record matches a specific version; if we materially update the consent text, parents are required to re-consent before disclosure resumes.</p>
+
+    <h2>Contact</h2>
+    <p>
+      If you are a parent and have questions about your child's data on any Matside product, or if you wish to review, correct, or delete data about your child, contact <a href="mailto:support@matside.org">support@matside.org</a>. We respond to verified parental requests within 30 days.
+    </p>
+
+    <h2>Changes to This Policy</h2>
+    <p>
+      We will update this policy as our COPPA posture evolves &mdash; in particular, as the Safe Harbor engagement for WrestleFA progresses and as the bundled Sept 1, 2026 attorney review of all Matside legal documents takes place. The &ldquo;Last updated&rdquo; date at the top reflects the most recent change. Material changes affecting parental consent will trigger an in-product re-consent flow for affected users.
+    </p>
+
+  </main>
+
+  <footer class="footer">
+    <div class="section-inner">
+      <div class="footer-corporate">
+        <strong>Matside Wrestling Co.</strong> &mdash; Pennsylvania single-member LLC, headquartered in Glenshaw, PA<br>
+        Contact: <a href="mailto:support@matside.org">support@matside.org</a><br>
+        &copy; 2026 Matside Wrestling Co. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

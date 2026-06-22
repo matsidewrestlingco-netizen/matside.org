@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Information Security Program · Matside Wrestling Co.</title>
+  <meta name="description" content="Matside Wrestling Co. Information Security Program v1.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">MATSIDE</a>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/#products">Products</a></li>
+        <li><a href="/#tournaments">Tournaments</a></li>
+        <li><a href="/#leadership">Leadership</a></li>
+        <li><a href="/legal/">Legal</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="legal-prose">
+    <h1>Information Security Program</h1>
+    <div class="legal-meta">
+      <strong>Last updated:</strong> 2026-06-22 &middot; <strong>Version:</strong> 1.0 &mdash; pending Sept 1, 2026 attorney review<br>
+      <a href="/legal/">&larr; Back to Legal index</a>
+    </div>
+
+    <h2>1. Purpose and Scope</h2>
+    <p>This Information Security Program (&ldquo;ISP&rdquo;) documents the administrative, physical, technical, and operational safeguards Matside Wrestling Co. uses to protect personal information across the Matside software portfolio. It applies to all current and future Matside products:</p>
+    <ul>
+      <li><strong>WrestleFA</strong> &mdash; free-agent marketplace for wrestling tournaments; COPPA in scope</li>
+      <li><strong>MatRecruit</strong> &mdash; HS-athlete recruiting platform; COPPA out of scope by structural exclusion</li>
+      <li><strong>MatTime</strong> &mdash; privates booking marketplace; COPPA out of scope; not yet launched</li>
+      <li><strong>MatPass</strong> &mdash; athlete compliance management for wrestling programs; COPPA out of scope; FERPA-adjacent</li>
+      <li><strong>SignupSignin</strong> &mdash; volunteer event signup and day-of check-in; COPPA out of scope; in maintenance mode</li>
+    </ul>
+    <p>This document is the <strong>master ISP</strong>. Each product has its own addendum (linked at the end of this document) describing product-specific data classes, technical safeguards, and operational gotchas that extend or specialize this master.</p>
+    <p>This ISP satisfies the &ldquo;written information security program&rdquo; requirement under COPPA &sect;312.8. It is calibrated to the size of Matside Wrestling Co. (one operator, sole-member LLC) and the sensitivity of the data processed (varies by product; WrestleFA is the only product handling under-13 personal information under the COPPA framework).</p>
+
+    <h2>2. Personnel and Access Model</h2>
+
+    <h3>2.1 Personnel</h3>
+    <p>Matside Wrestling Co. is a sole-member LLC. <strong>Daniel Emmons</strong> is the only person with access to production systems, source code, vendor accounts, and customer data. There is no other employee, contractor, or partner with production access at this time.</p>
+    <p>This single-person operating model is documented as a known constraint. Compensating controls:</p>
+    <ul>
+      <li><strong>No shared credentials.</strong> Every system uses individual sign-in tied to Daniel's account. No service accounts are used interactively.</li>
+      <li><strong>No standing access to customer data outside of operational need.</strong> Daniel does not query or export customer data except for support, debugging, or migration purposes.</li>
+      <li><strong>Audit logs of administrative actions.</strong> Every product logs meaningful state-changing actions (see &sect;5.4); the audit trail exists even when no other person is present to review it.</li>
+      <li><strong>Documented escalation contact.</strong> In the event Daniel becomes unable to operate the business, the registered agent on file with the Pennsylvania Department of State serves as the legal-process contact for business continuity.</li>
+    </ul>
+    <p>When additional personnel are added (employees, contractors, partners), this ISP must be revised to document role-based access controls and onboarding/offboarding procedures.</p>
+
+    <h3>2.2 Access Model</h3>
+    <p>Access to production systems is gated through individual provider accounts. Each system uses individual sign-in with multi-factor authentication enforced at the provider level. Hardware-key MFA is used wherever the provider supports it. All passwords are stored in a password manager &mdash; not in plain text, not in source code, not in environment files committed to git.</p>
+    <p>Production systems include: Supabase (multi-project), Firebase / Google Cloud (multi-project), Vercel, GitHub, Stripe, Square, Resend, Anthropic, and Sentry. Each is accessed through individual provider accounts with MFA enforced.</p>
+
+    <h2>3. Physical Security</h2>
+
+    <h3>3.1 Workstations</h3>
+    <p>Production work happens on Daniel's primary workstation (Apple MacBook). Controls in place:</p>
+    <ul>
+      <li><strong>Full-disk encryption</strong> via FileVault (macOS native; protects data at rest if the device is lost or stolen)</li>
+      <li><strong>Auto-lock + screen lock password</strong> required on idle</li>
+      <li><strong>No shared workstations.</strong> No other person uses this laptop interactively for production work.</li>
+      <li><strong>Operating system kept current</strong> on the latest macOS major release with auto-update for security patches</li>
+    </ul>
+
+    <h3>3.2 Office Environment</h3>
+    <p>Production work happens from Daniel's home office in Glenshaw, PA. Physical access to the workstation is limited to household members. The home network is described in &sect;4.</p>
+    <p>When operating from a coffee shop, hotel, or other untrusted location, no production database is queried over the network without using a trusted connection (laptop tethered to personal cellular hotspot if untrusted WiFi is the only option).</p>
+
+    <h3>3.3 Backup and Recovery</h3>
+    <p>Source code is backed up via GitHub (every commit pushed to <code>origin</code>). Local working trees are protected by Time Machine (encrypted local backup). Customer data is stored at the respective cloud provider (Supabase, Firebase) and is the provider's responsibility to back up; provider-level point-in-time recovery is enabled per project.</p>
+
+    <h2>4. Network Security</h2>
+
+    <h3>4.1 Home Network</h3>
+    <p>The home office uses a residential broadband connection. The router is administered by Daniel; the admin interface password is non-default; firmware is kept current; remote management is disabled.</p>
+    <p>WiFi is WPA2/WPA3 with a password not shared outside the household. Production credentials are never entered or used on a guest WiFi network or a network managed by a third party that Daniel does not control.</p>
+
+    <h3>4.2 Travel and Untrusted Networks</h3>
+    <p>When traveling, Daniel uses a personal cellular hotspot rather than untrusted WiFi for production-credential entry, code commits to private repos, or customer-data access.</p>
+    <p>A VPN service is <strong>not currently used.</strong> A backlog item exists to evaluate adding one (e.g., Mullvad, ProtonVPN) for additional defense-in-depth on travel networks.</p>
+
+    <h3>4.3 Transport Security</h3>
+    <p>All Matside products use HTTPS exclusively. HTTP requests to product domains are redirected to HTTPS by the hosting provider (Vercel or Firebase Hosting). No production system accepts unencrypted credential entry.</p>
+
+    <h2>5. Application Security</h2>
+
+    <h3>5.1 Database Row-Level Security</h3>
+    <p>The Supabase-backed products (WrestleFA, MatTime, MatRecruit) use Postgres Row-Level Security (RLS) to enforce tenant isolation at the database layer. Specific policies are documented in each product's addendum. Policies are reviewed when added; the test suite for each product includes RLS verification (e.g., MatRecruit Epic D D9 RLS Playwright verification; MatTime audit-log RLS tests).</p>
+    <p>The Firebase-backed products (MatPass, SignupSignin) use Firestore Security Rules to enforce the same tenant-isolation principle at the database layer. Rules are version-controlled in the repo at <code>firestore.rules</code> and deployed via <code>firebase deploy --only firestore:rules</code>. Direct editing of rules in the Firebase Console is prohibited; all rule changes go through git plus PR review.</p>
+
+    <h3>5.2 Authentication and Session Management</h3>
+    <ul>
+      <li><strong>Supabase Auth</strong> (WrestleFA, MatTime, MatRecruit) &mdash; magic-link email plus Google OAuth (MatRecruit Phase 2 adds Apple per the portfolio login standard).</li>
+      <li><strong>Firebase Auth</strong> (MatPass, SignupSignin) &mdash; email/password plus Google OAuth plus (SignupSignin only) Apple OAuth.</li>
+    </ul>
+    <p>Password hashes are stored by the auth provider; Matside never stores plaintext or hashed passwords directly. Sessions use HTTP-only secure cookies (Supabase) or IndexedDB/SecureStore (Firebase).</p>
+
+    <h3>5.3 Privileged Operations</h3>
+    <p>For products where the database-rule layer alone is insufficient to securely grant a role membership (e.g., MatPass's invite-acceptance and role-management functions), privileged operations run server-side as Cloud Functions with admin credentials. The pattern: the client requests the operation; the function validates the request server-side; the function writes the role grant with admin credentials so the client cannot forge it.</p>
+    <p>Similar pattern in MatRecruit for billing portal access (Stripe Customer Portal session creation), in WrestleFA for account-deletion finalization (the daily cron that processes the 30-day reversible deletion grace period).</p>
+
+    <h3>5.4 Audit Logging</h3>
+    <p>Every Matside product writes an audit-log entry on every meaningful state-changing server action:</p>
+    <ul>
+      <li><strong>MatRecruit:</strong> <code>lib/audit.ts</code> with <code>scrubMetadataPii</code> runtime guard that redacts email/phone/SSN-shaped values before storage</li>
+      <li><strong>MatTime:</strong> <code>src/lib/audit.ts</code> with actor (UUID), action, entity_type, entity_id, optional metadata</li>
+      <li><strong>MatPass:</strong> Firestore <code>activityLog</code> collection per org, with UID-based attribution</li>
+      <li><strong>WrestleFA:</strong> per-action audit-log entries on profile/consent/account-deletion actions</li>
+      <li><strong>SignupSignin:</strong> standard activity-log entries on signup creation, check-in, role-change events</li>
+    </ul>
+    <p>Retention: 24 months rolling for most products; 7 years for MatTime per its stronger policy. See the <a href="/legal/retention.html">Data Retention Policy</a> for full retention windows.</p>
+
+    <h3>5.5 Error Monitoring and PII Handling</h3>
+    <p>Where error monitoring is configured (MatRecruit and MatTime use Sentry), the SDK is configured with <code>sendDefaultPii: false</code> to suppress automatic PII capture. MatRecruit additionally runs a runtime guard (<code>scrubMetadataPii</code>) on audit-log entries to redact email/phone/SSN-shaped strings before they reach Sentry breadcrumbs.</p>
+    <p>MatPass, WrestleFA, and SignupSignin Web do not currently have error monitoring configured. This is a known operational gap; it is privacy-positive (no PII leaks to a third-party monitoring service) but limits production-incident visibility. Adding error monitoring with <code>sendDefaultPii: false</code> is on the post-Oct-1 engineering backlog.</p>
+
+    <h3>5.6 Secrets Management</h3>
+    <p>Production secrets (API keys, database service-role keys, signing secrets) are stored in:</p>
+    <ul>
+      <li>Vercel Project Environment Variables (for Vercel-hosted products: MatRecruit, MatTime, WrestleFA)</li>
+      <li>Firebase Functions secrets (for Cloud Functions: MatPass, SignupSignin)</li>
+      <li>The password manager (mirror copy)</li>
+    </ul>
+    <p>Secrets are scoped per environment: Production gets live keys; Preview/Development gets sandbox/test keys. Secrets are never committed to git; <code>.env.example</code> files document the keys without values.</p>
+    <p>A documented rotation cadence: high-value secrets (Stripe live secret key, Anthropic API key, Supabase service-role keys) reviewed quarterly; rotated annually or on suspected compromise. Other secrets reviewed at any incident touchpoint.</p>
+
+    <h3>5.7 Code Review and Change Control</h3>
+    <p>The single-developer model means code review is self-review. Compensating controls:</p>
+    <ul>
+      <li><strong>Test-driven development</strong> &mdash; pure logic gets unit tests (Vitest) and DB-touching code is exercised via Playwright e2e tests against live infrastructure</li>
+      <li><strong>Build verification before push</strong> &mdash; <code>tsc -b &amp;&amp; next build</code> (or <code>vite build</code>) must be clean</li>
+      <li><strong>Migration discipline</strong> &mdash; schema migrations are applied via the provider's SQL editor with preflight checks; not via blanket <code>prisma migrate</code> or similar</li>
+      <li><strong>Engineering gotchas knowledge base</strong> &mdash; documented cross-product traps (Supabase SMTP port 465, <code>@supabase/ssr</code> middleware PKCE race, DNS providers per domain, <code>'use server'</code> async-only, Turbopack stale CSS chunk) so the same trap doesn't recur on the next product</li>
+    </ul>
+
+    <h2>6. Vendor and Subprocessor Security</h2>
+
+    <h3>6.1 Subprocessor List</h3>
+    <p>Matside engages the following third-party providers (subprocessors) to process personal information on its behalf:</p>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+      <thead>
+        <tr>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Subprocessor</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Role</th>
+          <th style="text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); color: var(--white);">Products</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Supabase</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Database, auth, file storage</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">WrestleFA, MatTime, MatRecruit</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Firebase / Google Cloud</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Auth, Firestore, Cloud Functions, file storage</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">MatPass, SignupSignin</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Vercel</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Hosting, edge runtime, cron</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">MatRecruit, MatTime, WrestleFA</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Stripe</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Subscription billing</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">MatRecruit</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Square</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Transactional payments</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">WrestleFA, internal tools</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Resend</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Transactional email</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">MatRecruit (live); other products in progress</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Sentry</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Error monitoring</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">MatRecruit, MatTime</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Anthropic</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">AI recommendations (Claude API)</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">MatRecruit (Epic F)</td></tr>
+        <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Cloudflare R2</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Off-platform backup storage</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Internal HQ tooling</td></tr>
+        <tr><td style="padding: 0.5rem;">Expo</td><td style="padding: 0.5rem;">Mobile build, push notifications</td><td style="padding: 0.5rem;">SignupSignin Mobile</td></tr>
+      </tbody>
+    </table>
+    <p>Executed Data Processing Agreements are filed at <a href="https://github.com/matsidewrestlingco-netizen/matside-hq/tree/main/docs/legal/dpa" target="_blank" rel="noopener">matside-hq/docs/legal/dpa/</a>.</p>
+
+    <h3>6.2 Vendor Selection Criteria</h3>
+    <p>When selecting a subprocessor that will process personal information, Matside evaluates: published privacy policy and DPA; support for required security controls (encryption at rest, access controls, audit logging, breach notification commitments); for products in COPPA scope, that the provider's terms allow processing of children's personal information on behalf of an operator; for FERPA-adjacent products (MatPass for school-affiliated programs), that the provider's terms align with the FERPA "school official" exception.</p>
+
+    <h2>7. Incident Response</h2>
+
+    <h3>7.1 Definition</h3>
+    <p>A <strong>security incident</strong> is any event that compromises (or reasonably might compromise) the confidentiality, integrity, or availability of personal information processed by a Matside product, including:</p>
+    <ul>
+      <li>Unauthorized access to a production system, account, or database</li>
+      <li>Loss or theft of a workstation containing production credentials</li>
+      <li>Compromise of a third-party subprocessor that affects Matside customer data</li>
+      <li>A bug or misconfiguration that exposes one user's data to another user</li>
+    </ul>
+
+    <h3>7.2 Response Procedure</h3>
+    <p>When an incident is identified or reasonably suspected:</p>
+    <ol>
+      <li><strong>Contain.</strong> Disable the affected credential, rotate the affected secret, restrict the affected query path, or take the affected surface offline as the situation requires.</li>
+      <li><strong>Assess.</strong> Determine the scope: which data was exposed, to whom, for how long, and whether the exposure is ongoing.</li>
+      <li><strong>Notify.</strong> See &sect;7.3.</li>
+      <li><strong>Remediate.</strong> Patch the underlying cause; deploy the fix; verify the fix in production.</li>
+      <li><strong>Document.</strong> Record the incident in a post-mortem document committed to the relevant repo. Include: timeline, scope, root cause, remediation, lessons learned.</li>
+    </ol>
+
+    <h3>7.3 Notification</h3>
+    <p>Notification timing is product-specific and depends on the data exposed:</p>
+    <ul>
+      <li><strong>COPPA-affected incident</strong> (WrestleFA): notify affected parents within 30 days of confirmed exposure; notify the FTC if the incident meets the COPPA breach-reporting threshold; consult the COPPA Safe Harbor (when engaged) for guidance on edge cases.</li>
+      <li><strong>General security incident affecting US residents:</strong> notify affected users per applicable state breach-notification law (most US states require notification within 30&ndash;60 days; some have shorter windows).</li>
+      <li><strong>Incident affecting EU residents:</strong> notify the relevant supervisory authority within 72 hours per GDPR Article 33, and affected users per GDPR Article 34 when high risk.</li>
+      <li><strong>No-impact incident</strong> (e.g., a credential rotation done preemptively without evidence of exposure): no user notification required; logged internally per &sect;7.2 step 5.</li>
+    </ul>
+
+    <h3>7.4 Monitoring and Alerting</h3>
+    <p>Where Sentry is configured (MatRecruit, MatTime), error volume spikes and new high-severity issues trigger an email alert to Daniel. The alert is the first signal of a production incident in most cases.</p>
+    <p>For products without error monitoring (MatPass, WrestleFA, SignupSignin Web), incident detection relies on user reports plus Daniel's manual review of provider dashboards. The post-Oct-1 backlog item to add error monitoring across the portfolio addresses this gap.</p>
+
+    <h3>7.5 Cooperation with Law Enforcement</h3>
+    <p>Matside cooperates with valid legal process (subpoena, court order, search warrant). The process is logged; affected users are notified unless the legal process prohibits disclosure (gag order).</p>
+
+    <h2>8. Annual Review and Maintenance</h2>
+
+    <h3>8.1 Review Cadence</h3>
+    <p>This ISP is reviewed at least annually. Daniel performs the review in October each year (post-fiscal-year-end at Matside's Sept 30 close; aligns with the post-launch operational cadence). The review checks:</p>
+    <ul>
+      <li>Personnel + access model still accurate</li>
+      <li>Subprocessor list still accurate</li>
+      <li>Per-product addenda updated to reflect any architectural changes</li>
+      <li>Incident log reviewed for systemic patterns</li>
+      <li>Vendor DPAs still on file and current</li>
+    </ul>
+
+    <h3>8.2 Triggered Review</h3>
+    <p>Outside the annual cadence, this ISP is reviewed and updated when any of the following occur:</p>
+    <ul>
+      <li>A new product launches or a product reaches material new scope</li>
+      <li>A new subprocessor is engaged</li>
+      <li>A material change in an existing subprocessor's terms or services</li>
+      <li>A confirmed security incident</li>
+      <li>A change in applicable law (COPPA amendment, new state privacy law, GDPR update)</li>
+      <li>A material change in Matside personnel structure (employee added, contractor engaged)</li>
+    </ul>
+
+    <h2>9. Per-Product Addenda</h2>
+    <p>Product-specific information security addenda detail the data flow, access controls, and security architecture for each Matside Software product:</p>
+    <ul>
+      <li><a href="https://github.com/matsidewrestlingco-netizen/matside-hq/blob/main/docs/legal/isp-addenda/wrestlefa.md" target="_blank" rel="noopener">WrestleFA ISP Addendum</a></li>
+      <li><a href="https://github.com/matsidewrestlingco-netizen/matside-hq/blob/main/docs/legal/isp-addenda/matrecruit.md" target="_blank" rel="noopener">MatRecruit ISP Addendum</a></li>
+      <li><a href="https://github.com/matsidewrestlingco-netizen/matside-hq/blob/main/docs/legal/isp-addenda/mattime.md" target="_blank" rel="noopener">MatTime ISP Addendum</a></li>
+      <li><a href="https://github.com/matsidewrestlingco-netizen/matside-hq/blob/main/docs/legal/isp-addenda/matpass.md" target="_blank" rel="noopener">MatPass ISP Addendum</a></li>
+      <li><a href="https://github.com/matsidewrestlingco-netizen/matside-hq/blob/main/docs/legal/isp-addenda/signupsignin.md" target="_blank" rel="noopener">SignupSignin ISP Addendum</a></li>
+    </ul>
+
+    <hr>
+
+    <p style="font-size: 0.9375rem; color: var(--text-muted);">
+      Questions about this Information Security Program? Contact <a href="mailto:support@matside.org">support@matside.org</a>.
+    </p>
+
+  </main>
+
+  <footer class="footer">
+    <div class="section-inner">
+      <div class="footer-corporate">
+        <strong>Matside Wrestling Co.</strong> &mdash; Pennsylvania single-member LLC, headquartered in Glenshaw, PA<br>
+        Contact: <a href="mailto:support@matside.org">support@matside.org</a><br>
+        &copy; 2026 Matside Wrestling Co. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
