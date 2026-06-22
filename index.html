@@ -354,8 +354,72 @@
         <strong>Matside Wrestling Co.</strong> &mdash; Pennsylvania single-member LLC, headquartered in Glenshaw, PA<br>
         &copy; 2026 Matside Wrestling Co. All rights reserved.
       </div>
+
+      <div class="phrase-rotator">
+        <img src="/assets/images/pgh_skyline.png" alt="Pittsburgh" class="phrase-rotator-skyline">
+        <span class="phrase-rotator-text" id="matside-phrase"></span>
+      </div>
+
     </div>
   </footer>
+
+  <script>
+    (function () {
+      var phrases = [
+        'Made in Pittsburgh. Deployed Everywhere.',
+        'Built in the 412.',
+        'PGH Built. Internet Ready.',
+        'Crafted in Pittsburgh, Shipped to the Cloud.',
+        'Forged in the Steel City, Powered by Wi-Fi.',
+        'From the Three Rivers to Your Browser.',
+        'Yinzer-Built, Pixel-Perfect.',
+        'Pittsburgh Made. Beta-Tested.',
+        'Made in PGH — No Bugs, Just Bridges.',
+        'Steel City Code, Worldwide Mode.',
+        '412 Crafted. API Attached.',
+        'Three Rivers, Zero Downtime.',
+        'Steel City Stack.',
+        'Bridges, Tunnels, and TypeScript.',
+        'Yinzer Code, Cloud-Approved.',
+        'From Squirrel Hill to Server Hill.',
+        'Hot Metal Pipeline. Hot Reload Code.',
+        "Compiled in the 'Burgh.",
+        'Shipped from the Strip District.',
+        'Compiled at the Cathedral.',
+        'From the Point to Production.',
+        'Mount Washington Views. Mountain View Speeds.',
+        'South Side Source. North Side Nodes.',
+        'Glenshaw Garage. Worldwide Ship.',
+        'Yinzer-Built, Bracket-Tested.',
+        'From the Mon to the Mat.',
+        'PGH Tough. Pin-Perfect.',
+        'Three Rivers. Six Minutes.',
+        'Bridges Above. Brackets Below.',
+        'From the 412 to the Centerline.',
+        'Shaler Strong. Bracket-Tested.',
+        'Steel City Sweat. Pixel-Perfect Code.',
+        'Forged on the Mon, Sharpened on the Mat.',
+        'Three Rivers. One Codebase.',
+        'Pittsburgh Grit. Production Ready.',
+        'Built Like a Wrestler. Tested Like an Engineer.',
+        'Mat Tested. Production Approved.',
+        'Pinning Bugs Since Day One.',
+        'Western PA Wired Different.',
+        'Grit Over Glamour.',
+        'Steel City Tough. Championship Ready.',
+        'Wrestling Built. Software Driven.',
+        'Where Brackets Meet Backlogs.',
+        'Managing Mats. Shipping Software.',
+        'Built for Tournament Directors.',
+        'From Weigh-Ins to Web Apps.',
+        'Wrestling Problems. Software Solutions.',
+        'Built by Wrestling People.',
+        'From Brackets to Backends.'
+      ];
+      var el = document.getElementById('matside-phrase');
+      if (el) el.textContent = phrases[Math.floor(Math.random() * phrases.length)];
+    })();
+  </script>
 
 </body>
 </html>

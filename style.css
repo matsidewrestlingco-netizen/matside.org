@@ -865,3 +865,29 @@ body {
   display: block;
   margin: 0 auto;
 }
+
+/* ─── Phrase rotator (Pittsburgh skyline + cycling tagline) ─────────────── */
+/* Single-shot random pick at page load — same pattern as the original
+   signupsignin-web- Footer component, ported to vanilla JS for the
+   plain-HTML matside.org stack. */
+.phrase-rotator {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  opacity: 0.85;
+}
+.phrase-rotator-skyline {
+  height: 14px;
+  width: auto;
+  opacity: 0.45;
+  filter: invert(1);
+}
+.phrase-rotator-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  font-style: italic;
+}
