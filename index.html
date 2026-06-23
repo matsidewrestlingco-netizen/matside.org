@@ -175,7 +175,8 @@
     /* ── Leadership ─────────────────────────── */
     .leaders { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     .leader { border: 1px solid var(--rule); border-radius: 4px; padding: 26px; background: var(--panel); display: flex; gap: 18px; align-items: flex-start; }
-    .avatar { width: 60px; height: 60px; border-radius: 4px; background: var(--steel); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 700; font-size: 20px; flex-shrink: 0; letter-spacing: .03em; }
+    .avatar { width: 60px; height: 60px; border-radius: 4px; background: var(--steel); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 700; font-size: 20px; flex-shrink: 0; letter-spacing: .03em; overflow: hidden; }
+    .avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
     .leader .role { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--steel-br); margin-bottom: 6px; }
     .leader h3 { font-family: var(--display); font-weight: 700; font-size: 19px; color: #fff; margin-bottom: 8px; }
     .leader p { font-size: 13.5px; line-height: 1.6; color: var(--muted); margin-bottom: 12px; }
@@ -433,14 +434,14 @@
             <div>
               <div class="role">Founder &amp; Operator · USA Bracketing Expert</div>
               <h3>Daniel Emmons</h3>
-              <p>Daniel Emmons, Owner and President of Matside Wrestling Co., has been deeply involved in the sport since his elementary school days in Cincinnati, Ohio. As a father of two wrestlers and an active coach and booster, Daniel recognized the need for better tools and resources in the wrestling community.</p>
-              <p>Founded to fill this gap, Matside Wrestling Co. operates in two key areas: running tournaments and developing wrestling-specific software. By being hands-on and understanding the challenges faced by the community, Matside Wrestling Co. is uniquely positioned to create innovative solutions that push the sport forward.</p>
-              <p>With a vision to earn a seat at the big table of wrestling and make a lasting positive impact, Daniel brings his passion, knowledge, and family-oriented perspective to his role. Matside Wrestling Co. is proudly based in the heart of wrestling country near Pittsburgh, where Daniel lives with his wife Celia, children Will, Ana, and West, and their dogs George and Dayton.</p>
+              <p>Daniel Emmons, Owner and President of Matside Wrestling Co., has been involved in the sport since his elementary school days in Cincinnati, Ohio. As a father of wrestlers and an active coach and booster, Daniel recognized the need for better tools in the wrestling community — and built Matside to fill that gap.</p>
+              <p>Matside Wrestling Co. operates across two areas: tournament facilitation and wrestling-specific software development. Grounded in firsthand experience, the company is uniquely positioned to create solutions that move the sport forward.</p>
+              <p>Based near Pittsburgh — the heart of wrestling country — Daniel lives with his wife Celia, children Will, Ana, and West, and their dogs George and Dayton.</p>
               <a href="mailto:daniel@matside.org">daniel@matside.org</a>
             </div>
           </div>
           <div class="leader">
-            <div class="avatar">MM</div>
+            <div class="avatar"><img src="assets/images/mason.jpg" alt="Mason Manville" width="60" height="60" loading="lazy"></div>
             <div>
               <div class="role">Chief Mat Officer</div>
               <h3>Mason Manville</h3>
