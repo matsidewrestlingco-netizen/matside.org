@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operators &amp; Credentials · Matside Wrestling Co.</title>
+  <meta name="description" content="Active USA Wrestling credentials for Matside Wrestling Co. tournament operators and assistants. Independently verifiable at USAWmembership.com.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Operators page styles */
+    .ops-prose {
+      max-width: 1180px;
+      margin: 56px auto 64px;
+      padding: 0 28px;
+      color: var(--text);
+    }
+    .ops-prose h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: clamp(28px, 4vw, 40px);
+      letter-spacing: -0.01em;
+      margin: 0 0 18px;
+      color: #fff;
+    }
+    .ops-meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      color: var(--muted-2);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .ops-meta strong { color: var(--text); font-weight: 500; }
+    .ops-lede {
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--muted);
+      max-width: 78ch;
+      margin: 0 0 28px;
+    }
+
+    /* Verification callout */
+    .verify-callout {
+      border: 1px solid rgba(59, 130, 196, 0.3);
+      background: rgba(59, 130, 196, 0.06);
+      border-radius: 12px;
+      padding: 22px 26px;
+      margin: 28px 0 36px;
+    }
+    .verify-callout h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 0 0 10px;
+      font-weight: 600;
+    }
+    .verify-callout p {
+      margin: 0 0 14px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .verify-callout p:last-child { margin-bottom: 0; }
+    .verify-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--steel);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      transition: background 0.15s ease;
+    }
+    .verify-cta:hover { background: var(--steel-deep); }
+    .verify-cta::after { content: " →"; }
+
+    /* Section heading */
+    .ops-section-head {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 36px 0 16px;
+      font-weight: 600;
+    }
+
+    /* Desktop credentials table */
+    .credentials-table-wrap {
+      overflow-x: auto;
+      margin-bottom: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .credentials-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      min-width: 1080px;
+    }
+    .credentials-table th {
+      background: var(--ink-deep);
+      color: var(--steel);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 14px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      white-space: nowrap;
+    }
+    .credentials-table th.center { text-align: center; }
+    .credentials-table td {
+      padding: 16px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    .credentials-table tr:last-child td { border-bottom: none; }
+    .credentials-table td.center { text-align: center; }
+    .credentials-table td.mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+    .credentials-table td.name { font-weight: 600; color: #fff; }
+    .credentials-table td.role { color: var(--muted); font-size: 13px; }
+    .credentials-table td.ncep { font-weight: 600; color: var(--steel-br); letter-spacing: 0.05em; }
+    .credentials-table td.verified-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* USAW ID button-link */
+    .usaw-id-link {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--steel-br);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(125, 211, 240, 0.4);
+      padding-bottom: 1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .usaw-id-link:hover {
+      color: #fff;
+      border-bottom-color: var(--steel-br);
+    }
+
+    /* Status dots (mirror USAW color semantics) */
+    .dot-status {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      vertical-align: middle;
+    }
+    .dot-red { background: #C8102E; }
+    .dot-green { background: #2F9E44; }
+    .dot-blue { background: #1E90FF; }
+    .dot-yellow { background: #E5B71C; }
+    .dot-gray { background: #6B7280; }
+
+    /* Mobile cards */
+    .credentials-cards { display: none; }
+    .cred-card {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      padding: 22px 22px 24px;
+      margin-bottom: 18px;
+    }
+    .cred-card-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .cred-card-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+    .cred-card-state {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted-2);
+      letter-spacing: 0.08em;
+    }
+    .cred-card-role {
+      font-size: 14px;
+      color: var(--steel-br);
+      margin: 0 0 14px;
+    }
+    .cred-card-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 16px;
+    }
+    .cred-card-id a {
+      color: var(--steel-br);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(125, 211, 240, 0.4);
+      padding-bottom: 1px;
+    }
+    .cred-card-id a:hover { color: #fff; }
+    .cred-card-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px 18px;
+      margin: 0 0 16px;
+      font-size: 14px;
+    }
+    .cred-card-grid .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+      align-self: center;
+    }
+    .cred-card-grid .value { text-align: right; }
+    .cred-card-ncep {
+      font-weight: 600;
+      color: var(--steel-br);
+      letter-spacing: 0.05em;
+    }
+    .cred-card-footer {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-2);
+    }
+    .cred-card-footer strong { color: var(--text); font-weight: 500; }
+
+    /* Legend */
+    .ops-legend {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 22px 26px;
+      margin-bottom: 28px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .ops-legend h3 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 0 0 16px;
+      font-weight: 600;
+    }
+    .ops-legend ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 10px 22px;
+    }
+    .ops-legend li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text);
+    }
+    .ops-legend .dot-status {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    /* NCEP key */
+    .ncep-key {
+      margin-bottom: 28px;
+    }
+    .ncep-key h3 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 0 0 12px;
+      font-weight: 600;
+    }
+    .ncep-key dl {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px 22px;
+      margin: 0;
+      font-size: 14px;
+    }
+    .ncep-key dt {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--steel-br);
+      margin-right: 8px;
+    }
+    .ncep-key dd {
+      display: inline;
+      margin: 0;
+      color: var(--text);
+    }
+    .ncep-key .row { margin-bottom: 2px; }
+
+    /* Source attribution */
+    .ops-source {
+      margin-top: 20px;
+      padding: 18px 22px;
+      border-left: 2px solid var(--steel);
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+      background: rgba(59, 130, 196, 0.04);
+    }
+    .ops-source strong { color: var(--text); font-weight: 500; }
+    .ops-source a { color: var(--steel-br); text-decoration: none; border-bottom: 1px dashed rgba(125, 211, 240, 0.4); padding-bottom: 1px; }
+    .ops-source a:hover { color: #fff; }
+
+    /* Responsive switching */
+    @media (max-width: 900px) {
+      .credentials-table-wrap { display: none; }
+      .credentials-cards { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Banner -->
+  <div class="banner">
+    <div class="wrap">
+      <div><span class="dot"></span>Matside Wrestling Co.: Tournament Operations &amp; Software</div>
+      <div class="loc">Glenshaw, PA</div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="wrap">
+      <a href="/" class="logo">MATSIDE<span>WRESTLING&nbsp;CO.</span></a>
+      <ul class="nav-links">
+        <li><a href="/#tournaments">Tournaments</a></li>
+        <li><a href="/#software">Software</a></li>
+        <li><a href="/#leadership">Leadership</a></li>
+        <li><a href="/operators/" class="active">Operators</a></li>
+        <li><a href="/legal/">Legal</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="ops-prose">
+    <h1>Operators &amp; Credentials</h1>
+    <div class="ops-meta">
+      <strong>Last updated:</strong> 2026-06-25
+    </div>
+
+    <p class="ops-lede">
+      Every Matside Wrestling Co. operator and assistant holds an active USA Wrestling Wrestling Leader credential, current Background Check, and current Safe Sport training. Each record below mirrors the official USA Wrestling membership status as displayed on the USAW Verify Membership tool, and is independently verifiable using each member's USA Wrestling ID.
+    </p>
+
+    <div class="verify-callout">
+      <h2>Independent Verification</h2>
+      <p>
+        Matside Leadership has verified each record below at <strong>2026-06-25</strong> using USA Wrestling's official membership-verification tool. We encourage tournament directors, partner organizations, and parents to verify independently using each member's USA Wrestling ID.
+      </p>
+      <a href="https://www.usawmembership.com/verify_membership" target="_blank" rel="noopener" class="verify-cta">Verify at USAWmembership.com</a>
+    </div>
+
+    <h3 class="ops-section-head">Credential Status</h3>
+
+    <!-- Desktop table -->
+    <div class="credentials-table-wrap">
+      <table class="credentials-table">
+        <thead>
+          <tr>
+            <th>USAW ID</th>
+            <th>Name</th>
+            <th>State</th>
+            <th class="center">Athlete</th>
+            <th class="center">Wrestling Leader</th>
+            <th class="center">Booster</th>
+            <th class="center">Medical</th>
+            <th class="center">Sponsor</th>
+            <th class="center">Event Vol</th>
+            <th class="center">BG Check</th>
+            <th class="center">SS Training</th>
+            <th>NCEP Level(s)</th>
+            <th>Matside Role</th>
+            <th>Last Verified</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono"><a href="https://www.usawmembership.com/verify_membership" target="_blank" rel="noopener" class="usaw-id-link">1804855201</a></td>
+            <td class="name">Daniel Emmons</td>
+            <td class="mono">PA</td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-green" title="Active Wrestling Leader"></span></td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-green" title="Background check current"></span></td>
+            <td class="center"><span class="dot-status dot-green" title="Safe Sport training current"></span></td>
+            <td class="ncep">C, B, T, CT</td>
+            <td class="role">Owner &amp; President</td>
+            <td class="verified-date">2026-06-25</td>
+          </tr>
+          <tr>
+            <td class="mono"><a href="https://www.usawmembership.com/verify_membership" target="_blank" rel="noopener" class="usaw-id-link">9076501</a></td>
+            <td class="name">Mason Manville</td>
+            <td class="mono">PA</td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-green" title="Active Wrestling Leader"></span></td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-red" title="Not current"></span></td>
+            <td class="center"><span class="dot-status dot-green" title="Background check current"></span></td>
+            <td class="center"><span class="dot-status dot-green" title="Safe Sport training current"></span></td>
+            <td class="ncep">C, B</td>
+            <td class="role">Chief Mat Officer</td>
+            <td class="verified-date">2026-06-25</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile cards -->
+    <div class="credentials-cards">
+      <article class="cred-card">
+        <div class="cred-card-head">
+          <h4 class="cred-card-name">Daniel Emmons</h4>
+          <span class="cred-card-state">PA</span>
+        </div>
+        <p class="cred-card-role">Owner &amp; President</p>
+        <p class="cred-card-id">USA Wrestling ID: <a href="https://www.usawmembership.com/verify_membership" target="_blank" rel="noopener">1804855201</a></p>
+        <div class="cred-card-grid">
+          <div class="label">Athlete</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">Wrestling Leader</div><div class="value"><span class="dot-status dot-green"></span></div>
+          <div class="label">Booster</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">Medical</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">Sponsor</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">Event Vol</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">BG Check</div><div class="value"><span class="dot-status dot-green"></span></div>
+          <div class="label">SS Training</div><div class="value"><span class="dot-status dot-green"></span></div>
+          <div class="label">NCEP Level(s)</div><div class="value cred-card-ncep">C, B, T, CT</div>
+        </div>
+        <div class="cred-card-footer"><strong>Last verified by Matside:</strong> 2026-06-25</div>
+      </article>
+
+      <article class="cred-card">
+        <div class="cred-card-head">
+          <h4 class="cred-card-name">Mason Manville</h4>
+          <span class="cred-card-state">PA</span>
+        </div>
+        <p class="cred-card-role">Chief Mat Officer</p>
+        <p class="cred-card-id">USA Wrestling ID: <a href="https://www.usawmembership.com/verify_membership" target="_blank" rel="noopener">9076501</a></p>
+        <div class="cred-card-grid">
+          <div class="label">Athlete</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">Wrestling Leader</div><div class="value"><span class="dot-status dot-green"></span></div>
+          <div class="label">Booster</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">Medical</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">Sponsor</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">Event Vol</div><div class="value"><span class="dot-status dot-red"></span></div>
+          <div class="label">BG Check</div><div class="value"><span class="dot-status dot-green"></span></div>
+          <div class="label">SS Training</div><div class="value"><span class="dot-status dot-green"></span></div>
+          <div class="label">NCEP Level(s)</div><div class="value cred-card-ncep">C, B</div>
+        </div>
+        <div class="cred-card-footer"><strong>Last verified by Matside:</strong> 2026-06-25</div>
+      </article>
+    </div>
+
+    <div class="ops-legend">
+      <h3>USA Wrestling Membership Color Guide</h3>
+      <ul>
+        <li><span class="dot-status dot-red"></span> Not Current</li>
+        <li><span class="dot-status dot-green"></span> Traditional Athlete, Full Athlete, Wrestling Leader, High Performance Leader</li>
+        <li><span class="dot-status dot-blue"></span> Open License</li>
+        <li><span class="dot-status dot-yellow"></span> Limited Folkstyle</li>
+        <li><span class="dot-status dot-gray"></span> High Performance Athlete</li>
+      </ul>
+    </div>
+
+    <div class="ncep-key">
+      <h3>NCEP Level Key</h3>
+      <dl>
+        <div class="row"><dt>C</dt><dd>Copper</dd></div>
+        <div class="row"><dt>B</dt><dd>Bronze</dd></div>
+        <div class="row"><dt>T</dt><dd>Teal</dd></div>
+        <div class="row"><dt>CT</dt><dd>Concussion Training</dd></div>
+      </dl>
+    </div>
+
+    <div class="ops-source">
+      <strong>Source attribution.</strong> Membership status mirrored from the USA Wrestling Check Membership tool. Independently verifiable at <a href="https://www.usawmembership.com/verify_membership" target="_blank" rel="noopener">usawmembership.com/verify_membership</a> using each member's USA Wrestling ID. Background Check conducted by NCSI on USA Wrestling's behalf for active credentials; Safe Sport Training administered by the U.S. Center for SafeSport. Matside Wrestling Co. relays these statuses as displayed by USA Wrestling and does not independently verify the underlying background check or training records.
+    </div>
+
+    <p style="margin-top: 36px; font-size: 14px; color: var(--muted);">
+      Questions about staffing or credentials for an upcoming tournament? Contact <a href="mailto:support@matside.org" style="color: var(--steel-br);">support@matside.org</a>.
+    </p>
+  </main>
+
+  <!-- Footer (mirrors site footer) -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo">MATSIDE<span>WRESTLING&nbsp;CO.</span></span>
+          <p>Professional wrestling event management and software in Western Pennsylvania.</p>
+          <p class="footer-credential">* Daniel Emmons and Matside Wrestling Co. are recognized as <a href="https://www.usabracketing.com/experts" target="_blank" rel="noopener">USA Bracketing Experts</a>.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <p><a href="mailto:support@matside.org">support@matside.org</a></p>
+          <p>Glenshaw, PA</p>
+        </div>
+        <div class="footer-col">
+          <h4>Site</h4>
+          <p><a href="/#tournaments">Tournaments</a></p>
+          <p><a href="/#software">Software</a></p>
+          <p><a href="/#leadership">Leadership</a></p>
+          <p><a href="/operators/">Operators</a></p>
+          <p><a href="/legal/">Legal</a></p>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <p><a href="/legal/privacy.html">Privacy</a></p>
+          <p><a href="/legal/terms.html">Terms</a></p>
+          <p><a href="/legal/coppa.html">COPPA</a></p>
+          <p><a href="/legal/information-security.html">Information Security</a></p>
+          <p><a href="/legal/retention.html">Data Retention</a></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <strong>Matside Wrestling Co.</strong>, a Pennsylvania single-member LLC, headquartered in Glenshaw, PA<br>
+        &copy; 2026 Matside Wrestling Co. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
