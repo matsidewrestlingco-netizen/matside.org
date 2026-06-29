@@ -172,7 +172,7 @@ No JSON config block needed (unlike `/today`). The page text is the content of r
 
 **Total:** half a day end-to-end, plus ~1 hour of Daniel + Mason time during the Mason JD review pass.
 
-## Open questions for Daniel — RESOLVED 2026-06-29
+## Open questions for Daniel: RESOLVED 2026-06-29
 
 1. **Single application form with role selector, or two separate postings on `forms.matsidesystems.com`?** **RESOLVED: single posting with a `role` multi-select.** Apply CTAs use `?role=operator|assistant|either` to pre-populate the field.
 
@@ -184,7 +184,7 @@ No JSON config block needed (unlike `/today`). The page text is the content of r
 
 5. **Shadow-before-schedule expectation.** **RESOLVED: confirmed accurate.** "Selected operators and assistants shadow one event before being put on the schedule" matches Daniel + Mason's intended onboarding.
 
-6. **Adjacent-roles teaser at the bottom of the page** flagging future roles (e.g., bracket-software trainers, weigh-in coordinators). **PENDING CLARIFICATION** (default recommendation was "no, keep v1 focused"; Daniel's "Yes" reply is ambiguous between "yes confirming the no" and "yes add the teaser"). Will resolve before build.
+6. **Adjacent-roles teaser at the bottom of the page** flagging future roles (e.g., bracket-software trainers, weigh-in coordinators). **RESOLVED: option (a) — no teaser, keep v1 focused on Operator + Assistant.** Adjacent roles can get their own page later if real demand materializes.
 
 ## Content changes flowing from JD round 1 (2026-06-29)
 
@@ -194,7 +194,7 @@ Round 1 of JD edits landed on `matside-hq` commit `8018252`. Page copy must mirr
 - **Officials interface line on Operator card**: soften to "coordinate with officials on event flow, scheduling, and logistics" — bout calls and rulings are explicitly NOT a Matside scope item.
 - **Operator head-table experience floor**: phrase the requirement as "experience running a head table OR a strong wrestling background and the reliability to learn the head table fast — we train the right person." The hard "from-zero" rejection in the previous draft is gone.
 - **Assistant role bullets**: bullet 1 = setup/breakdown, bullet 2 = "assist with weigh-ins" (TDs run them), bullet 3 = "support the table workers" running between head table and mat tables (no bout sheets).
-- **Helps-tier terminology**: replace "NCEP Bronze / NCEP Copper" with "USA Wrestling Leader training levels (Bronze, Tournament, or above)" for Operators and "USA Wrestling Leader Copper-level training or higher" for Assistants. The wrestling community does not recognize "NCEP" by name even though it's the canonical USAW term.
+- **Helps-tier terminology**: replace "NCEP Bronze / NCEP Copper" with community-facing "USA Wrestling Leader training levels" terminology. Per JD round 2 fix (2026-06-29), the Operator card reads "Higher USA Wrestling Leader training levels (Bronze or above). Teal-level training is a plus for events with girls' divisions." Assistant card reads "USA Wrestling Leader Copper-level training or higher." **Do NOT write a 'Tournament Level' anywhere** — there is no such USAW credential. `T` on the matside.org/operators portal is Teal (girls-specific), not Tournament.
 
 ## Shared-styles refactor (deferred, noted here)
 
