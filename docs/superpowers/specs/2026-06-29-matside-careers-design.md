@@ -172,19 +172,29 @@ No JSON config block needed (unlike `/today`). The page text is the content of r
 
 **Total:** half a day end-to-end, plus ~1 hour of Daniel + Mason time during the Mason JD review pass.
 
-## Open questions for Daniel (resolve before plan)
+## Open questions for Daniel — RESOLVED 2026-06-29
 
-1. **Single application form with role selector, or two separate postings on `forms.matsidesystems.com`?** Default recommendation: single posting with a `role` multi-select. Unified queue in admin, flexibility for candidates who are open to either role, simpler page surface. Two postings would double the admin workload and split the pipeline. Confirm.
+1. **Single application form with role selector, or two separate postings on `forms.matsidesystems.com`?** **RESOLVED: single posting with a `role` multi-select.** Apply CTAs use `?role=operator|assistant|either` to pre-populate the field.
 
-2. **Off-cycle behavior at 2026-09-30:** quiet "not actively hiring" state with a "get notified" email capture (option a), or let the page stand and let JSON-LD expire (option b)? Default recommendation: option (a). It gives us a year-round passive pipeline at near-zero cost and signals professionalism. Confirm.
+2. **Off-cycle behavior at 2026-09-30** **RESOLVED: option (a) — quiet "not actively hiring" state with a "get notified" email capture.** Provides a year-round passive bench pipeline at near-zero cost.
 
-3. **Hiring leadership on the page:** include a small "Hiring leads: Daniel Emmons + Mason Manville" section linking to `/operators` and `/#leadership` for credibility, or keep the page faceless to reduce the "they're hiring for him specifically" framing? Default recommendation: include it. It mirrors the credibility play that `/operators` already runs and matches matside.org's leadership-row pattern.
+3. **Hiring leadership on the page.** **RESOLVED: include the "Hiring leads: Daniel Emmons + Mason Manville" block** linking to `/operators` and `/#leadership` as a trust signal.
 
-4. **Response-time commitment:** "5 business days" (default recommendation) or something else? Be cautious about over-promising; 5 business days is a comfortable buffer and easy to keep during normal weeks.
+4. **Response-time commitment.** **RESOLVED: 5–7 business days.** Wider buffer than the 5-day default; easier to keep during partner-program crunch weeks. JDs updated 2026-06-29 to reflect this.
 
-5. **Shadow-before-schedule expectation:** is "Selected operators and assistants shadow one event before being put on the schedule" accurate to how Mason and Daniel plan to onboard, or does the actual workflow look different? Confirm with Mason during the JD review.
+5. **Shadow-before-schedule expectation.** **RESOLVED: confirmed accurate.** "Selected operators and assistants shadow one event before being put on the schedule" matches Daniel + Mason's intended onboarding.
 
-6. **Should there be a "We are also looking for" sentence at the bottom of the page** flagging adjacent roles (e.g., bracket-software trainers, weigh-in coordinators) that might emerge post-MSWA-signature? Default recommendation: no. Keep the v1 page focused on Operator + Assistant. Adjacent roles can get their own page later if real demand materializes.
+6. **Adjacent-roles teaser at the bottom of the page** flagging future roles (e.g., bracket-software trainers, weigh-in coordinators). **PENDING CLARIFICATION** (default recommendation was "no, keep v1 focused"; Daniel's "Yes" reply is ambiguous between "yes confirming the no" and "yes add the teaser"). Will resolve before build.
+
+## Content changes flowing from JD round 1 (2026-06-29)
+
+Round 1 of JD edits landed on `matside-hq` commit `8018252`. Page copy must mirror:
+
+- **Bracketing software references**: drop TrackWrestling; use "FloArena or USA Bracketing" wherever bracketing tools are named.
+- **Officials interface line on Operator card**: soften to "coordinate with officials on event flow, scheduling, and logistics" — bout calls and rulings are explicitly NOT a Matside scope item.
+- **Operator head-table experience floor**: phrase the requirement as "experience running a head table OR a strong wrestling background and the reliability to learn the head table fast — we train the right person." The hard "from-zero" rejection in the previous draft is gone.
+- **Assistant role bullets**: bullet 1 = setup/breakdown, bullet 2 = "assist with weigh-ins" (TDs run them), bullet 3 = "support the table workers" running between head table and mat tables (no bout sheets).
+- **Helps-tier terminology**: replace "NCEP Bronze / NCEP Copper" with "USA Wrestling Leader training levels (Bronze, Tournament, or above)" for Operators and "USA Wrestling Leader Copper-level training or higher" for Assistants. The wrestling community does not recognize "NCEP" by name even though it's the canonical USAW term.
 
 ## Shared-styles refactor (deferred, noted here)
 
