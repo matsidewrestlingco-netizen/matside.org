@@ -3,14 +3,14 @@
 **Date:** 2026-06-29
 **Status:** Draft, ready for plan
 **Scope:** Single new route on `matsidewrestlingco-netizen/matside.org`; static HTML + CSS; ~half-day engineering
-**Audience:** Prospective Tournament Operators and Operator Assistants in Western PA and Maryland (wrestling coaches, officials, parents, college athletes, program admins) who can run or learn the head table at youth and HS wrestling events
+**Audience:** Prospective Tournament Operators and Operator Assistants in Western PA, Maryland, and Northern Virginia (wrestling coaches, officials, parents, college athletes, program admins) who can run or learn the head table at youth and HS wrestling events
 **Stack:** Plain HTML + CSS, no JS framework. Same posture as the rest of matside.org (static, Vercel-deployed on push to main).
 
 ---
 
 ## Why now
 
-We are expanding the Matside bench for the 2026-27 season across Western PA and Maryland. Two roles, both per-event 1099 contract work: Tournament Operator ($25/hr) and Operator Assistant ($15/hr). Final bench locks late September so we have a trained squad in time for the November tournament ramp.
+We are expanding the Matside bench for the 2026-27 season across Western PA, Maryland, and Northern Virginia. Two roles, both per-event 1099 contract work: Tournament Operator ($25/hr) and Operator Assistant ($15/hr). Final bench locks late September so we have a trained squad in time for the November tournament ramp.
 
 We need a public surface that does three jobs:
 
@@ -38,7 +38,7 @@ A candidate who is not qualified (no USAW credentials, can't travel within the r
 - **No CMS / admin form for editing the JDs.** Job descriptions are committed to the repo at `matside-hq/operations/bench-hiring-2026-27/{operator,assistant}-jd.md`; this page renders the public-facing distilled version. If the JDs change, edit the HTML + push (same workflow as legal pages today).
 - **No live candidate count or "X applications received" social proof.** Pre-launch, the number is zero; lying or omitting is worse than not showing it.
 - **No applicant tracking surface here.** Tracking lives in the `forms.matsidesystems.com` admin dashboard. Optional CRM upgrade later if volume justifies it.
-- **No Maryland-specific page or MSWA-named copy.** Region framing stays "Western PA + Maryland" generic. Do not name MSWA, Foster, or any specific MD partner. The MSWA agreement is unsigned and naming it on a public surface ahead of signature shifts the relationship dynamic against us.
+- **No Maryland-specific page or MSWA-named copy.** Region framing stays "Western PA, Maryland, and Northern Virginia" generic. Do not name MSWA, Foster, or any specific MD partner. The MSWA agreement is unsigned and naming it on a public surface ahead of signature shifts the relationship dynamic against us. The NoVA addition (2026-06-29) dilutes the MSWA-dependency optics further and maps to Mason's home base.
 - **No D1 / college recruiting angle.** This is bench staffing for HS / club / USAW events, not a college pipeline.
 
 ## Architecture
@@ -68,7 +68,7 @@ The form itself is one posting with a `role` multi-select field that the URL pre
 - `<meta name="robots" content="index,follow">` on this page. We want Google + Bing to index it; "wrestling tournament operator job Western PA" should reach this page.
 - `<title>Careers · Matside Wrestling Co. · 2026-27 Bench Hiring</title>` (middot separator matches the matside.org `<title>` convention on `/operators` and keeps the browser-tab text em-dash-free in line with the Matside copy rule).
 - Open Graph image: reuse the matside.org default OG image. If volume justifies it, design a branded `og-careers.png` later (Recruit Green is the wrong accent; stay on Steel Blue for parent-brand consistency).
-- Schema.org `JobPosting` JSON-LD blocks for both roles. Boosts Google for Jobs eligibility and is cheap to ship. Two blocks (one per role), each with `title`, `description`, `hiringOrganization`, `jobLocation` (Western PA), `baseSalary` ($25 or $15 hourly), `employmentType` ("CONTRACTOR"), `datePosted`, `validThrough` (set to 2026-09-30 for the v1 cycle), and a direct `applicationContact` URL pointing at the appropriate `forms.matsidesystems.com` URL.
+- Schema.org `JobPosting` JSON-LD blocks for both roles. Boosts Google for Jobs eligibility and is cheap to ship. Two blocks (one per role), each with `title`, `description`, `hiringOrganization`, `jobLocation` (three Place entries: PA, MD, VA), `baseSalary` ($25 or $15 hourly), `employmentType` ("CONTRACTOR"), `datePosted`, `validThrough` (set to 2026-09-30 for the v1 cycle), and a direct `applicationContact` URL pointing at the appropriate `forms.matsidesystems.com` URL.
 
 ## Page layout
 
@@ -78,7 +78,7 @@ Matches matside.org Midnight redesign aesthetic. Steel Blue `#3B82C4` parent acc
 
 1. **Eyebrow.** JetBrains Mono UPPERCASE, Steel Blue, letter-spaced: `2026-27 SEASON BENCH`
 2. **Page headline.** Montserrat 800, Off-White, large (clamp 32px to 48px): `Run the head table for Matside.`
-3. **Lede.** Inter 500, ms-muted, 2-3 sentences covering who we are, that we're hiring two roles, and the regions (Western PA + Maryland). Same voice as `matside.org/operators` lede.
+3. **Lede.** Inter 500, ms-muted, 2-3 sentences covering who we are, that we're hiring two roles, and the regions (Western PA, Maryland, and Northern Virginia). Same voice as `matside.org/operators` lede.
 4. **Trust strip.** Small mono caption row linking to `matside.org/operators` for credential verification, with a "Verify our credentials at USAW" external link. Builds trust before the role pitch.
 5. **Role cards.** Two cards side-by-side on desktop (`md:` breakpoint and up), stacked on mobile. Each card carries:
    - Role name (Montserrat 700)
@@ -114,7 +114,7 @@ V1 default: option (a) is preferable but not required for launch. Add the "Get n
 
 1. **Am I employed or 1099?** 1099 contractor. We file your 1099 each January if your total earnings cross the IRS threshold. Quarterly tax responsibility is yours.
 2. **What does a typical event look like?** Saturday or Sunday, 8-12 hours including setup and breakdown. Most events are 1-day. Multi-day events are rare and paid per shift.
-3. **Do I need to travel?** You apply to one or both regions (Western PA + Maryland). We assign events based on your stated region preference and our schedule. Mileage is reimbursed as a pass-through to the host program when applicable.
+3. **Do I need to travel?** You apply to one or both regions (Western PA, Maryland, and Northern Virginia). We assign events based on your stated region preference and our schedule. Mileage is reimbursed as a pass-through to the host program when applicable.
 4. **What if I'm a wrestling parent or coach with no head-table experience?** Apply for the Assistant role. We train the technical side; reliability and a willingness to learn are what get you on the schedule.
 5. **What software do I need to know?** TrackWrestling for the Operator role at minimum. FloArena and USA Bracketing are pluses. Assistants don't need software knowledge; they learn it on the bench.
 6. **When does the season start?** Most events run November through March, with occasional summer and fall events. We post the schedule once we've locked the bench.
