@@ -82,6 +82,21 @@
     .banner .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--steel); margin-right: 9px; vertical-align: middle; }
     .banner .loc { color: var(--muted-2); }
 
+    /* ── Now-hiring strip (2026-27 window; remove block after 2026-09-30) ── */
+    .hire-strip {
+      background: rgba(59,130,196,.08);
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--mono);
+      font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    }
+    .hire-strip .wrap { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; padding-bottom: 10px; gap: 16px; }
+    .hire-strip .label { color: var(--muted); }
+    .hire-strip .label strong { color: var(--steel-br); font-weight: 600; }
+    .hire-strip .hire-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--steel-br); margin-right: 9px; vertical-align: middle; box-shadow: 0 0 0 3px rgba(59,130,196,.16); }
+    .hire-strip .cta { color: var(--steel-br); text-decoration: none; font-weight: 600; transition: color .15s; white-space: nowrap; }
+    .hire-strip .cta:hover { color: #fff; }
+    .hire-strip .cta::after { content: " →"; }
+
     /* ── Nav ────────────────────────────────── */
     .nav { position: sticky; top: 0; z-index: 50; background: rgba(10,15,26,.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); }
     .nav .wrap { display: flex; align-items: center; justify-content: space-between; padding-top: 22px; padding-bottom: 22px; }
@@ -243,6 +258,14 @@
     </div>
   </div>
 
+  <!-- Now-hiring strip (2026-27 window; remove the entire .hire-strip block after 2026-09-30 close) -->
+  <div class="hire-strip">
+    <div class="wrap">
+      <div class="label"><span class="hire-dot"></span><strong>Now Hiring</strong> · 2026-27 Season Bench</div>
+      <a href="/careers" class="cta">Work with us this season</a>
+    </div>
+  </div>
+
   <!-- Nav -->
   <nav class="nav">
     <div class="wrap">
@@ -251,6 +274,7 @@
         <li><a href="#tournaments">Tournaments</a></li>
         <li><a href="#software">Software</a></li>
         <li><a href="#leadership">Leadership</a></li>
+        <li><a href="/careers">Careers</a></li>
         <li><a href="#contact" class="active">Contact</a></li>
       </ul>
     </div>
