@@ -57,9 +57,9 @@ A candidate who is not qualified (no USAW credentials, can't travel within the r
 
 The careers page links each role's "Apply" CTA to a single form on `forms.matsidesystems.com` with a `?role=` query parameter pre-selecting the candidate's intent:
 
-- Operator CTA → `https://forms.matsidesystems.com/[slug]?role=operator`
-- Assistant CTA → `https://forms.matsidesystems.com/[slug]?role=assistant`
-- A small "Either role / not sure" link at the bottom of the role-card section → `https://forms.matsidesystems.com/[slug]?role=either`
+- Operator CTA → `https://forms.matsidesystems.com/r/[slug]?role=operator`
+- Assistant CTA → `https://forms.matsidesystems.com/r/[slug]?role=assistant`
+- A small "Either role / not sure" link at the bottom of the role-card section → `https://forms.matsidesystems.com/r/[slug]?role=either`
 
 The form itself is one posting with a `role` multi-select field that the URL pre-populates. This keeps all applications in a single admin queue and lets us see if candidates are flexible across roles (often the strongest signal). If `forms.matsidesystems.com` cannot honor query-param pre-population in the field UI today, the role selector still lives in the form and the page just links to the bare URL; candidates pick their role manually. Verify with Daniel during the form setup.
 
@@ -134,7 +134,7 @@ No JSON config block needed (unlike `/today`). The page text is the content of r
 
 - [ ] Route `matside.org/careers` resolves and serves the page.
 - [ ] Two role cards render side-by-side at desktop widths and stack cleanly at mobile widths (iPhone SE through iPhone Pro Max).
-- [ ] Each Apply CTA links to the correct `forms.matsidesystems.com/[slug]?role=...` URL and opens in a new tab.
+- [ ] Each Apply CTA links to the correct `forms.matsidesystems.com/r/[slug]?role=...` URL and opens in a new tab.
 - [ ] "Either role / not sure" link is present and links to `?role=either`.
 - [ ] All required-credentials copy (USAW Wrestling Leader + BG Check + Safe Sport) is surfaced in at least two places on the page (in the role cards and in the credentials callout).
 - [ ] The `matside.org/operators` link in the trust strip resolves and is verifiable.
