@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Careers · Matside Wrestling Co. · 2026-27 Bench Hiring</title>
+  <meta name="description" content="Hiring Tournament Operators and Operator Assistants for the 2026-27 wrestling season across Western Pennsylvania and Maryland. 1099 contract, paid per event. USA Wrestling Leader credential required.">
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Careers page styles. Mirrors the operators-page vocabulary. */
+    .careers-prose {
+      max-width: 1180px;
+      margin: 56px auto 64px;
+      padding: 0 28px;
+      color: var(--text);
+    }
+    .careers-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 0 0 14px;
+      font-weight: 600;
+    }
+    .careers-prose h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: clamp(32px, 4.5vw, 48px);
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      margin: 0 0 18px;
+      color: #fff;
+    }
+    .careers-lede {
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--muted);
+      max-width: 72ch;
+      margin: 0 0 22px;
+    }
+
+    /* Trust strip linking back to /operators */
+    .trust-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 18px;
+      padding: 14px 18px;
+      margin: 0 0 36px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+    .trust-strip strong { color: var(--text); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; }
+    .trust-strip a {
+      color: var(--steel-br);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(125, 211, 240, 0.4);
+      padding-bottom: 1px;
+    }
+    .trust-strip a:hover { color: #fff; }
+
+    /* Section heading */
+    .careers-section-head {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 44px 0 18px;
+      font-weight: 600;
+    }
+
+    /* Role-card grid */
+    .role-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin: 0 0 18px;
+    }
+    .role-card {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      padding: 26px 26px 24px;
+      display: flex;
+      flex-direction: column;
+    }
+    .role-card-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .role-card-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+    }
+    .role-card-pay {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 18px;
+      color: var(--steel-br);
+      letter-spacing: 0.04em;
+    }
+    .role-card-pitch {
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--muted);
+      margin: 8px 0 18px;
+    }
+    .role-card-block {
+      margin-bottom: 16px;
+    }
+    .role-card-block h3 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 0 0 8px;
+      font-weight: 600;
+    }
+    .role-card-block ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .role-card-block li {
+      position: relative;
+      padding: 4px 0 4px 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .role-card-block li::before {
+      content: "›";
+      position: absolute;
+      left: 0;
+      color: var(--steel-br);
+      font-weight: 600;
+    }
+    .role-card-block li strong { color: #fff; font-weight: 600; }
+    .role-card-cta {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      background: var(--steel);
+      color: #fff;
+      padding: 13px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: background 0.15s ease;
+      margin-top: auto;
+    }
+    .role-card-cta:hover { background: var(--steel-deep); }
+    .role-card-cta::after { content: " →"; }
+
+    .either-affordance {
+      text-align: center;
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0 0 36px;
+    }
+    .either-affordance a {
+      color: var(--steel-br);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(125, 211, 240, 0.4);
+      padding-bottom: 1px;
+    }
+    .either-affordance a:hover { color: #fff; }
+
+    /* Credential floor callout (mirrors operators verify-callout) */
+    .credentials-callout {
+      border: 1px solid rgba(59, 130, 196, 0.3);
+      background: rgba(59, 130, 196, 0.06);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 0 0 44px;
+    }
+    .credentials-callout h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 0 0 14px;
+      font-weight: 600;
+    }
+    .credentials-callout p {
+      margin: 0 0 12px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .credentials-callout ul {
+      list-style: none;
+      padding: 0;
+      margin: 14px 0;
+    }
+    .credentials-callout li {
+      position: relative;
+      padding: 5px 0 5px 22px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .credentials-callout li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--steel-br);
+      font-weight: 700;
+    }
+    .credentials-callout a {
+      color: var(--steel-br);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(125, 211, 240, 0.4);
+      padding-bottom: 1px;
+    }
+    .credentials-callout a:hover { color: #fff; }
+
+    /* "How we hire" section */
+    .how-we-hire {
+      margin: 0 0 44px;
+    }
+    .how-we-hire ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: step;
+    }
+    .how-we-hire li {
+      position: relative;
+      padding: 14px 0 14px 56px;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      counter-increment: step;
+    }
+    .how-we-hire li:last-child { border-bottom: none; }
+    .how-we-hire li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(59, 130, 196, 0.4);
+      background: rgba(59, 130, 196, 0.08);
+      color: var(--steel-br);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .how-we-hire li strong { color: #fff; font-weight: 600; }
+
+    /* FAQ */
+    .faq {
+      margin: 0 0 44px;
+    }
+    .faq-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 18px 0;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-item h3 {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .faq-item p {
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    /* Hiring leads block */
+    .hiring-leads {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin: 0 0 44px;
+    }
+    .hiring-leads h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 0 0 12px;
+      font-weight: 600;
+    }
+    .hiring-leads p {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .hiring-leads p:last-child { margin-bottom: 0; }
+    .hiring-leads a {
+      color: var(--steel-br);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(125, 211, 240, 0.4);
+      padding-bottom: 1px;
+    }
+    .hiring-leads a:hover { color: #fff; }
+
+    /* Tail prompt */
+    .careers-tail {
+      margin-top: 36px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .careers-tail a {
+      color: var(--steel-br);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(125, 211, 240, 0.4);
+      padding-bottom: 1px;
+    }
+    .careers-tail a:hover { color: #fff; }
+
+    /* Responsive */
+    @media (max-width: 760px) {
+      .role-grid {
+        grid-template-columns: 1fr;
+      }
+      .careers-prose h1 {
+        font-size: clamp(28px, 8vw, 38px);
+      }
+      .role-card-head {
+        align-items: flex-start;
+      }
+      .how-we-hire li {
+        padding-left: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Banner -->
+  <div class="banner">
+    <div class="wrap">
+      <div><span class="dot"></span>Matside Wrestling Co.: Tournament Operations &amp; Software</div>
+      <div class="loc">Glenshaw, PA</div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="wrap">
+      <a href="/" class="logo">MATSIDE<span>WRESTLING&nbsp;CO.</span></a>
+      <ul class="nav-links">
+        <li><a href="/#tournaments">Tournaments</a></li>
+        <li><a href="/#software">Software</a></li>
+        <li><a href="/#leadership">Leadership</a></li>
+        <li><a href="/#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="careers-prose">
+    <p class="careers-eyebrow">2026-27 Season Bench</p>
+    <h1>Run the head table for Matside.</h1>
+
+    <p class="careers-lede">
+      Matside Wrestling Co. runs professional event management for wrestling tournaments across Western Pennsylvania and Maryland. We are expanding our bench for the 2026-27 season with two roles, both 1099 contract and paid per event. The good ones get hooked on it.
+    </p>
+
+    <div class="trust-strip">
+      <strong>Who we are.</strong>
+      <span>Daniel Emmons and Mason Manville, both active USA Wrestling Leaders.</span>
+      <a href="/operators">Verify our credentials at matside.org/operators</a>
+    </div>
+
+    <h2 class="careers-section-head">Open Roles</h2>
+
+    <div class="role-grid">
+      <!-- Tournament Operator -->
+      <article class="role-card">
+        <div class="role-card-head">
+          <h2 class="role-card-name">Tournament Operator</h2>
+          <span class="role-card-pay">$25/HR</span>
+        </div>
+        <p class="role-card-pitch">
+          The person behind the head table. Brackets, scoring, mat flow, TD-side coordination. You keep the event moving from first whistle to final award.
+        </p>
+        <div class="role-card-block">
+          <h3>What you'll do</h3>
+          <ul>
+            <li>Run the bracketing and scoring software (FloArena or USA Bracketing).</li>
+            <li>Manage all bouts and wrestlers through weigh-ins, seeding, and live mat flow.</li>
+            <li>Coordinate with the TD on cancellations, no-shows, and bracket consolidation.</li>
+            <li>Close the event: results export, awards support, post-event handoff.</li>
+          </ul>
+        </div>
+        <div class="role-card-block">
+          <h3>What we need</h3>
+          <ul>
+            <li><strong>Active USA Wrestling Leader credential</strong> plus current BG Check and Safe Sport training.</li>
+            <li>Experience running a head table, or a strong wrestling background and the reliability to learn fast.</li>
+            <li>Calm under pressure. The head table is where every problem at the event walks up.</li>
+          </ul>
+        </div>
+        <a class="role-card-cta" href="https://forms.matsidesystems.com/bench-2026-27?role=operator" target="_blank" rel="noopener">Apply for Operator</a>
+      </article>
+
+      <!-- Operator Assistant -->
+      <article class="role-card">
+        <div class="role-card-head">
+          <h2 class="role-card-name">Operator Assistant</h2>
+          <span class="role-card-pay">$15/HR</span>
+        </div>
+        <p class="role-card-pitch">
+          The right hand at the head table. Setup, weigh-ins support, table-worker support, and the dozens of small things that keep an event on schedule. The entry point onto our bench.
+        </p>
+        <div class="role-card-block">
+          <h3>What you'll do</h3>
+          <ul>
+            <li>Help with setup and breakdown: head-table layout, bracket boards, signage.</li>
+            <li>Assist with weigh-ins (TDs run them; you keep the line moving).</li>
+            <li>Support the table workers running between the head table and mat tables.</li>
+            <li>Be the first friendly face for parent and coach questions.</li>
+          </ul>
+        </div>
+        <div class="role-card-block">
+          <h3>What we need</h3>
+          <ul>
+            <li><strong>Active USA Wrestling Leader credential</strong> plus current BG Check and Safe Sport training.</li>
+            <li>A working understanding of how a wrestling tournament runs.</li>
+            <li>Reliability. Showing up on time, every time, for the events you commit to.</li>
+          </ul>
+        </div>
+        <a class="role-card-cta" href="https://forms.matsidesystems.com/bench-2026-27?role=assistant" target="_blank" rel="noopener">Apply for Assistant</a>
+      </article>
+    </div>
+
+    <p class="either-affordance">
+      Open to either role? <a href="https://forms.matsidesystems.com/bench-2026-27?role=either" target="_blank" rel="noopener">Apply here</a> and we will place you where you fit best.
+    </p>
+
+    <div class="credentials-callout">
+      <h2>What we need from every bench member</h2>
+      <p>Every Matside Operator and Assistant carries the same three USAW credentials, no exceptions:</p>
+      <ul>
+        <li><strong>Active USA Wrestling Wrestling Leader credential.</strong></li>
+        <li><strong>Current USAW Background Check</strong> (administered by NCSI on USA Wrestling's behalf).</li>
+        <li><strong>Current USAW Safe Sport training</strong> (administered by the U.S. Center for SafeSport).</li>
+      </ul>
+      <p>If you do not hold these yet, you can still apply. Start the credentials path at <a href="https://www.teamusa.com/usa-wrestling/membership" target="_blank" rel="noopener">teamusa.com/usa-wrestling/membership</a> and let us know on your application; the right candidate without credentials in hand is welcome to apply.</p>
+    </div>
+
+    <h2 class="careers-section-head">How we hire</h2>
+    <div class="how-we-hire">
+      <ol>
+        <li><strong>We read every application personally.</strong> Daniel and Mason both review. No black-box pipeline, no recruiter screen.</li>
+        <li><strong>We respond within 5 to 7 business days.</strong> Either a yes-let's-talk or a thanks-but-not-this-cycle, but you will hear back.</li>
+        <li><strong>Strong candidates get a 20-minute call</strong> with Daniel or Mason to talk through the schedule, your background, and what we expect on event day.</li>
+        <li><strong>Selected Operators and Assistants shadow one event</strong> before being put on the schedule. Real-conditions onboarding; nobody runs a head table cold their first day.</li>
+      </ol>
+    </div>
+
+    <h2 class="careers-section-head">FAQ</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>Am I an employee or a 1099 contractor?</h3>
+        <p>1099 contractor. We file your 1099 each January if your total earnings cross the IRS threshold. Quarterly tax responsibility is yours.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What does a typical event day look like?</h3>
+        <p>Saturday or Sunday, 8 to 12 hours including setup and breakdown. Most events are one-day. Multi-day events are rare and paid per shift.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Do I need to travel?</h3>
+        <p>You pick your region preference on the application (Western PA, Maryland, or both). We assign events based on your stated preference and our schedule. Mileage is reimbursed as a pass-through to the host program when applicable.</p>
+      </div>
+      <div class="faq-item">
+        <h3>I am a wrestling parent or coach with no head-table experience. Can I apply?</h3>
+        <p>Yes, for the Assistant role. We train the technical side. Reliability and a willingness to learn are what get you on the schedule.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What software do I need to know?</h3>
+        <p>Operators should be comfortable with FloArena or USA Bracketing. Assistants do not need software knowledge; you learn it on the bench.</p>
+      </div>
+      <div class="faq-item">
+        <h3>When does the season start?</h3>
+        <p>Most events run November 2026 through March 2027, with occasional summer and fall events. We post the schedule once we have locked the bench.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I apply for both roles?</h3>
+        <p>Yes. Use the "Either role" link above and we will place you where you fit best.</p>
+      </div>
+    </div>
+
+    <div class="hiring-leads">
+      <h2>Hiring Leads</h2>
+      <p><strong>Daniel Emmons</strong> (Owner and President) and <strong>Mason Manville</strong> (Chief Mat Officer) jointly review every application. Both hold active USA Wrestling Leader credentials with BG Check and Safe Sport training current; both have NCEP coaching education on file. Verify our credentials independently at <a href="/operators">matside.org/operators</a>.</p>
+    </div>
+
+    <p class="careers-tail">
+      Questions about the role or the application? Email <a href="mailto:support@matside.org">support@matside.org</a>. Hiring window opens July 2026 and locks late September; we will continue to take applications until the bench is full.
+    </p>
+  </main>
+
+  <!-- Footer (mirrors site footer) -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo">MATSIDE<span>WRESTLING&nbsp;CO.</span></span>
+          <p>Professional wrestling event management and software in Western Pennsylvania.</p>
+          <p class="footer-credential">* Daniel Emmons and Matside Wrestling Co. are recognized as <a href="https://www.usabracketing.com/experts" target="_blank" rel="noopener">USA Bracketing Experts</a>.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <p><a href="mailto:support@matside.org">support@matside.org</a></p>
+          <p>Glenshaw, PA</p>
+        </div>
+        <div class="footer-col">
+          <h4>Site</h4>
+          <p><a href="/#tournaments">Tournaments</a></p>
+          <p><a href="/#software">Software</a></p>
+          <p><a href="/#leadership">Leadership</a></p>
+          <p><a href="/legal/">Legal</a></p>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <p><a href="/legal/privacy.html">Privacy</a></p>
+          <p><a href="/legal/terms.html">Terms</a></p>
+          <p><a href="/legal/coppa.html">COPPA</a></p>
+          <p><a href="/legal/information-security.html">Information Security</a></p>
+          <p><a href="/legal/retention.html">Data Retention</a></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <strong>Matside Wrestling Co.</strong>, a Pennsylvania single-member LLC, headquartered in Glenshaw, PA<br>
+        &copy; 2026 Matside Wrestling Co. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- JSON-LD JobPosting · Tournament Operator -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "JobPosting",
+    "title": "Tournament Operator",
+    "description": "Matside Wrestling Co. is hiring Tournament Operators for the 2026-27 wrestling season. Run the bracketing and scoring software (FloArena or USA Bracketing), manage all bouts and wrestlers through weigh-ins and live mat flow, coordinate with the TD on event-day logistics, and close out the event. 1099 contractor, tournament-day work, $25/hr. Active USA Wrestling Leader credential plus current Background Check and Safe Sport training required.",
+    "datePosted": "2026-06-29",
+    "validThrough": "2026-09-30T23:59:59-04:00",
+    "employmentType": "CONTRACTOR",
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": "Matside Wrestling Co.",
+      "sameAs": "https://www.matside.org",
+      "logo": "https://www.matside.org/favicon.ico"
+    },
+    "jobLocation": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressRegion": "PA",
+          "addressCountry": "US"
+        }
+      },
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressRegion": "MD",
+          "addressCountry": "US"
+        }
+      }
+    ],
+    "baseSalary": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "value": 25,
+        "unitText": "HOUR"
+      }
+    },
+    "directApply": false,
+    "applicationContact": {
+      "@type": "ContactPoint",
+      "email": "support@matside.org",
+      "url": "https://forms.matsidesystems.com/bench-2026-27?role=operator"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD JobPosting · Operator Assistant -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "JobPosting",
+    "title": "Operator Assistant",
+    "description": "Matside Wrestling Co. is hiring Operator Assistants for the 2026-27 wrestling season. Help with event setup and breakdown, assist with weigh-ins, support the table workers running between the head table and mat tables, and be the first friendly face for parent and coach questions. Entry point onto the Matside bench. 1099 contractor, tournament-day work, $15/hr. Active USA Wrestling Leader credential plus current Background Check and Safe Sport training required.",
+    "datePosted": "2026-06-29",
+    "validThrough": "2026-09-30T23:59:59-04:00",
+    "employmentType": "CONTRACTOR",
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": "Matside Wrestling Co.",
+      "sameAs": "https://www.matside.org",
+      "logo": "https://www.matside.org/favicon.ico"
+    },
+    "jobLocation": [
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressRegion": "PA",
+          "addressCountry": "US"
+        }
+      },
+      {
+        "@type": "Place",
+        "address": {
+          "@type": "PostalAddress",
+          "addressRegion": "MD",
+          "addressCountry": "US"
+        }
+      }
+    ],
+    "baseSalary": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": {
+        "@type": "QuantitativeValue",
+        "value": 15,
+        "unitText": "HOUR"
+      }
+    },
+    "directApply": false,
+    "applicationContact": {
+      "@type": "ContactPoint",
+      "email": "support@matside.org",
+      "url": "https://forms.matsidesystems.com/bench-2026-27?role=assistant"
+    }
+  }
+  </script>
+</body>
+</html>
