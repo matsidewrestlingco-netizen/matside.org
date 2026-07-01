@@ -41,5 +41,80 @@
   <main id="today-root" class="today-wrap">
     <p class="today-loading">Loading today's event info...</p>
   </main>
+  <script>
+    (function () {
+      var configEl = document.getElementById('today-config');
+      var root = document.getElementById('today-root');
+      if (!configEl || !root) return;
+
+      var config;
+      try {
+        config = JSON.parse(configEl.textContent);
+      } catch (err) {
+        console.error('today-config JSON parse failed:', err);
+        return;
+      }
+
+      function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function renderEventDay(cfg) {
+        var hostRow = '';
+        if (cfg.host_program_handle && cfg.host_program_handle.length > 0) {
+          hostRow = '<p class="today-host">HOSTED BY ' + escapeHtml(cfg.host_program_handle) + '</p>';
+        }
+
+        var upcomingHtml = '';
+        if (Array.isArray(cfg.upcoming_events) && cfg.upcoming_events.length > 0) {
+          upcomingHtml = '<hr class="today-rule">' +
+            '<p class="today-eyebrow">What is next</p>' +
+            cfg.upcoming_events.slice(0, 3).map(function (ev) {
+              var reg = ev.register_url
+                ? '<a class="today-upcoming-link" href="' + escapeHtml(ev.register_url) + '" target="_blank" rel="noopener">Register &rarr;</a>'
+                : '';
+              return '<div class="today-upcoming-row">' +
+                '<p class="today-upcoming-name">' + escapeHtml(ev.name) + '</p>' +
+                '<p class="today-upcoming-meta">' + escapeHtml(ev.date) + ' &middot; ' + escapeHtml(ev.venue) + '</p>' +
+                reg +
+                '</div>';
+            }).join('');
+        }
+
+        var bracketBtn = cfg.bracket_url
+          ? '<a class="today-cta" href="' + escapeHtml(cfg.bracket_url) + '" target="_blank" rel="noopener">View today\'s brackets on ' + escapeHtml(cfg.bracket_source_name || 'the host site') + ' &rarr;</a>'
+          : '<p class="today-cta-pending">Bracket source posted shortly. Follow @matsidewrestlingco for the link.</p>';
+
+        return '<p class="today-eyebrow">Live today</p>' +
+          '<h1 class="today-headline">' + escapeHtml(cfg.event_name) + '</h1>' +
+          '<p class="today-meta">' + escapeHtml(cfg.event_date) + ' &middot; ' + escapeHtml(cfg.venue) + '</p>' +
+          hostRow +
+          bracketBtn +
+          '<hr class="today-rule">' +
+          '<a class="today-follow" href="https://www.instagram.com/matsidewrestlingco/" target="_blank" rel="noopener">' +
+            '<span class="today-follow-handle">@matsidewrestlingco</span>' +
+            '<span class="today-follow-label">Follow for photos + recap</span>' +
+          '</a>' +
+          upcomingHtml;
+      }
+
+      function render(cfg) {
+        if (cfg.active) {
+          root.innerHTML = renderEventDay(cfg);
+          return;
+        }
+        // Off-day branch added in Task 4.
+        root.innerHTML = '<p class="today-loading">No Matside event today.</p>';
+      }
+
+      render(config);
+    })();
+  </script>
 </body>
 </html>
