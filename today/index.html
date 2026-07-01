@@ -36,6 +36,134 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* Page-specific styles for /today. Uses tokens from /style.css. */
+    .today-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 48px 22px 96px;
+      color: var(--text);
+    }
+    .today-loading {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: center;
+      padding: 48px 0;
+    }
+    .today-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--steel);
+      margin: 0 0 14px;
+      font-weight: 600;
+    }
+    .today-headline {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(30px, 6vw, 56px);
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      color: #fff;
+      margin: 0 0 10px;
+    }
+    .today-meta {
+      font-family: var(--sans);
+      font-size: 15px;
+      color: var(--text);
+      opacity: 0.85;
+      margin: 0 0 8px;
+    }
+    .today-host {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--steel);
+      opacity: 0.85;
+      margin: 4px 0 24px;
+      font-weight: 600;
+    }
+    .today-cta {
+      display: block;
+      background: var(--steel);
+      color: #fff;
+      text-align: center;
+      padding: 16px 18px;
+      border-radius: 3px;
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 120ms ease;
+    }
+    .today-cta:hover { background: var(--steel-deep); }
+    .today-cta:focus-visible { outline: 2px solid var(--steel-br); outline-offset: 3px; }
+    .today-cta-pending {
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--muted);
+      padding: 14px 0;
+      margin: 0;
+    }
+    .today-rule {
+      border: 0;
+      border-top: 1px solid var(--rule);
+      margin: 28px 0;
+    }
+    .today-follow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      text-decoration: none;
+      color: var(--text);
+      padding: 6px 0;
+    }
+    .today-follow-handle { font-family: var(--display); font-weight: 700; font-size: 15px; color: #fff; }
+    .today-follow-label { font-family: var(--sans); font-size: 12px; color: var(--muted); }
+    .today-follow:hover .today-follow-handle { color: var(--steel-br); }
+    .today-upcoming-row {
+      padding: 14px 0;
+      border-top: 1px solid var(--rule-soft);
+    }
+    .today-upcoming-row:first-of-type { border-top: 0; padding-top: 4px; }
+    .today-upcoming-name {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text);
+      margin: 0 0 4px;
+    }
+    .today-upcoming-meta {
+      font-family: var(--sans);
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+    .today-upcoming-link {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--steel-br);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(125, 211, 240, 0.4);
+      padding-bottom: 1px;
+    }
+    .today-upcoming-link:hover { color: #fff; }
+
+    @media (max-width: 380px) {
+      .today-wrap { padding: 36px 18px 72px; }
+      .today-headline { font-size: clamp(26px, 8vw, 40px); }
+    }
+  </style>
 </head>
 <body>
   <main id="today-root" class="today-wrap">
