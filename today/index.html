@@ -167,8 +167,48 @@
 </head>
 <body>
   <main id="today-root" class="today-wrap">
+    <noscript>
+      <p class="today-eyebrow">Live today</p>
+      <p class="today-meta">This page needs JavaScript to show today's live event. For upcoming Matside events, visit <a href="/">matside.org</a>.</p>
+    </noscript>
     <p class="today-loading">Loading today's event info...</p>
   </main>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo">MATSIDE<span>WRESTLING&nbsp;CO.</span></span>
+          <p>Professional wrestling event management and software in Western Pennsylvania.</p>
+          <p class="footer-credential">* Daniel Emmons and Matside Wrestling Co. are recognized as <a href="https://www.usabracketing.com/experts" target="_blank" rel="noopener">USA Bracketing Experts</a>.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <a href="mailto:support@matside.org">support@matside.org</a>
+        </div>
+        <div class="footer-social">
+          <h4>Follow</h4>
+          <div><div>Facebook</div><div>Instagram</div></div>
+        </div>
+      </div>
+      <div class="footer-legal">
+        <a href="/legal/privacy.html">Privacy</a>
+        <a href="/legal/terms.html">Terms</a>
+        <a href="/legal/coppa.html">COPPA</a>
+        <a href="/legal/information-security.html">Information Security</a>
+        <a href="/legal/retention.html">Data Retention</a>
+      </div>
+      <div class="footer-corp">
+        <strong>Matside Wrestling Co.</strong> — Pennsylvania single-member LLC, headquartered in Glenshaw, PA<br>
+        © 2026 Matside Wrestling Co. All rights reserved.
+      </div>
+      <div class="phrase">
+        <img src="/assets/images/pgh_skyline.png" alt="Pittsburgh">
+        <span id="matside-phrase"></span>
+      </div>
+    </div>
+  </footer>
+
   <script>
     (function () {
       var configEl = document.getElementById('today-config');
@@ -268,6 +308,23 @@
       }
 
       render(config);
+    })();
+
+    (function () {
+      var phrases = [
+        'Made in Pittsburgh. Deployed Everywhere.',
+        'From the Mon to the Mat.',
+        'PGH Tough. Pin-Perfect.',
+        'Bridges Above. Brackets Below.',
+        'Steel City Sweat. Pixel-Perfect Code.',
+        'Built by Wrestling People.',
+        'From Brackets to Backends.',
+        'Mat Tested. Production Approved.',
+        'Three Rivers. One Codebase.',
+        'Grit Over Glamour.'
+      ];
+      var el = document.getElementById('matside-phrase');
+      if (el) el.textContent = phrases[Math.floor(Math.random() * phrases.length)];
     })();
   </script>
 </body>
