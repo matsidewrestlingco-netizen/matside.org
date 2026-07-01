@@ -104,13 +104,39 @@
           upcomingHtml;
       }
 
+      function renderOffDay(cfg) {
+        var next = Array.isArray(cfg.upcoming_events) && cfg.upcoming_events.length > 0
+          ? cfg.upcoming_events[0]
+          : null;
+
+        var nextBlock = '';
+        if (next) {
+          var reg = next.register_url
+            ? '<a class="today-cta" href="' + escapeHtml(next.register_url) + '" target="_blank" rel="noopener">Register &rarr;</a>'
+            : '';
+          nextBlock = '<h1 class="today-headline">' + escapeHtml(next.name) + '</h1>' +
+            '<p class="today-meta">' + escapeHtml(next.date) + ' &middot; ' + escapeHtml(next.venue) + '</p>' +
+            reg;
+        } else {
+          nextBlock = '<p class="today-meta">Full schedule at <a href="/">matside.org</a>.</p>';
+        }
+
+        return '<p class="today-eyebrow">Next Matside event</p>' +
+          nextBlock +
+          '<hr class="today-rule">' +
+          '<a class="today-follow" href="https://www.instagram.com/matsidewrestlingco/" target="_blank" rel="noopener">' +
+            '<span class="today-follow-handle">@matsidewrestlingco</span>' +
+            '<span class="today-follow-label">Follow for photos + recap</span>' +
+          '</a>';
+      }
+
       function render(cfg) {
         if (cfg.active) {
           root.innerHTML = renderEventDay(cfg);
           return;
         }
-        // Off-day branch added in Task 4.
-        root.innerHTML = '<p class="today-loading">No Matside event today.</p>';
+        // Off-day: render the "Next Matside Event" fallback in place.
+        root.innerHTML = renderOffDay(cfg);
       }
 
       render(config);
