@@ -1,7 +1,7 @@
 # matside.org/today — Event-Day Landing Page
 
 **Date:** 2026-06-28
-**Status:** Draft — ready for plan
+**Status:** Ready to plan (all open questions resolved 2026-07-01)
 **Scope:** Single new route on `matsidewrestlingco-netizen/matside.org`; plain HTML/CSS + a small JSON config block; ~2–3 hours engineering
 **Audience:** Wrestlers / parents / coaches / officials at the head table of a Matside-operated tournament, plus anyone who scans the head-table QR poster
 **Stack:** Plain HTML + CSS, no JS framework. Same posture as the rest of matside.org (static, Vercel-deployed on push to main)
@@ -78,6 +78,8 @@ Vanilla JS at the bottom of the page reads the block via `document.getElementByI
 
 ### Off-day behavior
 
+**Resolved 2026-07-01:** render the fallback in place; no redirect. `matside.org/today` stays the single URL for every QR poster forever. The page adapts based on the `active` state so posters print once for the season and always resolve cleanly.
+
 When `"active": false` (or the config is missing/stale), render a quiet fallback:
 
 > **NO MATSIDE EVENT TODAY.**
@@ -95,6 +97,7 @@ Matches matside.org Midnight redesign aesthetic. Steel Blue `#3B82C4` parent acc
 1. **Eyebrow** — JetBrains Mono UPPERCASE, Steel Blue, letter-spaced: `LIVE TODAY`
 2. **Event headline** — Montserrat 800, Off-White, large (~clamp 36px–64px): event name
 3. **Event meta** — Inter 500, Off-White 0.85 opacity: date + venue, one line
+3a. **Host attribution (conditional).** JetBrains Mono UPPERCASE, Steel Blue at 0.85 opacity, letter-spaced: `HOSTED BY [HOST_PROGRAM_HANDLE]`. **Renders only when `host_program_handle` is a non-empty string in the JSON config** (resolved 2026-07-01). Empty string, missing key, or null: the renderer skips DOM injection for this row entirely so the page carries no dead vertical space for events without a host IG.
 4. **Primary CTA** — full-width Steel Blue button, Montserrat 700, white text: `VIEW TODAY'S BRACKETS ON [BRACKET_SOURCE_NAME] →` (button links to `bracket_url`, opens in new tab)
 5. **Mono rule** — thin Steel Blue divider
 6. **Secondary CTA — IG follow** — flat row: avatar + handle text `@matsidewrestlingco` + a small button `FOLLOW FOR PHOTOS + RECAP` linking to `https://www.instagram.com/matsidewrestlingco/`
@@ -155,8 +158,10 @@ Same chrome, but eyebrow reads `NEXT MATSIDE EVENT` instead of `LIVE TODAY`, the
 
 **Total:** half a day, end-to-end.
 
-## Open questions for Daniel (resolve before plan)
+## Resolved decisions (closed 2026-07-01)
 
-1. **Should the page redirect to `matside.org/events` on off-days,** or render the quiet fallback in place? (Default recommendation: render in place; one URL behavior is simpler and the page still does useful work on off-days by surfacing what's next.)
-2. **Does the QR poster ship before or after the page goes live?** (Default recommendation: page first by 1 week. QR poster only orders once the page is live and tested on a real phone at the actual viewing distance.)
-3. **Should `host_program_handle` get displayed on the page** (e.g., "Today's host: @shalerwrestling")? Could drive partner-program tag visibility but adds chrome. Default: include it as a small mono caption near the event meta.
+1. ✅ **Off-day behavior: render the fallback in place; no redirect.** `matside.org/today` is the single URL for every QR poster forever. Details in "Off-day behavior" section above.
+2. ✅ **QR poster timing: page ships first, poster print order follows by approximately 1 week.** Verification on a real phone at head-table viewing distance (approximately 4 to 6 feet on gym Wi-Fi) happens before the print order goes out. Zero risk of a printed poster resolving to a 404 or a broken page. First fall event Shaler Titan Duals Dec 5 gives ample runway.
+3. ✅ **Host-program handle: include the field in the JSON config with a conditional renderer.** The `HOSTED BY [handle]` mono line only injects into the DOM when `host_program_handle` is a non-empty string. Empty string, missing key, or null suppresses the row entirely so the page never carries dead chrome for events without a host IG.
+
+**Status:** Ready to plan. No further design questions outstanding.
