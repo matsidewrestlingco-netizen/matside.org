@@ -1,0 +1,18 @@
+{
+  "slug": "smoke-2026",
+  "formsSlug": "smoke-2026",
+  "name": "Smoke Test 2026",
+  "date": "2026-10-01",
+  "venueName": "Test Arena",
+  "venueLocation": "Pittsburgh, PA",
+  "divisions": "K-12",
+  "weighin": "7:00am",
+  "wrestling": "9:00am",
+  "contactEmail": "daniel@matside.org",
+  "accentHex": "#c9a967",
+  "about": "Thanks",
+  "hero": null,
+  "logo": null,
+  "generatedAt": "2026-09-03T19:18:41.851Z",
+  "templateVersion": 1
+}

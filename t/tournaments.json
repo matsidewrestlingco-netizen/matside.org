@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "slug": "smoke-2026",
+    "name": "Smoke Test 2026",
+    "date": "2026-10-01",
+    "venueLocation": "Pittsburgh, PA"
+  }
+]

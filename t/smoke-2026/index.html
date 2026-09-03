@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smoke Test 2026 — Matside</title>
+<meta name="description" content="Smoke Test 2026 — Oct 1, 2026 at Test Arena, Pittsburgh, PA. Registration hosted by Matside.">
+<link rel="canonical" href="https://www.matside.org/t/smoke-2026/">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+<!-- OpenGraph -->
+<meta property="og:title" content="Smoke Test 2026">
+<meta property="og:description" content="Oct 1, 2026 · Test Arena, Pittsburgh, PA">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.matside.org/t/smoke-2026/">
+<meta property="og:image" content="https://www.matside.org/apple-touch-icon.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Fonts (matches Midnight system used elsewhere on matside.org) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+<!-- Schema.org SportsEvent -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SportsEvent",
+  "name": "Smoke Test 2026",
+  "startDate": "2026-10-01",
+  "sport": "Wrestling",
+  "location": {
+    "@type": "Place",
+    "name": "Test Arena",
+    "address": "Pittsburgh, PA"
+  },
+  "url": "https://www.matside.org/t/smoke-2026/"
+}
+</script>
+
+<style>
+:root {
+  --accent: #c9a967;
+  --bg: #0b0d12;
+  --surface: #161a22;
+  --border: #2a2f3a;
+  --text: #e6e8ee;
+  --muted: #8b90a0;
+  --subtle: #a8adba;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+.page { max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; }
+.crumb { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.crumb a { color: var(--muted); text-decoration: none; }
+.crumb a:hover { color: var(--text); }
+.hero { position: relative; margin-bottom: 20px; }
+.hero-image { width: 100%; aspect-ratio: 16/9; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--bg)); background-size: cover; background-position: center; margin-bottom: 16px; }
+.hero-image[data-src]:not([style*="url"]) { background: linear-gradient(135deg, var(--accent), var(--bg)); }
+.logo { max-height: 56px; margin-bottom: 12px; }
+h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 6px; }
+.subhead { color: var(--subtle); font-size: 14px; margin: 0 0 24px; }
+.pills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
+.pill { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 10px 12px; border-radius: 4px; }
+.pill-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.pill-value { font-size: 14px; font-weight: 600; }
+.about { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; margin-bottom: 24px; font-size: 14px; color: var(--subtle); white-space: pre-wrap; }
+.about[hidden] { display: none; }
+.register { border-top: 1px solid var(--border); padding-top: 24px; }
+.register h2 { font-size: 12px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin: 0 0 12px; }
+.iframe-shell { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+#reg-iframe { width: 100%; min-height: 800px; border: 0; display: block; background: #fff; }
+.iframe-fallback { display: none; padding: 24px; text-align: center; color: var(--subtle); font-size: 14px; }
+.iframe-fallback a { color: var(--accent); font-weight: 600; }
+.iframe-shell.fallback #reg-iframe { display: none; }
+.iframe-shell.fallback .iframe-fallback { display: block; }
+footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+footer a { color: var(--muted); text-decoration: none; }
+footer a:hover { color: var(--text); }
+@media (max-width: 520px) {
+  .pills { grid-template-columns: 1fr; }
+  h1 { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="crumb"><a href="/t/">Matside · Tournaments</a></div>
+
+  <section class="hero">
+    <div class="hero-image" id="hero" data-src=""></div>
+    <img class="logo" id="logo" data-src="" alt="" hidden>
+    <h1>Smoke Test 2026</h1>
+    <p class="subhead">Oct 1, 2026 · Test Arena · Pittsburgh, PA</p>
+  </section>
+
+  <div class="pills">
+    <div class="pill"><div class="pill-label">Divisions</div><div class="pill-value">K-12</div></div>
+    <div class="pill"><div class="pill-label">Weigh-in</div><div class="pill-value">7:00am</div></div>
+    <div class="pill"><div class="pill-label">Wrestling</div><div class="pill-value">9:00am</div></div>
+  </div>
+
+  <div class="about" id="about" data-content="Thanks" hidden></div>
+
+  <section class="register">
+    <h2>Register</h2>
+    <div class="iframe-shell" id="iframe-shell">
+      <iframe id="reg-iframe" src="https://forms.matsidesystems.com/r/smoke-2026?embed=1" title="Registration form" loading="lazy"></iframe>
+      <div class="iframe-fallback">
+        Registration is temporarily unavailable in-page.
+        <a href="https://forms.matsidesystems.com/r/smoke-2026" target="_blank" rel="noopener">Register directly →</a>
+      </div>
+    </div>
+    <noscript>
+      <p style="margin-top:16px;color:var(--subtle);font-size:13px">
+        JavaScript is required for the embedded form.
+        <a href="https://forms.matsidesystems.com/r/smoke-2026" style="color:var(--accent)">Register directly →</a>
+      </p>
+    </noscript>
+  </section>
+
+  <footer>
+    <span>Questions? <a href="mailto:daniel@matside.org">daniel@matside.org</a></span>
+    <span><a href="https://www.matside.org">matside.org</a> · hosted by Matside</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  // Populate optional pieces without breaking when values are empty.
+  var hero = document.getElementById('hero');
+  var heroSrc = hero.getAttribute('data-src');
+  if (heroSrc && heroSrc.indexOf('{{') === -1 && heroSrc.length > 0) {
+    hero.style.backgroundImage = 'url(' + heroSrc + ')';
+  }
+
+  var logo = document.getElementById('logo');
+  var logoSrc = logo.getAttribute('data-src');
+  if (logoSrc && logoSrc.indexOf('{{') === -1 && logoSrc.length > 0) {
+    logo.setAttribute('src', logoSrc);
+    logo.removeAttribute('hidden');
+    logo.removeAttribute('alt');
+    logo.setAttribute('alt', 'Event logo');
+  }
+
+  var about = document.getElementById('about');
+  var aboutContent = about.getAttribute('data-content');
+  if (aboutContent && aboutContent.indexOf('{{') === -1 && aboutContent.length > 0) {
+    about.textContent = aboutContent;
+    about.removeAttribute('hidden');
+  }
+
+  // Iframe height listener + fallback timeout.
+  var shell = document.getElementById('iframe-shell');
+  var iframe = document.getElementById('reg-iframe');
+  var receivedHeight = false;
+  var ALLOWED_ORIGIN = 'https://forms.matsidesystems.com';
+  var TIMEOUT_MS = 5000;
+
+  window.addEventListener('message', function (evt) {
+    if (evt.origin !== ALLOWED_ORIGIN) return;
+    var data = evt.data;
+    if (!data || data.type !== 'matsysforms-height' || typeof data.px !== 'number') return;
+    if (data.px < 100 || data.px > 10000) return; // sanity clamp
+    iframe.style.height = data.px + 'px';
+    receivedHeight = true;
+  });
+
+  setTimeout(function () {
+    if (!receivedHeight) {
+      shell.classList.add('fallback');
+    }
+  }, TIMEOUT_MS);
+})();
+</script>
+</body>
+</html>
