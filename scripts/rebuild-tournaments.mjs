@@ -72,6 +72,23 @@ export async function rebuild({ root = DEFAULT_ROOT } = {}) {
       throw new Error(`${configPath}: invalid JSON — ${err.message}`)
     }
 
+    if (!KNOWN_TEMPLATE_VERSIONS.has(config.templateVersion)) {
+      throw new Error(`${configPath}: unknown templateVersion ${config.templateVersion}`)
+    }
+
+    if (config.slug !== slug) {
+      throw new Error(`${configPath}: slug mismatch — folder is "${slug}" but config.slug is "${config.slug}"`)
+    }
+
+    for (const key of ['hero', 'logo']) {
+      const filename = config[key]
+      if (!filename) continue
+      const assetPath = path.join(tDir, slug, filename)
+      if (!existsSync(assetPath)) {
+        throw new Error(`${configPath}: ${key} references ${filename} but ${filename} not found in folder`)
+      }
+    }
+
     const html = renderTemplate(template, config)
     const outPath = path.join(tDir, slug, 'index.html')
     writeFileSync(outPath, html, 'utf8')

@@ -41,3 +41,27 @@ test('happy path — renders all tokens', async () => {
   assert.match(out, /data-hero="hero\.jpg"/)
   assert.doesNotMatch(out, /\{\{[A-Z_]+\}\}/)
 })
+
+test('rejects malformed JSON', async () => {
+  const root = makeRoot()
+  seed(root, 'malformed', 'malformed')
+  await assert.rejects(rebuild({ root }), /invalid JSON/i)
+})
+
+test('rejects missing referenced image', async () => {
+  const root = makeRoot()
+  seed(root, 'missing-image', 'missing-image')
+  await assert.rejects(rebuild({ root }), /hero-missing\.jpg.*not found/i)
+})
+
+test('rejects slug/folder mismatch', async () => {
+  const root = makeRoot()
+  seed(root, 'slug-mismatch', 'slug-mismatch')
+  await assert.rejects(rebuild({ root }), /slug mismatch|does not match/i)
+})
+
+test('rejects unknown templateVersion', async () => {
+  const root = makeRoot()
+  seed(root, 'bad-version', 'bad-version')
+  await assert.rejects(rebuild({ root }), /template version|templateVersion/i)
+})
