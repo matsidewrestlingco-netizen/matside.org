@@ -124,6 +124,95 @@
   form.addEventListener('input', validate)
   form.addEventListener('change', validate)
 
+  const MAX_HERO_BYTES = 8 * 1024 * 1024
+  const MAX_LOGO_BYTES = 2 * 1024 * 1024
+  const MIN_HERO_LONG_SIDE = 800
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader()
+      fr.onload = () => resolve(fr.result)
+      fr.onerror = () => reject(new Error('Could not read file'))
+      fr.readAsDataURL(file)
+    })
+  }
+
+  function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader()
+      fr.onload = () => resolve(fr.result)
+      fr.onerror = () => reject(new Error('Could not read file'))
+      fr.readAsText(file)
+    })
+  }
+
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = () => reject(new Error('Could not decode image'))
+      img.src = url
+    })
+  }
+
+  async function processHero(file) {
+    if (!file) return null
+    if (file.size > MAX_HERO_BYTES) throw new Error(`Hero image too large (max 8 MB, got ${(file.size / 1024 / 1024).toFixed(1)} MB)`)
+    const dataUrl = await readFileAsDataURL(file)
+    const img = await loadImage(dataUrl)
+    const longSide = Math.max(img.width, img.height)
+    if (longSide < MIN_HERO_LONG_SIDE) throw new Error(`Hero image too small (min ${MIN_HERO_LONG_SIDE}px on long side, got ${longSide}px)`)
+
+    const MAX_W = 1600
+    const MAX_H = 900
+    const ratio = Math.min(MAX_W / img.width, MAX_H / img.height, 1)
+    const w = Math.round(img.width * ratio)
+    const h = Math.round(img.height * ratio)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/jpeg', 0.82))
+    if (!blob) throw new Error('Could not encode hero image')
+    return { filename: 'hero.jpg', blob }
+  }
+
+  function sanitizeSvg(svgText) {
+    // Remove <script> tags and any on* attributes. Conservative but not exhaustive.
+    let out = svgText.replace(/<script[\s\S]*?<\/script>/gi, '')
+    out = out.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '')
+    out = out.replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '')
+    return out
+  }
+
+  async function processLogo(file) {
+    if (!file) return null
+    if (file.size > MAX_LOGO_BYTES) throw new Error(`Logo too large (max 2 MB, got ${(file.size / 1024 / 1024).toFixed(1)} MB)`)
+
+    if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+      const text = await readFileAsText(file)
+      const sanitized = sanitizeSvg(text)
+      return { filename: 'logo.svg', blob: new Blob([sanitized], { type: 'image/svg+xml' }) }
+    }
+
+    // PNG/JPG path — resize to max 512x512, keep PNG for alpha
+    const dataUrl = await readFileAsDataURL(file)
+    const img = await loadImage(dataUrl)
+    const MAX = 512
+    const ratio = Math.min(MAX / img.width, MAX / img.height, 1)
+    const w = Math.round(img.width * ratio)
+    const h = Math.round(img.height * ratio)
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+    const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'))
+    if (!blob) throw new Error('Could not encode logo')
+    return { filename: 'logo.png', blob }
+  }
+
   form.addEventListener('submit', (e) => {
     e.preventDefault()
     const result = validate()
@@ -136,5 +225,5 @@
   validate()
 
   // Expose for later tasks
-  window.__builder = { slugify, normalizeHex, luminance, contrastAgainstBg, collectValues, validate }
+  window.__builder = { slugify, normalizeHex, luminance, contrastAgainstBg, collectValues, validate, processHero, processLogo, sanitizeSvg }
 })()
