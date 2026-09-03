@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournaments — Matside</title>
+<meta name="description" content="Wrestling tournaments hosted by Matside.">
+<link rel="canonical" href="https://www.matside.org/t/">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root { --bg:#0b0d12; --surface:#161a22; --border:#2a2f3a; --text:#e6e8ee; --muted:#8b90a0; --subtle:#a8adba; --accent:#c9a967; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; line-height: 1.5; }
+.page { max-width: 720px; margin: 0 auto; padding: 32px 20px 64px; }
+.crumb { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.crumb a { color: var(--muted); text-decoration: none; }
+h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 4px; }
+.subtitle { color: var(--subtle); font-size: 14px; margin: 0 0 32px; }
+h2 { font-size: 12px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin: 32px 0 12px; }
+.card { display: block; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 14px 16px; border-radius: 4px; margin-bottom: 8px; text-decoration: none; color: inherit; transition: border-color 0.15s; }
+.card:hover { border-color: var(--accent); }
+.card-name { font-size: 16px; font-weight: 600; }
+.card-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+details summary { cursor: pointer; color: var(--muted); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px; }
+details[open] summary { color: var(--text); }
+.empty { color: var(--subtle); font-size: 14px; padding: 24px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
+footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
+footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="crumb"><a href="/">Matside</a></div>
+  <h1>Tournaments</h1>
+  <p class="subtitle">Wrestling events hosted or supported by Matside.</p>
+
+  <div id="content"></div>
+
+  <footer>
+    <a href="/">matside.org</a>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var content = document.getElementById('content');
+
+  function card(t) {
+    var d = new Date(t.date + 'T00:00:00');
+    var display = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    var el = document.createElement('a');
+    el.className = 'card';
+    el.href = '/t/' + t.slug + '/';
+    var nameEl = document.createElement('div');
+    nameEl.className = 'card-name';
+    nameEl.textContent = t.name;
+    var metaEl = document.createElement('div');
+    metaEl.className = 'card-meta';
+    metaEl.textContent = display + ' · ' + t.venueLocation;
+    el.appendChild(nameEl);
+    el.appendChild(metaEl);
+    return el;
+  }
+
+  fetch('/t/tournaments.json', { cache: 'no-cache' })
+    .then(function (r) { return r.json(); })
+    .then(function (list) {
+      var today = new Date().toISOString().slice(0, 10);
+      var upcoming = list.filter(function (t) { return t.date >= today; });
+      var past = list.filter(function (t) { return t.date < today; }).reverse();
+
+      if (list.length === 0) {
+        var empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'No public tournaments right now — check back soon.';
+        content.appendChild(empty);
+        return;
+      }
+
+      if (upcoming.length) {
+        var h = document.createElement('h2');
+        h.textContent = 'Upcoming';
+        content.appendChild(h);
+        upcoming.forEach(function (t) { content.appendChild(card(t)); });
+      }
+
+      if (past.length) {
+        var details = document.createElement('details');
+        var summary = document.createElement('summary');
+        summary.textContent = 'Past (' + past.length + ')';
+        details.appendChild(summary);
+        past.forEach(function (t) { details.appendChild(card(t)); });
+        content.appendChild(details);
+      }
+    })
+    .catch(function () {
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'Tournament list unavailable.';
+      content.appendChild(empty);
+    });
+})();
+</script>
+</body>
+</html>
