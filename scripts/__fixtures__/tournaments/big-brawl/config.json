@@ -1,0 +1,18 @@
+{
+  "slug": "big-brawl",
+  "formsSlug": "big-brawl-forms",
+  "name": "The Big Brawl 2026",
+  "date": "2026-01-18",
+  "venueName": "Center Ice Arena",
+  "venueLocation": "Pittsburgh, PA",
+  "divisions": "K–12 · Girls",
+  "weighin": "7:00 AM",
+  "wrestling": "9:00 AM",
+  "contactEmail": "td@example.com",
+  "accentHex": "#c9a967",
+  "about": "A one-day open tournament for youth through high school.",
+  "hero": "hero.jpg",
+  "logo": null,
+  "generatedAt": "2026-09-03T14:00:00Z",
+  "templateVersion": 1
+}

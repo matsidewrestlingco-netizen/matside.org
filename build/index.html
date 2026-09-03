@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournament Minisite Builder — Matside</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="./build.css">
+</head>
+<body>
+<div class="page">
+  <header class="header">
+    <div class="crumb"><a href="/">Matside</a></div>
+    <h1>Tournament Minisite Builder</h1>
+    <p class="subtitle">Fill the form, upload images, download the zip, drop it into <code>t/[slug]/</code>, push.</p>
+  </header>
+
+  <form id="builder-form" class="builder">
+    <div class="col-form">
+      <fieldset>
+        <legend>Event basics</legend>
+        <label>Slug (URL segment)
+          <input name="slug" type="text" maxlength="60" required>
+          <small class="hint">Auto-slugified from the name if left empty. Used as <code>matside.org/t/[slug]/</code>.</small>
+        </label>
+        <label>Event name
+          <input name="name" type="text" required>
+        </label>
+        <label>Event date
+          <input name="date" type="date" required>
+        </label>
+        <label>Venue name
+          <input name="venueName" type="text" required>
+        </label>
+        <label>Venue location (city, state)
+          <input name="venueLocation" type="text" placeholder="Pittsburgh, PA" required>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Key facts (three pills at the top)</legend>
+        <label>Divisions
+          <input name="divisions" type="text" placeholder="K–12 · Girls" required>
+        </label>
+        <label>Weigh-in time
+          <input name="weighin" type="text" placeholder="7:00 AM" required>
+        </label>
+        <label>Wrestling start
+          <input name="wrestling" type="text" placeholder="9:00 AM" required>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Registration form binding</legend>
+        <label>matsidesystems-forms slug
+          <input name="formsSlug" type="text" required>
+          <small class="hint">The <code>/r/[slug]</code> slug on matsidesystems-forms. Often the same as the minisite slug, but doesn't have to be.</small>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Brand</legend>
+        <label>Accent color (hex)
+          <input name="accentHex" type="text" placeholder="#c9a967" required>
+          <small class="hint" id="contrast-hint"></small>
+        </label>
+        <label>Hero image (optional; jpg/png, resized to 1600×900)
+          <input name="hero" type="file" accept="image/jpeg,image/png">
+        </label>
+        <label>Event logo (optional; svg/png)
+          <input name="logo" type="file" accept="image/svg+xml,image/png">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Footer</legend>
+        <label>Contact email
+          <input name="contactEmail" type="email" required>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Optional</legend>
+        <label>About paragraph
+          <textarea name="about" rows="4" placeholder="A one-day open tournament for youth through high school."></textarea>
+        </label>
+      </fieldset>
+    </div>
+
+    <aside class="col-action">
+      <div class="sticky">
+        <button type="submit" id="generate-btn" disabled>Generate & Download Zip</button>
+        <p class="hint" id="missing-hint">Fill required fields to enable.</p>
+        <hr>
+        <p class="hint"><strong>After download:</strong></p>
+        <ol class="hint">
+          <li>Unzip into <code>matside.org/t/&lt;slug&gt;/</code></li>
+          <li>Run <code>node scripts/rebuild-tournaments.mjs</code></li>
+          <li><code>git commit &amp;&amp; git push</code></li>
+        </ol>
+      </div>
+    </aside>
+  </form>
+</div>
+
+<script src="./vendor/jszip.min.js"></script>
+<script src="./build.js"></script>
+</body>
+</html>

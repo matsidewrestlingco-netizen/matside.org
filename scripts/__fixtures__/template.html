@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<title>{{NAME}} — Matside</title>
+<h1>{{NAME}}</h1>
+<p>{{DATE_DISPLAY}} · {{VENUE_NAME}}, {{VENUE_LOCATION}}</p>
+<div class="pills">
+  <span>{{DIVISIONS}}</span>
+  <span>{{WEIGHIN}}</span>
+  <span>{{WRESTLING}}</span>
+</div>
+<iframe src="https://forms.matsidesystems.com/r/{{FORMS_SLUG}}?embed=1"></iframe>
+<a href="mailto:{{CONTACT_EMAIL}}">{{CONTACT_EMAIL}}</a>
+<a href="/t/{{SLUG}}/">/t/{{SLUG}}/</a>
+<style>:root { --accent: {{ACCENT_HEX}} }</style>
+<meta property="og:image" content="{{OG_IMAGE_URL}}">
+<time datetime="{{DATE_ISO}}"></time>
+<div data-hero="{{HERO_SRC}}" data-logo="{{LOGO_SRC}}" data-about="{{ABOUT}}"></div>

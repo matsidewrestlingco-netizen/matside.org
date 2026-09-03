@@ -1,0 +1,16 @@
+{
+  "slug": "different-slug",
+  "formsSlug": "different-slug",
+  "name": "Slug Mismatch Event",
+  "date": "2026-02-01",
+  "venueName": "Nowhere",
+  "venueLocation": "Nowhere, NA",
+  "divisions": "K–12",
+  "weighin": "7:00 AM",
+  "wrestling": "9:00 AM",
+  "contactEmail": "a@b.co",
+  "accentHex": "#000000",
+  "hero": null,
+  "logo": null,
+  "templateVersion": 1
+}

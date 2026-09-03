@@ -1,0 +1,16 @@
+{
+  "slug": "missing-image",
+  "formsSlug": "missing-image",
+  "name": "Missing Image Event",
+  "date": "2026-02-01",
+  "venueName": "Nowhere",
+  "venueLocation": "Nowhere, NA",
+  "divisions": "K–12",
+  "weighin": "7:00 AM",
+  "wrestling": "9:00 AM",
+  "contactEmail": "a@b.co",
+  "accentHex": "#000000",
+  "hero": "hero-missing.jpg",
+  "logo": null,
+  "templateVersion": 1
+}
