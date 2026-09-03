@@ -55,6 +55,7 @@ export async function rebuild({ root = DEFAULT_ROOT } = {}) {
 
   const tDir = path.join(root, 't')
   const entries = readdirSync(tDir, { withFileTypes: true })
+  const manifest = []
 
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
@@ -93,7 +94,18 @@ export async function rebuild({ root = DEFAULT_ROOT } = {}) {
     const outPath = path.join(tDir, slug, 'index.html')
     writeFileSync(outPath, html, 'utf8')
     console.log(`${slug}: regenerated`)
+
+    manifest.push({
+      slug: config.slug,
+      name: config.name,
+      date: config.date,
+      venueLocation: config.venueLocation,
+    })
   }
+
+  manifest.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+  writeFileSync(path.join(tDir, 'tournaments.json'), JSON.stringify(manifest, null, 2) + '\n', 'utf8')
+  console.log(`manifest: ${manifest.length} tournaments`)
 }
 
 // CLI entry

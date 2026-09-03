@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, cpSync, readFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, cpSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { rebuild } from './rebuild-tournaments.mjs'
@@ -64,4 +64,27 @@ test('rejects unknown templateVersion', async () => {
   const root = makeRoot()
   seed(root, 'bad-version', 'bad-version')
   await assert.rejects(rebuild({ root }), /template version|templateVersion/i)
+})
+
+test('emits tournaments.json manifest sorted by date ascending', async () => {
+  const root = makeRoot()
+  seed(root, 'big-brawl')
+
+  // Seed a second tournament with an earlier date
+  const early = path.join(root, 't', 'early-event')
+  mkdirSync(early, { recursive: true })
+  const cfg = JSON.parse(readFileSync(path.join(FIXTURES, 'tournaments', 'big-brawl', 'config.json'), 'utf8'))
+  cfg.slug = 'early-event'
+  cfg.date = '2026-01-01'
+  cfg.name = 'Early Event'
+  cfg.hero = null
+  writeFileSync(path.join(early, 'config.json'), JSON.stringify(cfg, null, 2))
+
+  await rebuild({ root })
+
+  const manifest = JSON.parse(readFileSync(path.join(root, 't', 'tournaments.json'), 'utf8'))
+  assert.equal(manifest.length, 2)
+  assert.equal(manifest[0].slug, 'early-event')
+  assert.equal(manifest[1].slug, 'big-brawl')
+  assert.deepEqual(Object.keys(manifest[0]).sort(), ['date', 'name', 'slug', 'venueLocation'])
 })
