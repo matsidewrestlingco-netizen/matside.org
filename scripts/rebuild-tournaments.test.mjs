@@ -88,3 +88,31 @@ test('emits tournaments.json manifest sorted by date ascending', async () => {
   assert.equal(manifest[1].slug, 'big-brawl')
   assert.deepEqual(Object.keys(manifest[0]).sort(), ['date', 'name', 'slug', 'venueLocation'])
 })
+
+test('renders the real production template end-to-end', async () => {
+  const root = mkdtempSync(path.join(tmpdir(), 'matside-rebuild-'))
+  mkdirSync(path.join(root, 't', '_template'), { recursive: true })
+  // Copy the ACTUAL template, not the fixture — this catches attribute drift
+  cpSync(
+    path.resolve('t/_template/index.html'),
+    path.join(root, 't', '_template', 'index.html')
+  )
+  seed(root, 'big-brawl')
+
+  await rebuild({ root })
+
+  const out = readFileSync(path.join(root, 't', 'big-brawl', 'index.html'), 'utf8')
+
+  // Head
+  assert.match(out, /<title>The Big Brawl 2026 — Matside<\/title>/)
+  // Iframe src
+  assert.match(out, /https:\/\/forms\.matsidesystems\.com\/r\/big-brawl-forms\?embed=1/)
+  // Accent color in inline style
+  assert.match(out, /--accent: #c9a967/)
+  // Hero element uses data-src on the element carrying id="hero"
+  assert.match(out, /id="hero"[^>]*data-src="hero\.jpg"/)
+  // About element uses data-content
+  assert.match(out, /id="about"[^>]*data-content="A one-day open tournament for youth through high school\."/)
+  // No unreplaced tokens
+  assert.doesNotMatch(out, /\{\{[A-Z_]+\}\}/)
+})
