@@ -213,12 +213,67 @@
     return { filename: 'logo.png', blob }
   }
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault()
     const result = validate()
     if (!result) return
-    // Zip generation added in a later task.
-    alert('Validation passed — zip generation not yet implemented.')
+
+    btn.disabled = true
+    btn.textContent = 'Generating…'
+    try {
+      const values = result.values
+      const heroInput = form.querySelector('[name=hero]').files[0] || null
+      const logoInput = form.querySelector('[name=logo]').files[0] || null
+
+      const hero = await processHero(heroInput)
+      const logo = await processLogo(logoInput)
+
+      const config = {
+        slug: values.slug,
+        formsSlug: values.formsSlug,
+        name: values.name,
+        date: values.date,
+        venueName: values.venueName,
+        venueLocation: values.venueLocation,
+        divisions: values.divisions,
+        weighin: values.weighin,
+        wrestling: values.wrestling,
+        contactEmail: values.contactEmail,
+        accentHex: values.accentHex,
+        about: values.about || '',
+        hero: hero ? hero.filename : null,
+        logo: logo ? logo.filename : null,
+        generatedAt: new Date().toISOString(),
+        templateVersion: 1,
+      }
+
+      const zip = new JSZip()
+      const folder = zip.folder(values.slug)
+      folder.file('config.json', JSON.stringify(config, null, 2) + '\n')
+      if (hero) folder.file(hero.filename, hero.blob)
+      if (logo) folder.file(logo.filename, logo.blob)
+
+      // Also include a stub index.html so the folder can be served immediately
+      // (contents will be overwritten by scripts/rebuild-tournaments.mjs on the next run).
+      folder.file('index.html', `<!DOCTYPE html><meta charset="utf-8"><title>${values.name}</title><p>Run <code>node scripts/rebuild-tournaments.mjs</code> to build this page.</p>\n`)
+
+      const blob = await zip.generateAsync({ type: 'blob' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${values.slug}.zip`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      btn.textContent = 'Downloaded — Generate another?'
+    } catch (err) {
+      alert('Error: ' + err.message)
+      btn.textContent = 'Generate & Download Zip'
+    } finally {
+      btn.disabled = false
+    }
   })
 
   // Initial state
