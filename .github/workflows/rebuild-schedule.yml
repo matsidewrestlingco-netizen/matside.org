@@ -1,0 +1,44 @@
+name: Rebuild schedule
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/schedule.json'
+      - 'scripts/rebuild-schedule.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebuild-schedule
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run tests
+        run: node --test scripts/rebuild-schedule.test.mjs
+
+      - name: Rebuild schedule tables
+        run: node scripts/rebuild-schedule.mjs
+
+      - name: Commit regenerated index.html
+        run: |
+          if git diff --quiet index.html; then
+            echo "Schedule already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Rebuild schedule tables from data/schedule.json"
+          git push

@@ -1,0 +1,245 @@
+{
+  "seasons": [
+    {
+      "season": "2026–27",
+      "events": [
+        {
+          "date": "2026-11-22",
+          "name": "Back Points for Bella",
+          "location": "Baldwin-Whitehall HS",
+          "registerUrl": "https://www.matside.org/t/2026-back-points-for-bella/"
+        },
+        {
+          "date": "2026-12-05",
+          "name": "Shaler Area Junior High Titan Duals",
+          "location": "Shaler Area HS"
+        },
+        {
+          "date": "2026-12-06",
+          "name": "MSWA Future Champions #1",
+          "location": "Easton HS, MD"
+        },
+        {
+          "date": "2026-12-13",
+          "name": "MSWA Future Champions #2",
+          "location": "Eastern Tech HS, MD"
+        },
+        {
+          "date": "2026-12-19",
+          "name": "Pine-Richland Girls Ram Slam",
+          "location": "Pine-Richland HS"
+        },
+        {
+          "date": "2026-12-20",
+          "name": "MSWA Future Champions #3",
+          "location": "St. Andrew's Episcopal School, MD"
+        },
+        {
+          "date": "2026-12-20",
+          "name": "MSWA First Ever Girls-only Tournament",
+          "location": "McDaniel College, MD"
+        },
+        {
+          "date": "2027-01-02",
+          "name": "Ed Driscoll MAC Tournament",
+          "location": "Moon Area HS"
+        },
+        {
+          "date": "2027-01-02",
+          "name": "MSWA Future Champions #4",
+          "location": "Huntingtown HS, MD"
+        },
+        {
+          "date": "2027-01-08",
+          "name": "ACC JH Tournament",
+          "location": "Shaler Area HS"
+        },
+        {
+          "date": "2027-01-09",
+          "name": "ACC JH Tournament",
+          "location": "Shaler Area HS"
+        },
+        {
+          "date": "2027-01-10",
+          "name": "Kurt J Nellis Memorial Tournament",
+          "location": "Shaler Area HS"
+        },
+        {
+          "date": "2027-01-16",
+          "name": "Sharpsville Girl's Tournament",
+          "location": "Sharpsville HS / MS"
+        },
+        {
+          "date": "2027-01-17",
+          "name": "MSWA Future Champions #5",
+          "location": "C. Milton Wright HS, MD"
+        },
+        {
+          "date": "2027-01-17",
+          "name": "Mason Dixon Duals",
+          "location": "TBD"
+        },
+        {
+          "date": "2027-01-22",
+          "name": "Demolition HS Duals",
+          "location": "Mount Saint Joseph HS, MD"
+        },
+        {
+          "date": "2027-01-23",
+          "name": "Demolition HS Duals",
+          "location": "Mount Saint Joseph HS, MD"
+        },
+        {
+          "date": "2027-01-24",
+          "name": "MSWA Future Champions #6",
+          "location": "Mount Saint Joseph HS, MD"
+        },
+        {
+          "date": "2027-01-30",
+          "name": "Pine-Richland Ram Slam Youth Tournament",
+          "location": "Pine-Richland HS"
+        },
+        {
+          "date": "2027-01-31",
+          "name": "MSWA Future Champions #7",
+          "location": "Howard HS, MD"
+        },
+        {
+          "date": "2027-02-06",
+          "name": "MSWA Future Champions #8",
+          "location": "Kent Island HS, MD"
+        },
+        {
+          "date": "2027-02-20",
+          "name": "MSWA Future Champions Championship (Day 1)",
+          "location": "Howard HS, MD"
+        },
+        {
+          "date": "2027-02-21",
+          "name": "MSWA Future Champions Championship (Day 2)",
+          "location": "Howard HS, MD"
+        },
+        {
+          "date": "TBD",
+          "name": "MSWA Freestyle & Greco State Qualifier",
+          "location": "TBD"
+        },
+        {
+          "date": "TBD",
+          "name": "MSWA Freestyle & Greco State Qualifier",
+          "location": "TBD"
+        },
+        {
+          "date": "TBD",
+          "name": "MSWA Freestyle & Greco State Qualifier",
+          "location": "TBD"
+        },
+        {
+          "date": "TBD",
+          "name": "MSWA Freestyle & Greco State Qualifier",
+          "location": "TBD"
+        },
+        {
+          "date": "2027-05-15",
+          "name": "MSWA Freestyle & Greco State Championship",
+          "location": "Mount Saint Joseph HS, MD"
+        }
+      ]
+    },
+    {
+      "season": "2025–26",
+      "events": [
+        {
+          "date": "2025-12-06",
+          "name": "Shaler Area Titan Duals",
+          "location": "Shaler Area HS",
+          "bracketUrl": "https://go.flo.zone/9pfNXZ6j"
+        },
+        {
+          "date": "2025-12-20",
+          "name": "PR Girls Ram Slam",
+          "location": "Pine-Richland HS",
+          "bracketUrl": "https://go.flo.zone/jHW9tIR7"
+        },
+        {
+          "date": "2026-01-02",
+          "name": "JH MAC Tournament",
+          "location": "Laurel HS",
+          "bracketUrl": "https://go.flo.zone/5kXgYI1c"
+        },
+        {
+          "date": "2026-01-03",
+          "name": "HS MAC Tournament",
+          "location": "Laurel HS",
+          "bracketUrl": "https://go.flo.zone/5kXgYI1c"
+        },
+        {
+          "date": "2026-01-09",
+          "name": "ACC JH Tournament",
+          "location": "Shaler Area HS",
+          "bracketUrl": "https://go.flo.zone/Mzm2LTb5"
+        },
+        {
+          "date": "2026-01-11",
+          "name": "Kurt J Nellis Memorial Tournament",
+          "location": "Shaler Area HS",
+          "bracketUrl": "https://go.flo.zone/7eonXh6J"
+        },
+        {
+          "date": "2026-01-17",
+          "name": "Sharpsville Girl's Tournament",
+          "location": "Sharpsville HS & MS",
+          "bracketUrl": "https://go.flo.zone/lihHGIcV"
+        },
+        {
+          "date": "2026-01-31",
+          "name": "PR Youth Ram Slam",
+          "location": "Pine-Richland HS",
+          "bracketUrl": "https://go.flo.zone/o7Co75aA"
+        },
+        {
+          "date": "2026-02-14",
+          "name": "2026 WPIAL AAA Northern Sectional",
+          "location": "Butler HS",
+          "bracketUrl": "https://go.flo.zone/3TJzlh9I"
+        },
+        {
+          "date": "2026-02-21",
+          "name": "2026 WPIAL Girls Championship",
+          "location": "Mt. Lebanon HS",
+          "bracketUrl": "https://go.flo.zone/eTsnYfD7"
+        },
+        {
+          "date": "2026-02-28",
+          "name": "2026 Regional Girls Championship",
+          "location": "Mt. Lebanon HS",
+          "bracketUrl": "https://go.flo.zone/eTsnYfD7"
+        },
+        {
+          "date": "2026-04-12",
+          "name": "MSWA Freestyle & Greco Qualifier",
+          "location": "Edgewood HS, MD",
+          "bracketUrl": "https://www.usabracketing.com/events/56fdf2e7-4325-4765-9bab-93e7c2859166"
+        },
+        {
+          "date": "2026-04-26",
+          "name": "MSWA Freestyle & Greco Qualifier",
+          "location": "Archbishop Spalding HS, MD",
+          "bracketUrl": "https://www.usabracketing.com/events/24545db7-fe8c-4a41-bfd4-f4bc86c71ea5"
+        },
+        {
+          "date": "2026-05-03",
+          "name": "MSWA Freestyle & Greco Qualifier",
+          "location": "Queen Anne's Co HS, MD",
+          "bracketUrl": "https://www.usabracketing.com/events/95cb7fac-d4c0-4dfb-bd59-e24530961e42"
+        },
+        {
+          "date": "2026-05-16",
+          "name": "MSWA Freestyle & Greco State Championships",
+          "location": "Mount Saint Joseph HS, MD",
+          "bracketUrl": "https://www.usabracketing.com/events/f375db78-71e9-45f8-9035-74814c75dcb6"
+        }
+      ]
+    }
+  ]
+}
