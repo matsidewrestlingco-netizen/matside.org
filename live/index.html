@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Matside Live — Parent View</title>
+<style>
+  :root {
+    --bg: #0a0a0f; --bg-raised: #12121a; --bg-card: #16161f;
+    --border: #1e1e2a; --text: #e4e4e7; --text-muted: #71717a;
+    --accent: #3d82c4; --accent-bright: #7dd3f0; --green: #4ade80; --yellow: #facc15;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 500px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+  header { text-align: center; margin-bottom: 1.25rem; }
+  header img { width: 160px; margin-bottom: 0.5rem; }
+  h1 { font-size: 1.3rem; font-weight: 700; color: #fff; }
+  .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem; }
+
+  .search-box {
+    display: flex; gap: 0.5rem; margin: 1rem 0 1.5rem;
+  }
+  .search-box input {
+    flex: 1; padding: 0.7rem 0.9rem; border-radius: 8px; font-size: 1rem;
+    border: 1px solid var(--border); background: var(--bg-card); color: var(--text);
+  }
+  .search-box input:focus { outline: none; border-color: var(--accent); }
+
+  .find-result {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.9rem 1rem; margin-bottom: 1.5rem;
+  }
+  .find-result .fr-name { font-weight: 700; color: #fff; margin-bottom: 0.3rem; }
+  .find-result .fr-line { font-size: 0.9rem; color: var(--text-muted); }
+  .find-result .fr-eta { color: var(--accent-bright); font-weight: 600; }
+
+  h2 { font-size: 1rem; font-weight: 700; color: #fff; margin: 1.25rem 0 0.6rem; }
+
+  .mat-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 0.9rem 1rem; margin-bottom: 0.75rem;
+  }
+  .mat-card-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.4rem;
+  }
+  .mat-card-header .mat-id { font-weight: 700; color: #fff; }
+  .mat-card-header .mat-eta { color: var(--accent-bright); font-size: 0.9rem; font-weight: 600; }
+  .mat-current { font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .mat-meta { font-size: 0.8rem; color: var(--text-muted); }
+
+  .waiting {
+    text-align: center; color: var(--text-muted); padding: 3rem 1rem; font-size: 0.95rem;
+  }
+  .waiting .dot-pulse { animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  footer {
+    text-align: center; color: var(--text-muted); font-size: 0.75rem; margin-top: 2rem;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="/assets/images/mswc.png" alt="Matside Wrestling Co.">
+      <h1 id="event-name">Matside Live</h1>
+      <p class="subtitle" id="event-sub">Find your wrestler · live mat board</p>
+    </header>
+
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="Search wrestler name…" autocomplete="off">
+    </div>
+    <div id="find-result" class="find-result hidden" style="display:none;"></div>
+
+    <div id="waiting" class="waiting">
+      <span class="dot-pulse">Waiting for live tournament data…</span>
+    </div>
+
+    <div id="mat-board"></div>
+
+    <footer>Information updates live · no accounts, no notifications in v1</footer>
+  </div>
+
+  <!-- Firebase compat SDK (no bundler needed) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="../wt/live.js"></script>
+  <script>
+    firebase.initializeApp({
+      apiKey: "AIzaSyArEEKlW_YTURBDKWC756rRNVSE7m338js",
+      authDomain: "matsidesystems---ticker.firebaseapp.com",
+      projectId: "matsidesystems---ticker",
+      storageBucket: "matsidesystems---ticker.firebasestorage.app",
+      messagingSenderId: "872289388964",
+      appId: "1:872289388964:web:e0fb95b23fefd1ef979931",
+      databaseURL: "https://matsidesystems---ticker-default-rtdb.firebaseio.com",
+    });
+
+    // ============================================================
+    // Matside Live — Parent view (Phase A, spec §4)
+    // Read-only. No accounts, no writes, no video. Degrades to the
+    // "waiting" state if the eventId is missing/unknown or RTDB is
+    // unreachable — never shows a broken page.
+    // ============================================================
+    const params = new URLSearchParams(location.search);
+    const eventId = params.get("e");
+
+    const state = {
+      meta: null,
+      mats: {},        // matId -> { log: {...} }
+      derivedEta: {},  // matId -> eta object from WT
+    };
+
+    function formatEpochClock(ms) {
+      if (!ms) return "—";
+      const d = new Date(ms);
+      const h = d.getHours();
+      const m = d.getMinutes();
+      const period = h >= 12 ? "PM" : "AM";
+      const displayH = h % 12 === 0 ? 12 : h % 12;
+      return `${displayH}:${String(m).padStart(2, "0")} ${period}`;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str ?? "";
+      return div.innerHTML;
+    }
+
+    function showWaiting(message) {
+      document.getElementById("waiting").style.display = "";
+      document.getElementById("waiting").innerHTML = `<span class="dot-pulse">${escapeHtml(message)}</span>`;
+      document.getElementById("mat-board").innerHTML = "";
+    }
+
+    function hideWaiting() {
+      document.getElementById("waiting").style.display = "none";
+    }
+
+    // Returns the single most-recently-started bout in a mat's log, or null.
+    function currentBoutFor(log) {
+      const bouts = Object.values(log || {}).filter((b) => b && b.startEpoch);
+      if (bouts.length === 0) return null;
+      // "current" = started but not yet ended; fall back to most recent overall.
+      const live = bouts.filter((b) => !b.endEpoch);
+      const pool = live.length ? live : bouts;
+      return pool.sort((a, b) => b.startEpoch - a.startEpoch)[0];
+    }
+
+    function renderMatBoard() {
+      const board = document.getElementById("mat-board");
+      const matIds = (state.meta && state.meta.mats) || Object.keys(state.mats);
+      if (!matIds.length) {
+        showWaiting("Waiting for live tournament data…");
+        return;
+      }
+      hideWaiting();
+
+      let html = "<h2>Mat Board</h2>";
+      matIds.forEach((matId) => {
+        const log = (state.mats[matId] && state.mats[matId].log) || {};
+        const current = currentBoutFor(log);
+        const eta = state.derivedEta[matId];
+        const boutsLogged = Object.keys(log).length;
+
+        const currentLine = current
+          ? `${escapeHtml(current.weight ? current.weight + " lbs" : "")} ${escapeHtml(current.w1 || "?")} vs ${escapeHtml(current.w2 || "?")}`.trim()
+          : "No bout in progress";
+        const etaLine = eta && eta.estFinishEpoch
+          ? `ETA ${formatEpochClock(eta.estFinishEpoch)}`
+          : "ETA —";
+
+        html += `
+          <div class="mat-card">
+            <div class="mat-card-header">
+              <span class="mat-id">Mat ${escapeHtml(matId)}</span>
+              <span class="mat-eta">${etaLine}</span>
+            </div>
+            <div class="mat-current">${currentLine}</div>
+            <div class="mat-meta">${boutsLogged} bout${boutsLogged === 1 ? "" : "s"} logged</div>
+          </div>
+        `;
+      });
+      board.innerHTML = html;
+    }
+
+    function allBouts() {
+      const out = [];
+      Object.entries(state.mats).forEach(([matId, matData]) => {
+        Object.values((matData && matData.log) || {}).forEach((b) => {
+          out.push({ ...b, matId });
+        });
+      });
+      return out;
+    }
+
+    function renderFindResult(query) {
+      const resultEl = document.getElementById("find-result");
+      if (!query) {
+        resultEl.style.display = "none";
+        return;
+      }
+      const q = query.trim().toLowerCase();
+      const matches = allBouts().filter(
+        (b) => (b.w1 || "").toLowerCase().includes(q) || (b.w2 || "").toLowerCase().includes(q)
+      );
+      if (matches.length === 0) {
+        resultEl.style.display = "";
+        resultEl.innerHTML = `<div class="fr-line">No bouts found for "${escapeHtml(query)}" yet.</div>`;
+        return;
+      }
+      // Most recent match wins for the headline; show completed results below.
+      matches.sort((a, b) => (b.startEpoch || 0) - (a.startEpoch || 0));
+      const latest = matches[0];
+      const name = (latest.w1 || "").toLowerCase().includes(q) ? latest.w1 : latest.w2;
+      const eta = state.derivedEta[latest.matId];
+      const etaLine = !latest.endEpoch && eta && eta.estFinishEpoch
+        ? `~${formatEpochClock(eta.estFinishEpoch)}`
+        : null;
+
+      const completed = matches.filter((b) => b.endEpoch && b.winner);
+      const resultsHtml = completed
+        .map((b) => {
+          const opp = (b.w1 === name) ? b.w2 : b.w1;
+          const won = b.winner === name;
+          return `<div class="fr-line">${won ? "W" : "L"} vs ${escapeHtml(opp || "?")} (${escapeHtml(b.method || "")}${b.scoreNote ? " " + escapeHtml(b.scoreNote) : ""})</div>`;
+        })
+        .join("");
+
+      resultEl.style.display = "";
+      resultEl.innerHTML = `
+        <div class="fr-name">${escapeHtml(name)}</div>
+        <div class="fr-line">Mat ${escapeHtml(latest.matId)}${etaLine ? ` · <span class="fr-eta">${etaLine}</span>` : ""}</div>
+        ${resultsHtml}
+      `;
+    }
+
+    document.getElementById("search-input").addEventListener("input", (e) => {
+      renderFindResult(e.target.value);
+    });
+
+    // ---------- Firebase listeners ----------
+    if (!eventId) {
+      showWaiting("No event specified. Scan the QR code at the venue entrance, or ask the head table for the link.");
+    } else {
+      document.getElementById("event-sub").textContent = `Event: ${eventId}`;
+
+      firebase.database().ref(`events/${eventId}/meta`).on("value", (snap) => {
+        state.meta = snap.val();
+        if (state.meta && state.meta.name) {
+          document.getElementById("event-name").textContent = state.meta.name;
+        }
+        renderMatBoard();
+      }, (err) => {
+        console.error("[Parent view] meta listener error:", err);
+        showWaiting("Can't reach live data right now. Check your connection, or ask the head table if the event has started.");
+      });
+
+      firebase.database().ref(`events/${eventId}/derived/eta`).on("value", (snap) => {
+        state.derivedEta = snap.val() || {};
+        renderMatBoard();
+      });
+
+      // Mats are joined dynamically by Loggers; listen for the whole mats/ tree
+      // rather than a fixed list, since meta.mats may lag an actual join.
+      firebase.database().ref(`events/${eventId}/mats`).on("value", (snap) => {
+        state.mats = snap.val() || {};
+        renderMatBoard();
+        const query = document.getElementById("search-input").value;
+        if (query) renderFindResult(query);
+      }, (err) => {
+        console.error("[Parent view] mats listener error:", err);
+      });
+    }
+  </script>
+</body>
+</html>

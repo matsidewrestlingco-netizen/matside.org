@@ -395,6 +395,12 @@ document.getElementById("btn-rounds-none").addEventListener("click", function ()
 // ============================================================
 let tickerState = {};
 
+// Hoisted up from below (needed by Matside Live's resume-on-reload code,
+// which runs at script top-level before buildHourlyBreakdown's block does).
+let hourlyBlocks = [];
+let hourlyTotalBouts = 0;
+let hourlyTotalBoutsPerHour = 0;
+
 function syncTicker(updates) {
   Object.assign(tickerState, updates);
   tickerState.updatedAt = Date.now();
@@ -405,6 +411,218 @@ function syncTicker(updates) {
     firebase.database().ref("ticker").set(tickerState);
   } catch (e) { /* Firebase unavailable */ }
 }
+
+// ============================================================
+// Matside Live — event creation, mirroring, Mat Status (Phase A)
+// Spec: /opt/data/matside/matside-live-v2-spec.md §2-3
+// ============================================================
+let liveEvent = null; // { eventId, joinCode, matIds }
+let matListeners = [];
+let matStatusData = {}; // matId -> log object mirrored from RTDB
+
+function loadLiveEventFromStorage() {
+  try {
+    const raw = localStorage.getItem("matsideLiveEvent");
+    if (raw) liveEvent = JSON.parse(raw);
+  } catch (e) { /* localStorage unavailable */ }
+}
+
+function saveLiveEventToStorage() {
+  try {
+    if (liveEvent) localStorage.setItem("matsideLiveEvent", JSON.stringify(liveEvent));
+    else localStorage.removeItem("matsideLiveEvent");
+  } catch (e) { /* localStorage unavailable */ }
+}
+
+function formatEpochClock(ms) {
+  if (!ms) return "—";
+  const d = new Date(ms);
+  const h = d.getHours();
+  const m = d.getMinutes();
+  const period = h >= 12 ? "PM" : "AM";
+  const displayH = h % 12 === 0 ? 12 : h % 12;
+  return `${displayH}:${String(m).padStart(2, "0")} ${period}`;
+}
+
+function renderLiveEventPanel() {
+  const panel = document.getElementById("live-event-panel");
+  if (!liveEvent) {
+    panel.classList.add("hidden");
+    panel.innerHTML = "";
+    return;
+  }
+  panel.classList.remove("hidden");
+  const parentUrl = `${location.origin}/live/?e=${liveEvent.eventId}`;
+  panel.innerHTML = `
+    <div class="live-event-card">
+      <div class="live-event-field"><span class="hint">Event ID</span><code>${liveEvent.eventId}</code></div>
+      <div class="live-event-field"><span class="hint">Logger join code</span><strong class="join-code">${liveEvent.joinCode}</strong></div>
+      <div class="live-event-field"><span class="hint">Parent view</span><a href="${parentUrl}" target="_blank" rel="noopener">${parentUrl}</a></div>
+      <button type="button" id="btn-end-live" class="btn-round-action">End live event</button>
+    </div>
+    <div id="live-sync-warning" class="mat-status-reconcile hidden"></div>
+  `;
+  document.getElementById("btn-end-live").addEventListener("click", endLiveEvent);
+}
+
+function showLiveSyncWarning(message) {
+  const el = document.getElementById("live-sync-warning");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.remove("hidden");
+}
+
+async function pushLiveMetaSetup() {
+  if (!liveEvent) return;
+  const name = document.getElementById("tournament-name").value.trim();
+  const mats = parseInt(document.getElementById("num-mats").value) || liveEvent.matIds.length;
+  const meta = {
+    name: name || "Untitled Tournament",
+    date: liveEvent.eventId.slice(0, 10),
+    mats: liveEvent.matIds,
+    level: levelSelect.value,
+    placing: placingSelect.value,
+  };
+  const setup = gatherSession();
+  try {
+    await firebase.database().ref(`events/${liveEvent.eventId}/meta`).set(meta);
+    await firebase.database().ref(`events/${liveEvent.eventId}/setup`).set(setup);
+  } catch (e) {
+    // Best-effort mirror — local state (liveEvent, hourlyBlocks, etc.) stays authoritative.
+    console.error("[Live] failed to write meta/setup (check RTDB rules):", e);
+    showLiveSyncWarning("⚠ Can't reach Firebase RTDB right now — Mat Status will stay local-only until this is fixed. Check RTDB rules/config.");
+  }
+}
+
+async function goLive() {
+  const name = document.getElementById("tournament-name").value.trim();
+  const mats = parseInt(document.getElementById("num-mats").value) || 1;
+  const matIds = Array.from({ length: mats }, (_, i) => String(i + 1));
+
+  liveEvent = {
+    eventId: LiveModel.genEventId(name, new Date().toISOString().slice(0, 10)),
+    joinCode: LiveModel.genJoinCode(),
+    matIds,
+  };
+  saveLiveEventToStorage();
+  renderLiveEventPanel();
+
+  try {
+    await firebase.database().ref(`joincodes/${liveEvent.joinCode}`).set(liveEvent.eventId);
+  } catch (e) {
+    console.error("[Live] failed to write join code (check RTDB rules):", e);
+  }
+  await pushLiveMetaSetup();
+
+  document.getElementById("mat-status-section").classList.remove("hidden");
+  startMatStatusListeners();
+}
+
+function endLiveEvent() {
+  stopMatStatusListeners();
+  liveEvent = null;
+  saveLiveEventToStorage();
+  renderLiveEventPanel();
+  document.getElementById("mat-status-section").classList.add("hidden");
+}
+
+document.getElementById("btn-go-live").addEventListener("click", goLive);
+
+function stopMatStatusListeners() {
+  matListeners.forEach(({ ref, cb }) => ref.off("value", cb));
+  matListeners = [];
+  matStatusData = {};
+}
+
+function startMatStatusListeners() {
+  if (!liveEvent) return;
+  stopMatStatusListeners();
+  liveEvent.matIds.forEach((matId) => { matStatusData[matId] = {}; });
+  renderMatStatus(); // render immediately so mats show "no taps yet" even if RTDB is unreachable
+  liveEvent.matIds.forEach((matId) => {
+    const ref = firebase.database().ref(`events/${liveEvent.eventId}/mats/${matId}/log`);
+    const cb = (snapshot) => {
+      matStatusData[matId] = snapshot.val() || {};
+      renderMatStatus();
+    };
+    const errCb = (err) => {
+      console.error(`[Live] mat ${matId} log listener denied (check RTDB rules):`, err);
+      showLiveSyncWarning("⚠ Can't reach Firebase RTDB right now — Mat Status will stay local-only until this is fixed. Check RTDB rules/config.");
+    };
+    ref.on("value", cb, errCb);
+    matListeners.push({ ref, cb });
+  });
+}
+
+// NOTE (Phase A simplification, flagged for Daniel): boutsRemaining is split
+// evenly across mats, same assumption WT used before v2. The real upgrade here
+// is per-mat PACE (median bout + turnaround), which is measured, not guessed.
+// Per-mat remaining-bout count needs weight->mat assignment (Venue Splitter
+// already has this data when used) to get more precise — candidate for Phase B.
+function renderMatStatus() {
+  const grid = document.getElementById("mat-status-grid");
+  const reconcileEl = document.getElementById("mat-status-reconcile");
+  if (!liveEvent || !grid) return;
+
+  const totalBouts = hourlyTotalBouts || 0;
+  let totalLogged = 0;
+  liveEvent.matIds.forEach((m) => {
+    totalLogged += Object.keys(matStatusData[m] || {}).length;
+  });
+  const totalRemaining = Math.max(0, totalBouts - totalLogged);
+  const remainingPerMat = liveEvent.matIds.length ? totalRemaining / liveEvent.matIds.length : 0;
+  const fallbackPerMatPerHour = liveEvent.matIds.length
+    ? (hourlyTotalBoutsPerHour || 0) / liveEvent.matIds.length
+    : 0;
+
+  const derivedPace = {};
+  const derivedEta = {};
+  let html = "";
+
+  liveEvent.matIds.forEach((matId) => {
+    const log = matStatusData[matId] || {};
+    const stats = LiveModel.computeMatStats(log);
+    const eta = LiveModel.computeMatETA(stats, remainingPerMat, fallbackPerMatPerHour);
+    derivedPace[matId] = stats;
+    derivedEta[matId] = eta;
+
+    const paceLabel = stats.medianBoutSec
+      ? `${Math.round(stats.medianBoutSec)}s bout + ${Math.round(stats.medianTurnaroundSec || 0)}s turn`
+      : "no taps yet";
+    const sourceLabel = eta.source === "measured" ? "measured" : eta.source === "fallback" ? "guess" : "—";
+
+    html += `
+      <div class="mat-status-card">
+        <div class="mat-status-card-header">Mat ${matId}</div>
+        <div class="mat-status-row"><span class="hint">Bouts logged</span><strong>${stats.boutsLogged}</strong></div>
+        <div class="mat-status-row"><span class="hint">Pace</span><span>${paceLabel}</span></div>
+        <div class="mat-status-row"><span class="hint">ETA (${sourceLabel})</span><strong>${formatEpochClock(eta.estFinishEpoch)}</strong></div>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+
+  const floTotal = typeof floArena !== "undefined" && floArena.active ? floArena.totalCompleted : null;
+  const reconcile = LiveModel.reconcileFloVsLogger(floTotal, matStatusData);
+  if (reconcile && reconcileEl) {
+    reconcileEl.classList.toggle("hidden", !reconcile.warn);
+    reconcileEl.textContent = reconcile.warn
+      ? `⚠ Flo reports ${reconcile.floTotalCompleted} completed vs. ${reconcile.loggerTotal} logged on mats — check for missed taps (diff ${reconcile.diff}).`
+      : "";
+  } else if (reconcileEl) {
+    reconcileEl.classList.add("hidden");
+  }
+
+  try {
+    firebase.database().ref(`events/${liveEvent.eventId}/derived/pace`).set(derivedPace);
+    firebase.database().ref(`events/${liveEvent.eventId}/derived/eta`).set(derivedEta);
+  } catch (e) {
+    console.error("[Live] failed to write derived/ (check RTDB rules):", e);
+  }
+}
+
+// (Resume-on-reload code moved to end of file — see bottom — so it runs
+// after every other top-level declaration, e.g. `floArena`, is initialized.)
 
 function syncTickerFromHourly() {
   // Compute completed bouts and actual run rate from hourly actuals
@@ -621,12 +839,16 @@ form.addEventListener("submit", function (e) {
   });
 
   resultsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  // Matside Live: keep the mirrored event in sync with whatever was just calculated.
+  if (liveEvent) {
+    pushLiveMetaSetup();
+    renderMatStatus();
+  }
 });
 
-// Store block data so we can recalculate when actuals are entered
-let hourlyBlocks = [];
-let hourlyTotalBouts = 0;
-let hourlyTotalBoutsPerHour = 0;
+// hourlyBlocks/hourlyTotalBouts/hourlyTotalBoutsPerHour declared earlier
+// (near tickerState) so Matside Live's top-level resume code can see them.
 
 function buildHourlyBreakdown(totalBouts, mats, boutsPerHourPerMat, numDays, startDay1, endDay1, startDay2) {
   const section = document.getElementById("hourly-section");
@@ -1528,6 +1750,7 @@ function applyFloArenaTotal(totalCompleted) {
 
   renderHourlyTable();
   syncTickerFromHourly();
+  if (liveEvent) renderMatStatus(); // refresh the Flo-vs-logger reconcile warning
 
   // Lock inputs so they read-only while FloArena is driving them
   const container = document.getElementById("hourly-table-container");
@@ -1631,3 +1854,20 @@ document.getElementById("btn-floarena-disconnect").addEventListener("click", fun
 
   renderFloArenaStatus();
 });
+
+// ============================================================
+// Matside Live — resume across page reloads
+// Placed at end-of-file (after floArena and every other top-level
+// const/let is initialized) to avoid a TDZ ReferenceError that would
+// otherwise abort all script.js execution below the throw point.
+// ============================================================
+try {
+  loadLiveEventFromStorage();
+  if (liveEvent) {
+    renderLiveEventPanel();
+    document.getElementById("mat-status-section").classList.remove("hidden");
+    startMatStatusListeners();
+  }
+} catch (e) {
+  console.error("[Live] failed to resume live event on reload:", e);
+}
