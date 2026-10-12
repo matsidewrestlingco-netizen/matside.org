@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Matside Bout Logger</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #1a1e26; --panel2: #232936;
+    --text: #e8eaf0; --dim: #8a93a6; --accent: #e63946;
+    --green: #2a9d5c; --amber: #e9a23b; --blue: #3b82e9;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; height: 100%; }
+  body { display: flex; flex-direction: column; }
+
+  header { display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: var(--panel); border-bottom: 1px solid #2c3242; }
+  header h1 { font-size: 16px; margin: 0; letter-spacing: .5px; }
+  header h1 span { color: var(--accent); }
+  #clock { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 14px; }
+  #matLabel { background: var(--panel2); border: 1px solid #343b4e; color: var(--text);
+    border-radius: 8px; padding: 4px 8px; font-size: 14px; width: 90px; text-align: center; }
+
+  main { flex: 1; overflow-y: auto; padding: 14px; max-width: 760px; width: 100%; margin: 0 auto; }
+
+  .card { background: var(--panel); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
+  .card h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--dim); }
+
+  /* Big action button */
+  .bigbtn { display: block; width: 100%; padding: 26px 16px; font-size: 26px; font-weight: 700;
+    border: none; border-radius: var(--radius); cursor: pointer; color: #fff; margin-top: 10px;
+    transition: transform .05s; }
+  .bigbtn:active { transform: scale(.98); }
+  .bigbtn.start { background: var(--green); }
+  .bigbtn.end { background: var(--accent); }
+  .bigbtn:disabled { background: #39404f; color: #6b7384; cursor: default; }
+
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+
+  select, input[type=text], input[type=number] {
+    width: 100%; padding: 12px; font-size: 16px; background: var(--panel2);
+    border: 1px solid #343b4e; color: var(--text); border-radius: 10px; }
+  label { font-size: 12px; color: var(--dim); display: block; margin: 10px 0 4px; }
+
+  .resultbtns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+  .resbtn { padding: 14px 4px; font-size: 15px; font-weight: 600; border: 1px solid #343b4e;
+    background: var(--panel2); color: var(--text); border-radius: 10px; cursor: pointer; }
+  .resbtn.sel { background: var(--blue); border-color: var(--blue); }
+
+  .winnerbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .winbtn { padding: 16px 6px; font-size: 16px; font-weight: 700; border: 1px solid #343b4e;
+    background: var(--panel2); color: var(--text); border-radius: 10px; cursor: pointer;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .winbtn.red.sel { background: var(--accent); border-color: var(--accent); }
+  .winbtn.green.sel { background: var(--green); border-color: var(--green); }
+
+  .status { text-align: center; font-size: 14px; color: var(--dim); margin-top: 8px; }
+  .live { color: var(--green); font-weight: 700; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 50% { opacity: .5; } }
+
+  #boutTimer { text-align: center; font-size: 40px; font-weight: 700;
+    font-variant-numeric: tabular-nums; margin: 4px 0; }
+
+  .loglist { list-style: none; margin: 0; padding: 0; }
+  .loglist li { padding: 10px 6px; border-bottom: 1px solid #2c3242; font-size: 14px;
+    display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+  .loglist .meta { color: var(--dim); font-size: 12px; }
+  .loglist .undo { background: none; border: 1px solid #343b4e; color: var(--dim);
+    border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 12px; }
+
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+  .toolbtn { flex: 1; min-width: 110px; padding: 12px 8px; font-size: 13px; font-weight: 600;
+    background: var(--panel2); color: var(--text); border: 1px solid #343b4e;
+    border-radius: 10px; cursor: pointer; }
+
+  .clapboard { position: fixed; inset: 0; background: #000; z-index: 50; display: none;
+    flex-direction: column; align-items: center; justify-content: center; }
+  .clapboard.show { display: flex; }
+  .clapboard .big { font-size: 10vw; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .clapboard .sub { color: #888; margin-top: 12px; font-size: 16px; }
+  .clapboard .epoch { color: var(--amber); font-size: 5vw; font-variant-numeric: tabular-nums; margin-top: 6px; }
+
+  .pill { display: inline-block; background: var(--panel2); border-radius: 999px;
+    padding: 2px 10px; font-size: 12px; color: var(--dim); }
+  .hidden { display: none !important; }
+  textarea { width: 100%; min-height: 110px; background: var(--panel2); color: var(--text);
+    border: 1px solid #343b4e; border-radius: 10px; padding: 10px; font-size: 13px;
+    font-family: ui-monospace, monospace; }
+  .hint { font-size: 12px; color: var(--dim); margin-top: 6px; line-height: 1.5; }
+  #syncPill2 { cursor: default; }
+  #syncPill2.synced { color: var(--green); border-color: var(--green); }
+  #syncPill2.error { color: var(--accent); border-color: var(--accent); }
+  .joincard input { text-align: center; font-size: 28px; letter-spacing: 0.3em; font-weight: 700; }
+</style>
+</head>
+<body>
+<header>
+  <h1>MAT<span>SIDE</span> Logger</h1>
+  <input id="matLabel" placeholder="Mat #" title="Mat label">
+  <div id="clock">--:--:--</div>
+</header>
+
+<main>
+  <!-- JOIN EVENT (Firebase mirror sync) -->
+  <div class="card joincard" id="joinCard">
+    <h2>Event sync <span class="pill" id="syncPill2">offline</span></h2>
+    <div id="joinForm">
+      <label>4-digit join code</label>
+      <input type="text" id="joinCodeInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="0000" autocomplete="off">
+      <label>Logged by <span class="hint" style="display:inline;margin:0;">(optional, goes on every bout)</span></label>
+      <input type="text" id="loggedByInput" placeholder="Your name" autocomplete="off">
+      <button class="bigbtn start" id="btnJoin" style="padding:14px;font-size:18px;margin-top:8px;">Join Event</button>
+      <div class="hint" id="joinMsg"></div>
+      <div class="hint">Get this code from the head table (WT → Go Live). Taps still save locally first either way — joining only adds a live mirror for the parent view and WT's Mat Status panel.</div>
+    </div>
+    <div id="joinedInfo" class="hidden">
+      <div class="hint">Joined event: <strong id="joinedEventId">—</strong> · Mat <strong id="joinedMat">—</strong></div>
+      <button class="toolbtn" id="btnLeaveEvent" style="margin-top:8px;">Leave event (go local-only)</button>
+    </div>
+  </div>
+
+  <!-- CURRENT BOUT -->
+  <div class="card">
+    <h2>Current bout</h2>
+    <div class="row">
+      <div>
+        <label>Red / Wrestler 1</label>
+        <input type="text" id="w1" list="wrestlers" placeholder="Name (Team)" autocomplete="off">
+      </div>
+      <div>
+        <label>Green / Wrestler 2</label>
+        <input type="text" id="w2" list="wrestlers" placeholder="Name (Team)" autocomplete="off">
+      </div>
+    </div>
+    <datalist id="wrestlers"></datalist>
+    <div class="row">
+      <div>
+        <label>Weight</label>
+        <input type="text" id="weight" placeholder="e.g. 122" autocomplete="off">
+      </div>
+      <div>
+        <label>Round / Bout #</label>
+        <input type="text" id="round" placeholder="e.g. R2 or Q-3" autocomplete="off">
+      </div>
+    </div>
+
+    <div id="boutTimer" class="hidden">0:00</div>
+    <button class="bigbtn start" id="btnStart">▶ BOUT START</button>
+    <button class="bigbtn end hidden" id="btnEnd">■ BOUT END</button>
+    <div class="status" id="statusLine">Ready — enter wrestlers (optional) and tap START at the whistle.</div>
+  </div>
+
+  <!-- RESULT (shown after end) -->
+  <div class="card hidden" id="resultCard">
+    <h2>Result — <span id="resBoutLabel"></span></h2>
+    <label>Winner</label>
+    <div class="winnerbtns">
+      <button class="winbtn red" id="winW1">Wrestler 1</button>
+      <button class="winbtn green" id="winW2">Wrestler 2</button>
+    </div>
+    <label>Method</label>
+    <div class="resultbtns" id="methodBtns">
+      <button class="resbtn" data-m="FALL">Fall</button>
+      <button class="resbtn" data-m="TF">Tech Fall</button>
+      <button class="resbtn" data-m="MD">Major Dec</button>
+      <button class="resbtn" data-m="DEC">Decision</button>
+      <button class="resbtn" data-m="FFT">Forfeit</button>
+      <button class="resbtn" data-m="OTHER">Other/DQ</button>
+    </div>
+    <label>Score / note (optional)</label>
+    <input type="text" id="scoreNote" placeholder="e.g. 7-2, or F 1:34" autocomplete="off">
+    <button class="bigbtn start" id="btnSaveResult" style="font-size:20px;padding:18px;">✓ SAVE BOUT</button>
+    <button class="toolbtn" id="btnSkipResult" style="margin-top:8px;width:100%;">Save without result (fix later)</button>
+  </div>
+
+  <!-- LOG -->
+  <div class="card">
+    <h2>Logged bouts — <span id="boutCount">0</span> <span class="pill" id="syncPill">0 clap-boards</span></h2>
+    <ul class="loglist" id="logList"></ul>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="card">
+    <h2>Tools</h2>
+    <div class="toolbar">
+      <button class="toolbtn" id="btnClap">🎬 Clap-board sync</button>
+      <button class="toolbtn" id="btnExport">⬇ Export JSON</button>
+      <button class="toolbtn" id="btnExportCsv">⬇ Export CSV</button>
+      <button class="toolbtn" id="btnRoster">👥 Load roster</button>
+      <button class="toolbtn" id="btnReset" style="color:var(--accent)">🗑 New event</button>
+    </div>
+    <div class="hint">
+      <b>Clap-board:</b> tap it, then film this screen for 5 seconds with the mat camera.
+      Do it at setup, midday, and end of day. It records the exact time so video and log
+      can be aligned later.<br>
+      <b>Exports</b> download a file AND copy to clipboard (belt and suspenders).
+      Data auto-saves on this device after every tap.
+    </div>
+  </div>
+
+  <!-- ROSTER MODAL (inline card) -->
+  <div class="card hidden" id="rosterCard">
+    <h2>Load roster / bracket</h2>
+    <div class="hint" style="margin-bottom:8px;">
+      Paste names below, one per line — <code>Name, Team</code> or just <code>Name</code>.
+      (Export entries from FloArena/USA Bracketing to a spreadsheet, copy the name column, paste here.)
+      Names appear as autocomplete suggestions in the wrestler fields.
+    </div>
+    <textarea id="rosterText" placeholder="Will Emmons, Shaler&#10;John Smith, Baldwin"></textarea>
+    <div class="row" style="margin-top:8px;">
+      <button class="toolbtn" id="btnRosterSave">Save roster</button>
+      <button class="toolbtn" id="btnRosterCancel">Cancel</button>
+    </div>
+  </div>
+</main>
+
+<!-- CLAPBOARD OVERLAY -->
+<div class="clapboard" id="clapOverlay">
+  <div class="big" id="clapClock">--:--:--.-</div>
+  <div class="epoch" id="clapEpoch"></div>
+  <div class="sub">MATSIDE CLAP-BOARD — film this screen · tap anywhere to close</div>
+</div>
+
+<!-- Firebase compat SDK (no bundler needed) — loaded before the main
+     script below so firebase.initializeApp()/firebase.database() exist. -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+<script>
+'use strict';
+// ---------- state ----------
+const LS_KEY = 'matside_bout_logger_v1';
+let state = {
+  eventName: '',
+  mat: '',
+  roster: [],        // [{name, team}]
+  bouts: [],         // [{id, w1, w2, weight, round, startIso, startEpoch, endIso, endEpoch, winner, method, scoreNote, loggedBy, savedAt}]
+  claps: [],         // [{iso, epoch}]
+  current: null,     // in-progress bout or null
+  join: null,        // { eventId, matId } once joined to a Matside Live event, else null
+  loggedBy: '',       // free-text name attached to every bout going forward
+  syncedIds: []       // bout ids confirmed written to Firebase (retry skip-list)
+};
+
+function save() {
+  try {
+    const ml = document.getElementById('matLabel');
+    if (ml && ml.value.trim()) state.mat = ml.value.trim();
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+  } catch(e) { console.error(e); }
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) state = Object.assign(state, JSON.parse(raw));
+  } catch(e) { console.error(e); }
+}
+
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const now = () => { const d = new Date(); return { iso: d.toISOString(), epoch: d.getTime() }; };
+function fmtClock(d) {
+  return d.toLocaleTimeString('en-US', {hour12:false});
+}
+function fmtDur(ms) {
+  const s = Math.floor(ms/1000);
+  return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+}
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// ---------- clock ----------
+setInterval(() => {
+  $('clock').textContent = fmtClock(new Date());
+  if (state.current) {
+    $('boutTimer').textContent = fmtDur(Date.now() - state.current.startEpoch);
+  }
+  if ($('clapOverlay').classList.contains('show')) {
+    const d = new Date();
+    $('clapClock').textContent = fmtClock(d) + '.' + Math.floor(d.getMilliseconds()/100);
+    $('clapEpoch').textContent = 'epoch ' + d.getTime();
+  }
+}, 100);
+
+// ---------- bout flow ----------
+function refreshButtons() {
+  const live = !!state.current;
+  $('btnStart').classList.toggle('hidden', live);
+  $('btnEnd').classList.toggle('hidden', !live);
+  $('boutTimer').classList.toggle('hidden', !live);
+  $('statusLine').innerHTML = live
+    ? '<span class="live">● RECORDING BOUT</span> — tap END at the final whistle.'
+    : 'Ready — enter wrestlers (optional) and tap START at the whistle.';
+}
+
+$('btnStart').onclick = () => {
+  const t = now();
+  state.current = {
+    id: uid(),
+    w1: $('w1').value.trim(), w2: $('w2').value.trim(),
+    weight: $('weight').value.trim(), round: $('round').value.trim(),
+    startIso: t.iso, startEpoch: t.epoch
+  };
+  save(); refreshButtons();
+};
+
+$('btnEnd').onclick = () => {
+  if (!state.current) return;
+  const t = now();
+  state.current.endIso = t.iso;
+  state.current.endEpoch = t.epoch;
+  // allow names typed mid-bout to count
+  state.current.w1 = $('w1').value.trim() || state.current.w1;
+  state.current.w2 = $('w2').value.trim() || state.current.w2;
+  state.current.weight = $('weight').value.trim() || state.current.weight;
+  state.current.round = $('round').value.trim() || state.current.round;
+  save();
+  openResultCard();
+};
+
+let pendingWinner = null, pendingMethod = null;
+function openResultCard() {
+  const b = state.current;
+  pendingWinner = null; pendingMethod = null;
+  $('scoreNote').value = '';
+  $('winW1').textContent = b.w1 || 'Wrestler 1';
+  $('winW2').textContent = b.w2 || 'Wrestler 2';
+  $('winW1').classList.remove('sel'); $('winW2').classList.remove('sel');
+  document.querySelectorAll('#methodBtns .resbtn').forEach(x => x.classList.remove('sel'));
+  $('resBoutLabel').textContent = [b.weight && (b.weight+'lbs'), b.round].filter(Boolean).join(' · ') || 'this bout';
+  $('resultCard').classList.remove('hidden');
+  refreshButtons();
+  $('resultCard').scrollIntoView({behavior:'smooth'});
+}
+
+$('winW1').onclick = () => { pendingWinner = 'w1'; $('winW1').classList.add('sel'); $('winW2').classList.remove('sel'); };
+$('winW2').onclick = () => { pendingWinner = 'w2'; $('winW2').classList.add('sel'); $('winW1').classList.remove('sel'); };
+document.querySelectorAll('#methodBtns .resbtn').forEach(btn => {
+  btn.onclick = () => {
+    pendingMethod = btn.dataset.m;
+    document.querySelectorAll('#methodBtns .resbtn').forEach(x => x.classList.remove('sel'));
+    btn.classList.add('sel');
+  };
+});
+
+function finalizeBout(withResult) {
+  const b = state.current;
+  if (!b) return;
+  if (withResult) {
+    b.winner = pendingWinner ? (pendingWinner === 'w1' ? (b.w1 || 'W1') : (b.w2 || 'W2')) : '';
+    b.winnerSlot = pendingWinner || '';
+    b.method = pendingMethod || '';
+    b.scoreNote = $('scoreNote').value.trim();
+  } else {
+    b.winner = ''; b.winnerSlot = ''; b.method = ''; b.scoreNote = '(no result logged)';
+  }
+  b.savedAt = now().iso;
+  b.loggedBy = state.loggedBy || '';
+  state.bouts.push(b);
+  state.current = null;
+  save();
+  mirrorBout(b); // best-effort; local save above already happened
+  $('resultCard').classList.add('hidden');
+  // clear bout fields for next one
+  ['w1','w2','round'].forEach(id => $(id).value = '');
+  renderLog(); refreshButtons();
+}
+$('btnSaveResult').onclick = () => finalizeBout(true);
+$('btnSkipResult').onclick = () => finalizeBout(false);
+
+// ---------- log render ----------
+function renderLog() {
+  $('boutCount').textContent = state.bouts.length;
+  $('syncPill').textContent = state.claps.length + ' clap-boards';
+  const ul = $('logList');
+  ul.innerHTML = '';
+  [...state.bouts].reverse().forEach(b => {
+    const li = document.createElement('li');
+    const dur = (b.endEpoch && b.startEpoch) ? fmtDur(b.endEpoch - b.startEpoch) : '?';
+    const title = [b.weight && (b.weight+'lbs'), b.round].filter(Boolean).join(' ');
+    const matchup = (b.w1 || '?') + ' vs ' + (b.w2 || '?');
+    const res = b.winner ? ('W: ' + b.winner + (b.method ? ' ('+b.method+(b.scoreNote?' '+b.scoreNote:'')+')' : '')) : (b.scoreNote || '');
+    li.innerHTML = '<div><div>' + esc(title ? title+' — ' : '') + esc(matchup) + '</div>' +
+      '<div class="meta">' + new Date(b.startIso).toLocaleTimeString('en-US',{hour12:false}) +
+      ' · ' + dur + (res ? ' · ' + esc(res) : '') + '</div></div>';
+    const undo = document.createElement('button');
+    undo.className = 'undo'; undo.textContent = 'delete';
+    undo.onclick = () => {
+      if (confirm('Delete this bout from the log?')) {
+        state.bouts = state.bouts.filter(x => x.id !== b.id);
+        save(); renderLog();
+      }
+    };
+    li.appendChild(undo);
+    ul.appendChild(li);
+  });
+}
+
+// ---------- clapboard ----------
+$('btnClap').onclick = () => {
+  const t = now();
+  state.claps.push(t);
+  save(); renderLog();
+  $('clapOverlay').classList.add('show');
+};
+$('clapOverlay').onclick = () => $('clapOverlay').classList.remove('show');
+
+// ---------- roster ----------
+$('btnRoster').onclick = () => {
+  $('rosterText').value = state.roster.map(r => r.team ? (r.name + ', ' + r.team) : r.name).join('\n');
+  $('rosterCard').classList.remove('hidden');
+  $('rosterCard').scrollIntoView({behavior:'smooth'});
+};
+$('btnRosterCancel').onclick = () => $('rosterCard').classList.add('hidden');
+$('btnRosterSave').onclick = () => {
+  state.roster = $('rosterText').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+    const i = l.indexOf(',');
+    return i === -1 ? {name: l, team: ''} : {name: l.slice(0,i).trim(), team: l.slice(i+1).trim()};
+  });
+  save(); renderRoster();
+  $('rosterCard').classList.add('hidden');
+};
+function renderRoster() {
+  const dl = $('wrestlers');
+  dl.innerHTML = '';
+  state.roster.forEach(r => {
+    const o = document.createElement('option');
+    o.value = r.team ? (r.name + ' (' + r.team + ')') : r.name;
+    dl.appendChild(o);
+  });
+}
+
+// ---------- exports ----------
+function download(filename, text, mime) {
+  const blob = new Blob([text], {type: mime || 'application/octet-stream'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  if (navigator.clipboard) navigator.clipboard.writeText(text).catch(()=>{});
+}
+function stamp() {
+  const d = new Date();
+  return d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+}
+$('btnExport').onclick = () => {
+  const payload = {
+    tool: 'matside-bout-logger', version: 1,
+    exportedAt: now().iso,
+    mat: $('matLabel').value.trim(),
+    clapboards: state.claps,
+    bouts: state.bouts
+  };
+  download('matside-log-mat' + (payload.mat||'X') + '-' + stamp() + '.json', JSON.stringify(payload, null, 2), 'application/json');
+};
+$('btnExportCsv').onclick = () => {
+  const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+  const rows = [['mat','weight','round','wrestler1','wrestler2','start_iso','start_epoch_ms','end_iso','end_epoch_ms','duration_s','winner','method','score_note'].join(',')];
+  const mat = $('matLabel').value.trim();
+  state.bouts.forEach(b => rows.push([
+    q(mat), q(b.weight), q(b.round), q(b.w1), q(b.w2),
+    q(b.startIso), b.startEpoch ?? '', q(b.endIso || ''), b.endEpoch ?? '',
+    (b.endEpoch && b.startEpoch) ? Math.round((b.endEpoch-b.startEpoch)/1000) : '',
+    q(b.winner), q(b.method), q(b.scoreNote)
+  ].join(',')));
+  state.claps.forEach(c => rows.push([q(mat),'','CLAPBOARD','','',q(c.iso),c.epoch,'','','','','',''].join(',')));
+  download('matside-log-mat' + (mat||'X') + '-' + stamp() + '.csv', rows.join('\n'), 'text/csv');
+};
+
+// ---------- reset ----------
+$('btnReset').onclick = () => {
+  if (!confirm('Start a NEW EVENT? This clears all logged bouts on this device.\n\nExport JSON/CSV first if you have not!')) return;
+  if (!confirm('Really sure? This cannot be undone.')) return;
+  state = { eventName:'', mat: state.mat, roster: [], bouts: [], claps: [], current: null, join: state.join, loggedBy: state.loggedBy, syncedIds: [] };
+  save(); renderLog(); renderRoster(); refreshButtons();
+};
+
+// ---------- mat label persistence ----------
+$('matLabel').addEventListener('input', () => { state.mat = $('matLabel').value.trim(); save(); });
+
+// ============================================================
+// Matside Live — Firebase mirror (Phase A, spec §2)
+// NON-NEGOTIABLE: this whole block is best-effort. localStorage via save()
+// above has ALREADY happened by the time any of this runs. Firebase being
+// unreachable (gym wifi, denied rules, offline) must never block a tap.
+// ============================================================
+let liveDb = null;
+try {
+  firebase.initializeApp({
+    apiKey: "AIzaSyArEEKlW_YTURBDKWC756rRNVSE7m338js",
+    authDomain: "matsidesystems---ticker.firebaseapp.com",
+    projectId: "matsidesystems---ticker",
+    storageBucket: "matsidesystems---ticker.firebasestorage.app",
+    messagingSenderId: "872289388964",
+    appId: "1:872289388964:web:e0fb95b23fefd1ef979931",
+    databaseURL: "https://matsidesystems---ticker-default-rtdb.firebaseio.com",
+  });
+  liveDb = firebase.database();
+} catch (e) {
+  console.error('[Logger] Firebase init failed — running fully offline:', e);
+}
+
+function setSyncPill(mode, label) {
+  const pill = $('syncPill2');
+  if (!pill) return;
+  pill.className = 'pill' + (mode ? ' ' + mode : '');
+  pill.textContent = label;
+}
+
+function renderJoinUI() {
+  const joined = !!state.join;
+  $('joinForm').classList.toggle('hidden', joined);
+  $('joinedInfo').classList.toggle('hidden', !joined);
+  if (joined) {
+    $('joinedEventId').textContent = state.join.eventId;
+    $('joinedMat').textContent = state.join.matId;
+    setSyncPill('synced', 'joined');
+  } else {
+    setSyncPill(null, 'offline');
+  }
+}
+
+$('btnJoin').onclick = async () => {
+  const code = $('joinCodeInput').value.trim();
+  const msg = $('joinMsg');
+  if (!/^\d{4}$/.test(code)) { msg.textContent = 'Enter the 4-digit join code from the head table.'; return; }
+  state.loggedBy = $('loggedByInput').value.trim();
+  if (!liveDb) { msg.textContent = "Firebase unavailable right now — can't join. Taps still save locally."; return; }
+  msg.textContent = '';
+  setSyncPill(null, 'joining…');
+  try {
+    const snap = await liveDb.ref(`joincodes/${code}`).once('value');
+    const eventId = snap.val();
+    if (!eventId) { setSyncPill('error', 'bad code'); msg.textContent = 'That join code was not found. Double-check with the head table.'; return; }
+    const matId = ($('matLabel').value.trim()) || '1';
+    state.join = { eventId, matId };
+    save();
+    renderJoinUI();
+    flushSyncQueue(); // mirror anything already logged before joining
+  } catch (e) {
+    console.error('[Logger] join failed:', e);
+    setSyncPill('error', 'join failed');
+    msg.textContent = 'Could not reach the server to join. Check wifi and try again — nothing logged locally is lost.';
+  }
+};
+
+$('btnLeaveEvent').onclick = () => {
+  state.join = null;
+  save();
+  renderJoinUI();
+};
+
+// Mirror one finalized bout to events/{id}/mats/{mat}/log/{boutKey}. Fire-and-forget
+// with a small retry via the syncedIds skip-list + flushSyncQueue() on reconnect/join.
+function mirrorBout(bout) {
+  if (!state.join || !liveDb) return;
+  const { eventId, matId } = state.join;
+  setSyncPill(null, 'syncing…');
+  liveDb.ref(`events/${eventId}/mats/${matId}/log/${bout.id}`).set(bout)
+    .then(() => {
+      state.syncedIds.push(bout.id);
+      save();
+      setSyncPill('synced', 'synced');
+    })
+    .catch((e) => {
+      console.error('[Logger] mirror failed for bout', bout.id, e);
+      setSyncPill('error', 'sync error — will retry');
+    });
+}
+
+// Retry every bout not yet confirmed synced — covers the "wifi came back" case.
+function flushSyncQueue() {
+  if (!state.join || !liveDb) return;
+  const pending = state.bouts.filter((b) => !state.syncedIds.includes(b.id));
+  pending.forEach(mirrorBout);
+}
+window.addEventListener('online', flushSyncQueue);
+setInterval(() => { if (state.join) flushSyncQueue(); }, 20000); // belt-and-suspenders poll
+
+// ---------- init ----------
+load();
+$('matLabel').value = state.mat || '';
+$('loggedByInput').value = state.loggedBy || '';
+renderRoster(); renderLog(); refreshButtons(); renderJoinUI();
+if (state.current) refreshButtons(); // resume live bout after reload
+if (state.join) flushSyncQueue(); // catch up anything logged while offline
+// keep screen awake where supported
+let wakeLock = null;
+async function requestWake() {
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') requestWake(); });
+requestWake();
+</script>
+</body>
+</html>
