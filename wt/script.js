@@ -410,6 +410,16 @@ function syncTicker(updates) {
   try {
     firebase.database().ref("ticker").set(tickerState);
   } catch (e) { /* Firebase unavailable */ }
+  // Mirror into the per-event scoped path too, when a live event is active
+  // (set via "Go Live" -> Matside Live Phase A / PR #4's eventId scoping).
+  // This is what boards.matside.org's flo+ticker composite page reads —
+  // keeps two concurrent tournaments' tickers from stomping each other on
+  // the single legacy `ticker` node above.
+  if (typeof liveEvent !== "undefined" && liveEvent) {
+    try {
+      firebase.database().ref(`events/${liveEvent.eventId}/ticker`).set(tickerState);
+    } catch (e) { /* Firebase unavailable */ }
+  }
 }
 
 // ============================================================

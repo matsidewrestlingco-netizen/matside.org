@@ -257,8 +257,16 @@
       return div.innerHTML;
     }
 
-    // Listen for real-time updates from Firebase
-    firebase.database().ref("ticker").on("value", function (snapshot) {
+    // Listen for real-time updates from Firebase. If ?e=<eventId> is present
+    // (set by WT's "Go Live" flow, matside-boards' flo+ticker composite
+    // page), read the per-event scoped path so two concurrent tournaments
+    // never collide. No ?e= falls back to the legacy global `ticker` node
+    // — same as this page has always worked, so existing bookmarked/kiosk
+    // URLs with no param keep working exactly as before.
+    const params = new URLSearchParams(location.search);
+    const eventId = params.get("e");
+    const tickerPath = eventId ? `events/${eventId}/ticker` : "ticker";
+    firebase.database().ref(tickerPath).on("value", function (snapshot) {
       render(snapshot.val());
     });
   </script>
