@@ -31,7 +31,9 @@
           Load Session
           <input type="file" id="btn-load" accept=".json" hidden>
         </label>
+        <button type="button" id="btn-go-live" class="btn-session">Go Live</button>
       </div>
+      <div id="live-event-panel" class="live-event-panel hidden"></div>
     </header>
 
     <form id="estimator-form" autocomplete="off">
@@ -218,11 +220,20 @@
       <div id="roundmap-day-summary" class="roundmap-day-summary hidden"></div>
       <div id="roundmap-table-container" class="roundmap-table-container"></div>
     </section>
+
+    <section id="mat-status-section" class="mat-status-section hidden">
+      <h2>Mat Status <span class="hint">(live, from Bout Logger taps)</span></h2>
+      <p class="subtitle">Per-mat measured pace + ETA, replacing the even-distribution guess once Loggers are joined.</p>
+      <div id="mat-status-join" class="mat-status-join"></div>
+      <div id="mat-status-reconcile" class="mat-status-reconcile hidden"></div>
+      <div id="mat-status-grid" class="mat-status-grid"></div>
+    </section>
   </div>
 
   <!-- Firebase compat SDK (no bundler needed) -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="live.js"></script>
   <script>
     firebase.initializeApp({
       apiKey: "AIzaSyArEEKlW_YTURBDKWC756rRNVSE7m338js",
