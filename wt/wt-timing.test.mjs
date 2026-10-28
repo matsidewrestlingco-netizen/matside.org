@@ -8,10 +8,14 @@ import {
   boutCapacityForInterval,
   timeToCompleteBouts,
   defaultMatSchedule,
+  buildDaySegments,
+  scheduleChunksAcrossDays,
+  chunkBoutsByDay,
   roundKind,
   boutDurationSec,
   derivedBoutsPerHourPerMat,
   FOLKSTYLE_LEVEL_PRESETS,
+  splitContiguousWeightRanges,
 } from './wt-timing.mjs';
 
 // ============================================================
@@ -297,3 +301,201 @@ test('derivedBoutsPerHourPerMat: empty bout counts returns null, not NaN/Infinit
   const cfg = FOLKSTYLE_LEVEL_PRESETS.hs;
   assert.equal(derivedBoutsPerHourPerMat({ championship: 0, consolation: 0 }, cfg), null);
 });
+
+// ============================================================
+// Day-aware scheduling — buildDaySegments() / scheduleChunksAcrossDays()
+// ============================================================
+
+test('buildDaySegments: 1-day tournament has a single open-ended day', () => {
+  const days = buildDaySegments(1, '09:00', '18:00', '09:00');
+  assert.deepEqual(days, [{ day: 1, label: null, startMin: 9 * 60, endMin: null }]);
+});
+
+test('buildDaySegments: 2-day tournament has a bounded Day 1 and open-ended Day 2', () => {
+  const days = buildDaySegments(2, '09:00', '20:00', '08:30');
+  assert.deepEqual(days, [
+    { day: 1, label: 'Day 1', startMin: 9 * 60, endMin: 20 * 60 },
+    { day: 2, label: 'Day 2', startMin: 8 * 60 + 30, endMin: null },
+  ]);
+});
+
+test('scheduleChunksAcrossDays: single day, single chunk, matches simple flat math', () => {
+  const days = buildDaySegments(1, '09:00', '18:00', '09:00');
+  const schedule = defaultMatSchedule('09:00', 2); // 2 mats
+  // 2 mats * 10/hr = 20/hr total. 100 bouts -> 5 hours -> 9am + 5h = 2pm.
+  const results = scheduleChunksAcrossDays(days, [{ label: 'All bouts', bouts: 100 }], schedule, 10);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].startMin, 9 * 60);
+  assert.equal(results[0].endMin, 14 * 60);
+  assert.equal(results[0].crossesDayBoundary, false);
+  assert.equal(results[0].boutsThisSegment, 100);
+});
+
+test('scheduleChunksAcrossDays: a single chunk that would run past Day 1 end splits across the day boundary', () => {
+  // Day 1: 9am-6pm (9h window), Day 2 starts 9am. 4 mats * 10/hr = 40/hr.
+  // Day 1 capacity = 9h * 40 = 360 bouts. Give it 500 bouts -> 360 fit on
+  // Day 1, 140 roll over to Day 2 starting at 9am.
+  const days = buildDaySegments(2, '09:00', '18:00', '09:00');
+  const schedule = defaultMatSchedule('09:00', 4);
+  const results = scheduleChunksAcrossDays(days, [{ label: 'All bouts', bouts: 500 }], schedule, 10);
+
+  assert.equal(results.length, 2);
+  assert.equal(results[0].day, 1);
+  assert.equal(results[0].startMin, 9 * 60);
+  assert.equal(results[0].endMin, 18 * 60);
+  assert.equal(results[0].boutsThisSegment, 360);
+  assert.equal(results[0].crossesDayBoundary, false);
+  assert.equal(results[0].isLastSegmentOfChunk, false);
+
+  assert.equal(results[1].day, 2);
+  assert.equal(results[1].startMin, 9 * 60);
+  assert.equal(results[1].boutsThisSegment, 140);
+  assert.equal(results[1].crossesDayBoundary, true);
+  assert.equal(results[1].isLastSegmentOfChunk, true);
+  // 140 bouts @ 40/hr = 3.5h -> 9am + 3.5h = 12:30pm
+  assert.equal(results[1].endMin, 9 * 60 + 210);
+});
+
+test('scheduleChunksAcrossDays: multiple chunks (rounds) that collectively cross the day boundary — only the crossing round splits', () => {
+  // Day 1: 9am-11am (2h window) = 2h * 20/hr (2 mats*10/hr) = 40 bouts capacity.
+  const days = buildDaySegments(2, '09:00', '11:00', '09:00');
+  const schedule = defaultMatSchedule('09:00', 2);
+  const chunks = [
+    { label: 'Round of 32', bouts: 16 }, // 0.8h, cumulative 0.8h
+    { label: 'Round of 16', bouts: 16 }, // 0.8h, cumulative 1.6h -> 0.4h (8 bouts) left in day 1
+    { label: 'Quarterfinal', bouts: 12 }, // only 8 bouts' worth of day-1 time left, 4 roll to day 2
+  ];
+  const results = scheduleChunksAcrossDays(days, chunks, schedule, 10);
+
+  // Round of 32 and Round of 16: one row each, fully on day 1
+  const r32 = results.filter((r) => r.chunkLabel === 'Round of 32');
+  assert.equal(r32.length, 1);
+  assert.equal(r32[0].day, 1);
+  assert.equal(r32[0].crossesDayBoundary, false);
+
+  const r16 = results.filter((r) => r.chunkLabel === 'Round of 16');
+  assert.equal(r16.length, 1);
+  assert.equal(r16[0].day, 1);
+
+  // Quarterfinal: splits into a day-1 part (8 bouts) and a day-2 part (4 bouts)
+  const qf = results.filter((r) => r.chunkLabel === 'Quarterfinal');
+  assert.equal(qf.length, 2);
+  assert.equal(qf[0].day, 1);
+  assert.equal(qf[0].boutsThisSegment, 8);
+  assert.equal(qf[0].crossesDayBoundary, false);
+  assert.equal(qf[0].isLastSegmentOfChunk, false);
+  assert.equal(qf[1].day, 2);
+  assert.equal(qf[1].boutsThisSegment, 4);
+  assert.equal(qf[1].crossesDayBoundary, true);
+  assert.equal(qf[1].isLastSegmentOfChunk, true);
+});
+
+test('scheduleChunksAcrossDays: zero-bout chunk (e.g. excluded round) still gets exactly one zero-length row', () => {
+  const days = buildDaySegments(1, '09:00', '18:00', '09:00');
+  const schedule = defaultMatSchedule('09:00', 2);
+  const results = scheduleChunksAcrossDays(
+    days,
+    [{ label: 'Round of 32', bouts: 10 }, { label: 'Bye round', bouts: 0 }],
+    schedule, 10
+  );
+  assert.equal(results.length, 2);
+  assert.equal(results[1].chunkLabel, 'Bye round');
+  assert.equal(results[1].boutsThisSegment, 0);
+  assert.equal(results[1].startMin, results[1].endMin);
+});
+
+test('scheduleChunksAcrossDays: respects a mid-day mat-schedule change (integration with boutCapacityForInterval)', () => {
+  // Day 1 9am-6pm, 8 mats dropping to 4 at 12pm (3h window total).
+  // 9am-12pm: 3h * 80/hr (8mats*10/hr) = 240 capacity.
+  const days = buildDaySegments(2, '09:00', '18:00', '09:00');
+  const schedule = [{ day: 1, time: '09:00', mats: 8 }, { day: 1, time: '12:00', mats: 4 }];
+  // Give exactly 240 bouts -> should land exactly at noon, still day 1, no rollover.
+  const results = scheduleChunksAcrossDays(days, [{ label: 'All bouts', bouts: 240 }], schedule, 10);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].day, 1);
+  assert.equal(results[0].endMin, 12 * 60);
+  assert.equal(results[0].crossesDayBoundary, false);
+});
+
+test('chunkBoutsByDay: a round that fully fits in Day 1 is attributed entirely to day 1', () => {
+  const days = buildDaySegments(2, '09:00', '11:00', '09:00');
+  const schedule = defaultMatSchedule('09:00', 2);
+  const chunks = [{ label: 'Round of 32', bouts: 16 }];
+  const segments = scheduleChunksAcrossDays(days, chunks, schedule, 10);
+  const byDay = chunkBoutsByDay(segments);
+  assert.deepEqual(byDay.get('Round of 32'), { 1: 16 });
+});
+
+test('chunkBoutsByDay: a round that straddles the day boundary is split proportionally across days', () => {
+  const days = buildDaySegments(2, '09:00', '11:00', '09:00');
+  const schedule = defaultMatSchedule('09:00', 2);
+  const chunks = [
+    { label: 'Round of 32', bouts: 16 },
+    { label: 'Round of 16', bouts: 16 },
+    { label: 'Quarterfinal', bouts: 12 },
+  ];
+  const segments = scheduleChunksAcrossDays(days, chunks, schedule, 10);
+  const byDay = chunkBoutsByDay(segments);
+  assert.deepEqual(byDay.get('Quarterfinal'), { 1: 8, 2: 4 });
+});
+
+// ============================================================
+// Venue Splitter — splitContiguousWeightRanges()
+// ============================================================
+
+test('splitContiguousWeightRanges: 2 equal-capacity gyms split 10 equal-bout weights down the middle', () => {
+  const weights = Array.from({ length: 10 }, (_, i) => ({ name: `W${i + 1}`, bouts: 4 }));
+  const result = splitContiguousWeightRanges(weights, [20, 20]); // equal capacity
+  assert.ok(result);
+  // Equal capacity + equal bouts -> an even 5/5 split, contiguous.
+  assert.deepEqual(result.assignments.slice(0, 5), [0, 0, 0, 0, 0]);
+  assert.deepEqual(result.assignments.slice(5), [1, 1, 1, 1, 1]);
+  assert.ok(result.spreadHours < 0.01); // should finish at (nearly) the same time
+});
+
+test('splitContiguousWeightRanges: never scatters weight classes — every assignment run is contiguous', () => {
+  const weights = Array.from({ length: 12 }, (_, i) => ({ name: `W${i + 1}`, bouts: Math.floor(Math.random() * 10) + 1 }));
+  const result = splitContiguousWeightRanges(weights, [15, 10, 25]);
+  assert.ok(result);
+  // For each location, the set of weight indices assigned to it must be
+  // one contiguous run — i.e. once you leave a location's block you
+  // never return to it (the defining property Daniel asked for).
+  let current = result.assignments[0];
+  const seenLocations = new Set([current]);
+  for (let i = 1; i < result.assignments.length; i++) {
+    if (result.assignments[i] !== current) {
+      current = result.assignments[i];
+      assert.ok(!seenLocations.has(current), `location ${current} reappeared non-contiguously at index ${i}`);
+      seenLocations.add(current);
+    }
+  }
+});
+
+test('splitContiguousWeightRanges: a higher-capacity gym gets a larger contiguous block to balance finish time', () => {
+  // Gym A has 2x the capacity of Gym B -> Gym A should get roughly 2x the bouts.
+  const weights = Array.from({ length: 9 }, (_, i) => ({ name: `W${i + 1}`, bouts: 2 })); // 18 total bouts
+  const result = splitContiguousWeightRanges(weights, [20, 10]); // A: 20/hr, B: 10/hr
+  assert.ok(result);
+  const groupA = result.groups.find((g) => g.locationIndex === 0);
+  const groupB = result.groups.find((g) => g.locationIndex === 1);
+  // A's capacity is 2x B's -> for balanced finish times A should carry ~2x B's bouts.
+  assert.ok(groupA.totalBouts > groupB.totalBouts);
+  assert.ok(result.spreadHours < 0.2); // finish times should be close
+});
+
+test('splitContiguousWeightRanges: returns null for empty weight list', () => {
+  assert.equal(splitContiguousWeightRanges([], [10, 10]), null);
+});
+
+test('splitContiguousWeightRanges: returns null when no location has positive capacity', () => {
+  const weights = [{ name: 'W1', bouts: 4 }];
+  assert.equal(splitContiguousWeightRanges(weights, [0, 0]), null);
+});
+
+test('splitContiguousWeightRanges: single location gets everything', () => {
+  const weights = [{ name: 'W1', bouts: 4 }, { name: 'W2', bouts: 6 }];
+  const result = splitContiguousWeightRanges(weights, [10]);
+  assert.deepEqual(result.assignments, [0, 0]);
+  assert.equal(result.groups[0].totalBouts, 10);
+});
+
