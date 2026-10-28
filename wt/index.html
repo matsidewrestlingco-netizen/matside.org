@@ -74,6 +74,14 @@
         </div>
 
         <div class="form-group">
+          <label for="wrestling-style">Style</label>
+          <select id="wrestling-style">
+            <option value="folkstyle" selected>Folkstyle</option>
+            <option value="freestyle_greco">Freestyle / Greco</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label for="level">Level</label>
           <select id="level">
             <option value="youth">Youth (1:00 periods)</option>
@@ -103,6 +111,48 @@
           <label for="num-weights">Number of Weight Classes</label>
           <input type="number" id="num-weights" min="1" max="50" value="10" required>
         </div>
+      </div>
+
+      <!-- Mat Schedule (mat count changes mid-event) -->
+      <div class="mat-schedule-section">
+        <div class="mat-schedule-header">
+          <h3>Mat Schedule <span class="optional">(optional)</span></h3>
+          <button type="button" id="btn-add-mat-change" class="btn-round-action">+ Add mat change</button>
+        </div>
+        <p class="hint">By default all mats run the whole event. Add a change if mats are added or dropped at a specific time (e.g. 8 mats → 4 mats at 4:00 PM Day 2).</p>
+        <div id="mat-schedule-rows" class="mat-schedule-rows"></div>
+      </div>
+
+      <!-- Period lengths (Folkstyle only this pass; Freestyle/Greco shown disabled) -->
+      <div class="period-config-section">
+        <div class="period-config-header">
+          <h3>Period Lengths <span class="hint" id="style-unsupported-hint"></span></h3>
+        </div>
+        <div class="period-config-grid">
+          <div class="period-config-group">
+            <span class="period-config-label">Championship (sec)</span>
+            <div class="period-inputs">
+              <input type="number" id="period-champ-1" min="0" class="period-input" title="Period 1">
+              <input type="number" id="period-champ-2" min="0" class="period-input" title="Period 2">
+              <input type="number" id="period-champ-3" min="0" class="period-input" title="Period 3">
+            </div>
+          </div>
+          <div class="period-config-group">
+            <span class="period-config-label">Consolation (sec)</span>
+            <div class="period-inputs">
+              <input type="number" id="period-cons-1" min="0" class="period-input" title="Period 1">
+              <input type="number" id="period-cons-2" min="0" class="period-input" title="Period 2">
+              <input type="number" id="period-cons-3" min="0" class="period-input" title="Period 3">
+            </div>
+          </div>
+          <div class="period-config-group">
+            <span class="period-config-label">Turnaround / bout (sec)</span>
+            <div class="period-inputs">
+              <input type="number" id="period-turnaround" min="0" value="90">
+            </div>
+          </div>
+        </div>
+        <p class="hint" id="youth-consolation-hint"></p>
       </div>
 
       <!-- Round Filter -->
@@ -246,6 +296,6 @@
     });
   </script>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>

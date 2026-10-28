@@ -1,6 +1,12 @@
 // ============================================================
 // Per-round bout data from spreadsheet (bracket size → bouts per round)
 // ============================================================
+import {
+  sortMatSchedule, matsAtTime, boutCapacityForInterval, timeToCompleteBouts, defaultMatSchedule,
+  roundKind, boutDurationSec, derivedBoutsPerHourPerMat,
+  FOLKSTYLE_LEVEL_PRESETS,
+} from './wt-timing.mjs';
+
 const ROUND_DATA = {
   top8: {
     rounds: ["R64","R32","CR32-1","CR32-2","R16","CR16-1","CR16-2","R8","CR8-1","CR8-2","Semis","CR4-1","CR4-2","Finals","Third","Fifth","Seventh"],
@@ -139,12 +145,17 @@ const BOUT_TABLE = {
   }
 };
 
-// Default bouts per hour per mat by level
-const DEFAULTS = {
-  youth: 14,
-  jh: 12,
-  hs: 10,
-};
+// Fallback "Bouts/Hour/Mat" placeholder shown before weight-class data
+// exists to compute a real derived value from period lengths — just the
+// championship-rate approximation from FOLKSTYLE_LEVEL_PRESETS, rounded.
+// Once bouts are entered, applyLevelDefault() replaces this with the
+// real weighted derivedBoutsPerHourPerMat() value (see below).
+function placeholderBoutsPerHour(level) {
+  const cfg = FOLKSTYLE_LEVEL_PRESETS[level];
+  if (!cfg) return 10;
+  const sec = cfg.championship.periods.reduce((a, b) => a + b, 0) + cfg.championship.turnaroundSec;
+  return Math.round((3600 / sec) * 10) / 10;
+}
 
 // ============================================================
 // DOM references
@@ -163,6 +174,23 @@ const endTimeDay1Group = document.getElementById("end-time-day1-group");
 const endTimeDay1Input = document.getElementById("end-time-day1");
 const startTimeDay2Group = document.getElementById("start-time-day2-group");
 const startTimeDay2Input = document.getElementById("start-time-day2");
+const startTimeDay1Input = document.getElementById("start-time-day1");
+const numMatsInput = document.getElementById("num-mats");
+
+// Style + period config (Mat Schedule & Period Timing, see
+// docs/superpowers/specs/2026-10-27-wt-mat-schedule-period-timing.md)
+const wrestlingStyleSelect = document.getElementById("wrestling-style");
+const styleUnsupportedHint = document.getElementById("style-unsupported-hint");
+const youthConsolationHint = document.getElementById("youth-consolation-hint");
+const periodChamp1 = document.getElementById("period-champ-1");
+const periodChamp2 = document.getElementById("period-champ-2");
+const periodChamp3 = document.getElementById("period-champ-3");
+const periodCons1 = document.getElementById("period-cons-1");
+const periodCons2 = document.getElementById("period-cons-2");
+const periodCons3 = document.getElementById("period-cons-3");
+const periodTurnaroundInput = document.getElementById("period-turnaround");
+const matScheduleRowsEl = document.getElementById("mat-schedule-rows");
+const btnAddMatChange = document.getElementById("btn-add-mat-change");
 
 // ============================================================
 // Helpers
@@ -229,17 +257,234 @@ function getBoutsFiltered(placing, wrestlers) {
 }
 
 // ============================================================
-// Level → default bouts/hour
+// Mat Schedule state (see spec §1 — matsAtTime)
+// ============================================================
+// matSchedule starts as the single-segment default mirroring today's
+// flat `Number of Mats` field. Additional segments are user-added via
+// "+ Add mat change". Kept at module scope so form submit / session
+// save-load / live mat status can all read it.
+let matSchedule = defaultMatSchedule(startTimeDay1Input.value, parseInt(numMatsInput.value) || 1);
+
+function syncFirstMatScheduleSegment() {
+  // Segment 1's day/time always mirrors Start Time Day 1 (spec §1 —
+  // "not independently editable"); its mats value mirrors the base
+  // Number of Mats field. Keep them in lockstep rather than letting
+  // the base field and segment 1 drift apart.
+  const sorted = sortMatSchedule(matSchedule);
+  if (sorted.length === 0) {
+    matSchedule = defaultMatSchedule(startTimeDay1Input.value, parseInt(numMatsInput.value) || 1);
+    return;
+  }
+  sorted[0] = { day: 1, time: startTimeDay1Input.value, mats: parseInt(numMatsInput.value) || 1 };
+  matSchedule = sorted;
+}
+
+function renderMatScheduleRows() {
+  matScheduleRowsEl.innerHTML = "";
+  const extraSegments = sortMatSchedule(matSchedule).slice(1); // segment 0 is the base field, not shown here
+
+  extraSegments.forEach((seg, i) => {
+    const row = document.createElement("div");
+    row.className = "mat-schedule-row";
+
+    const dayOptions = numDaysSelect.value === "2" ? [1, 2] : [1];
+
+    const daySelect = document.createElement("select");
+    daySelect.className = "mat-schedule-day";
+    dayOptions.forEach((d) => {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = `Day ${d}`;
+      if (d === seg.day) opt.selected = true;
+      daySelect.appendChild(opt);
+    });
+
+    const timeInput = document.createElement("input");
+    timeInput.type = "time";
+    timeInput.className = "mat-schedule-time";
+    timeInput.value = seg.time;
+
+    const matsInput = document.createElement("input");
+    matsInput.type = "number";
+    matsInput.className = "mat-schedule-mats";
+    matsInput.min = "1";
+    matsInput.max = "20";
+    matsInput.value = seg.mats;
+
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "btn-round-action";
+    removeBtn.textContent = "Remove";
+
+    function commit() {
+      const idx = i + 1; // +1 because extraSegments skips segment 0
+      const sorted = sortMatSchedule(matSchedule);
+      sorted[idx] = {
+        day: parseInt(daySelect.value),
+        time: timeInput.value,
+        mats: parseInt(matsInput.value) || 1,
+      };
+      matSchedule = sorted;
+      updateTotalBouts();
+    }
+
+    daySelect.addEventListener("change", commit);
+    timeInput.addEventListener("change", commit);
+    matsInput.addEventListener("input", commit);
+    removeBtn.addEventListener("click", function () {
+      const sorted = sortMatSchedule(matSchedule);
+      sorted.splice(i + 1, 1);
+      matSchedule = sorted;
+      renderMatScheduleRows();
+      updateTotalBouts();
+    });
+
+    row.appendChild(daySelect);
+    row.appendChild(timeInput);
+    row.appendChild(matsInput);
+    row.appendChild(removeBtn);
+    matScheduleRowsEl.appendChild(row);
+  });
+}
+
+btnAddMatChange.addEventListener("click", function () {
+  const sorted = sortMatSchedule(matSchedule);
+  const lastMats = sorted[sorted.length - 1]?.mats || parseInt(numMatsInput.value) || 1;
+  sorted.push({ day: numDaysSelect.value === "2" ? 2 : 1, time: "12:00", mats: lastMats });
+  matSchedule = sorted;
+  renderMatScheduleRows();
+  updateTotalBouts();
+});
+
+numMatsInput.addEventListener("input", function () {
+  syncFirstMatScheduleSegment();
+  updateTotalBouts();
+});
+startTimeDay1Input.addEventListener("change", function () {
+  syncFirstMatScheduleSegment();
+  updateTotalBouts();
+});
+
+// ============================================================
+// Period config + Style (see spec §2 — roundKind / boutDurationSec)
+// ============================================================
+// boutsPerHourOverridden: once the user hand-edits Bouts/Hour/Mat
+// directly, stop silently overwriting it from the derived period-based
+// calculation — their explicit number wins until they change Level or
+// a period field again (which resets the override, matching how
+// changing Level already used to just overwrite the field outright).
+let boutsPerHourOverridden = false;
+let periodConfig = buildPeriodConfigFromPresetAndFields();
+
+function buildPeriodConfigFromPresetAndFields() {
+  return {
+    style: "folkstyle", // only style with working math this pass — see spec §2 follow-up
+    championship: {
+      periods: [periodChamp1, periodChamp2, periodChamp3].map((el) => parseFloat(el.value) || 0),
+      turnaroundSec: parseFloat(periodTurnaroundInput.value) || 0,
+    },
+    consolation: {
+      periods: [periodCons1, periodCons2, periodCons3].map((el) => parseFloat(el.value) || 0),
+      turnaroundSec: parseFloat(periodTurnaroundInput.value) || 0,
+    },
+  };
+}
+
+function applyPeriodPreset(level) {
+  const preset = FOLKSTYLE_LEVEL_PRESETS[level];
+  if (!preset) return;
+  [periodChamp1, periodChamp2, periodChamp3].forEach((el, i) => { el.value = preset.championship.periods[i]; });
+  [periodCons1, periodCons2, periodCons3].forEach((el, i) => { el.value = preset.consolation.periods[i]; });
+  periodTurnaroundInput.value = preset.championship.turnaroundSec;
+  youthConsolationHint.textContent = level === "youth"
+    ? "Youth consolation periods default to the same as championship (no separate number confirmed yet) — edit above if different."
+    : "";
+}
+
+function updateStyleUnsupportedHint() {
+  const isFolkstyle = wrestlingStyleSelect.value === "folkstyle";
+  styleUnsupportedHint.textContent = isFolkstyle
+    ? ""
+    : "— not yet supported, showing Folkstyle timing (Freestyle/Greco is a tracked follow-up)";
+  // Freestyle/Greco period fields are disabled rather than hidden: the
+  // UI should make clear nothing was silently recomputed, not pretend
+  // the style selection took effect.
+  [periodChamp1, periodChamp2, periodChamp3, periodCons1, periodCons2, periodCons3, periodTurnaroundInput]
+    .forEach((el) => { el.disabled = !isFolkstyle; });
+}
+
+// ============================================================
+// Level → derived period lengths + Bouts/Hour/Mat
 // ============================================================
 function applyLevelDefault() {
   const level = levelSelect.value;
-  const def = DEFAULTS[level];
-  boutsPerHourInput.value = def;
-  defaultHint.textContent = `(default: ${def})`;
+  applyPeriodPreset(level);
+  periodConfig = buildPeriodConfigFromPresetAndFields();
+  boutsPerHourOverridden = false; // a level change resets any manual override
+  refreshDerivedBoutsPerHour();
 }
+
+function refreshDerivedBoutsPerHour() {
+  if (boutsPerHourOverridden) return;
+  periodConfig = buildPeriodConfigFromPresetAndFields();
+  // Use current weight-class data (if any) to weight championship vs.
+  // consolation bout mix; fall back to the championship-only placeholder
+  // before any weight data exists (see placeholderBoutsPerHour above).
+  const counts = currentBoutKindCounts();
+  const derived = counts
+    ? derivedBoutsPerHourPerMat(counts, periodConfig)
+    : null;
+  const value = derived ?? placeholderBoutsPerHour(levelSelect.value);
+  boutsPerHourInput.value = value;
+  defaultHint.textContent = `(derived from period lengths: ${value})`;
+}
+
+/** Sums championship vs. consolation bout counts from the currently
+ * entered weight classes + round filter, for the Bouts/Hour/Mat live
+ * hint. Returns null before any weight-class rows exist. */
+function currentBoutKindCounts() {
+  const placing = placingSelect.value;
+  const fmt = ROUND_DATA[placing];
+  if (!fmt) return null;
+  const inputs = weightInputsContainer.querySelectorAll(".weight-wrestler-input");
+  if (inputs.length === 0) return null;
+
+  let championship = 0;
+  let consolation = 0;
+  let any = false;
+  inputs.forEach((inp) => {
+    const wrestlers = parseInt(inp.value) || 0;
+    if (wrestlers < 6) return; // below ROUND_DATA table range — round-level split not available
+    const roundBouts = fmt.data[Math.min(wrestlers, 64)];
+    if (!roundBouts) return;
+    any = true;
+    for (let r = 0; r < roundBouts.length; r++) {
+      const roundName = fmt.rounds[r];
+      if (excludedRounds.has(roundName)) continue;
+      if (roundKind(roundName) === "consolation") consolation += roundBouts[r];
+      else championship += roundBouts[r];
+    }
+  });
+  return any ? { championship, consolation } : null;
+}
+
+boutsPerHourInput.addEventListener("input", function () {
+  boutsPerHourOverridden = true;
+  defaultHint.textContent = "(manually overridden — edit Level or a period field to re-derive)";
+});
+
+[periodChamp1, periodChamp2, periodChamp3, periodCons1, periodCons2, periodCons3, periodTurnaroundInput]
+  .forEach((el) => el.addEventListener("input", function () {
+    boutsPerHourOverridden = false; // hand-editing a period field re-enables live derivation
+    refreshDerivedBoutsPerHour();
+  }));
+
+wrestlingStyleSelect.addEventListener("change", updateStyleUnsupportedHint);
+updateStyleUnsupportedHint();
 
 levelSelect.addEventListener("change", applyLevelDefault);
 applyLevelDefault();
+renderMatScheduleRows();
 
 // ============================================================
 // Toggle 2-day fields
@@ -634,8 +879,16 @@ function renderMatStatus() {
 // (Resume-on-reload code moved to end of file — see bottom — so it runs
 // after every other top-level declaration, e.g. `floArena`, is initialized.)
 
-function syncTickerFromHourly() {
-  // Compute completed bouts and actual run rate from hourly actuals
+/**
+ * Measured bouts/hr across ALL mats combined, from hourly actuals —
+ * the single source of truth both the ticker (syncTickerFromHourly)
+ * and the hourly table's re-estimation (renderHourlyTable) now share,
+ * so they can no longer silently disagree about the live pace (see
+ * spec/bug-hunt 2026-10-27: the two used to compute this independently
+ * and drift apart once actuals came in).
+ * @returns {number|null} bouts/hr, or null if no actuals exist yet
+ */
+function computeMeasuredBoutsPerHour() {
   let completedBouts = 0;
   let actualMinutes = 0;
   let hasActuals = false;
@@ -648,10 +901,24 @@ function syncTickerFromHourly() {
     }
   }
 
+  if (!hasActuals || actualMinutes <= 0) return null;
+  return Math.round((completedBouts / (actualMinutes / 60)) * 10) / 10;
+}
+
+function syncTickerFromHourly() {
+  // Compute completed bouts and actual run rate from hourly actuals
+  let completedBouts = 0;
+  let hasActuals = false;
+
+  for (const block of hourlyBlocks) {
+    if (block.actual !== null) {
+      hasActuals = true;
+      completedBouts += block.actual;
+    }
+  }
+
   const remaining = Math.max(0, hourlyTotalBouts - completedBouts);
-  const actualRate = hasActuals && actualMinutes > 0
-    ? Math.round((completedBouts / (actualMinutes / 60)) * 10) / 10
-    : null;
+  const actualRate = computeMeasuredBoutsPerHour();
 
   // Estimate finish using actual rate if available, else configured rate
   const effectiveRate = actualRate || hourlyTotalBoutsPerHour;
@@ -873,18 +1140,23 @@ function buildHourlyBreakdown(totalBouts, mats, boutsPerHourPerMat, numDays, sta
   section.classList.remove("hidden");
   document.getElementById("floarena-section").classList.remove("hidden");
 
-  const totalBoutsPerHour = boutsPerHourPerMat * mats;
+  // totalBoutsPerHour is now mat-schedule-aware: each block looks up
+  // how many mats are active AT THAT BLOCK'S TIME via matsAtTime(), so
+  // a tournament that drops from 8 mats to 4 mid-event gets correct
+  // per-block pace instead of one constant rate for the whole event.
+  // hourlyTotalBoutsPerHour (used by the ticker/live re-estimation)
+  // reflects the CURRENT segment's rate, recomputed each render.
   hourlyTotalBouts = totalBouts;
-  hourlyTotalBoutsPerHour = totalBoutsPerHour;
+  hourlyTotalBoutsPerHour = boutsPerHourPerMat * matsAtTime(matSchedule, 1, timeToMinutes(startDay1));
 
   // Build time blocks for each day
   const days = [];
 
   if (numDays === 1) {
-    days.push({ label: null, startMin: timeToMinutes(startDay1), endMin: null });
+    days.push({ day: 1, label: null, startMin: timeToMinutes(startDay1), endMin: null });
   } else {
-    days.push({ label: "Day 1", startMin: timeToMinutes(startDay1), endMin: timeToMinutes(endDay1) });
-    days.push({ label: "Day 2", startMin: timeToMinutes(startDay2), endMin: null });
+    days.push({ day: 1, label: "Day 1", startMin: timeToMinutes(startDay1), endMin: timeToMinutes(endDay1) });
+    days.push({ day: 2, label: "Day 2", startMin: timeToMinutes(startDay2), endMin: null });
   }
 
   // Generate block definitions
@@ -909,14 +1181,27 @@ function buildHourlyBreakdown(totalBouts, mats, boutsPerHourPerMat, numDays, sta
 
       const blockMinutes = effectiveBlockEnd - blockStart;
       const blockFraction = blockMinutes / 60;
-      const estimated = Math.min(remaining, Math.round(totalBoutsPerHour * blockFraction));
+      // boutCapacityForInterval correctly integrates across a mid-block
+      // mat-schedule transition (e.g. 8→4 mats at 9:30 inside a
+      // 9:00–10:00 block) instead of sampling the mat count once at
+      // block start, which would silently over- or under-credit the
+      // block depending on which side of the transition it sampled.
+      const capacity = boutCapacityForInterval(matSchedule, day.day, blockStart, effectiveBlockEnd, boutsPerHourPerMat);
+      const matsThisBlock = matsAtTime(matSchedule, day.day, blockStart); // display only
+      const matsAtBlockEnd = matsAtTime(matSchedule, day.day, effectiveBlockEnd - 1);
+      const blockBoutsPerHour = blockFraction > 0 ? capacity / blockFraction : 0;
+      const estimated = Math.min(remaining, Math.round(capacity));
 
       remaining -= estimated;
 
       hourlyBlocks.push({
+        day: day.day,
         dayLabel: (numDays === 2 && blockStart === day.startMin) ? day.label : null,
         timeLabel: `${minutesToTime(blockStart)} – ${minutesToTime(effectiveBlockEnd)}`,
         blockFraction,
+        mats: matsThisBlock,
+        matsChangedMidBlock: matsThisBlock !== matsAtBlockEnd,
+        boutsPerHour: blockBoutsPerHour,
         estimated,
         actual: null,
       });
@@ -926,7 +1211,10 @@ function buildHourlyBreakdown(totalBouts, mats, boutsPerHourPerMat, numDays, sta
     }
   }
 
-  label.textContent = `${mats} mat${mats > 1 ? "s" : ""} at ${boutsPerHourPerMat} bouts/hr/mat (${totalBoutsPerHour} bouts/hr total)`;
+  const matsSummary = matSchedule.length > 1
+    ? `${mats} mats (schedule changes mid-event — see table)`
+    : `${mats} mat${mats > 1 ? "s" : ""}`;
+  label.textContent = `${matsSummary} at ${boutsPerHourPerMat} bouts/hr/mat`;
 
   renderHourlyTable();
 }
@@ -955,11 +1243,24 @@ function renderHourlyTable() {
     rows.push({ ...block, bouts, cumulative, remaining, isActual: block.actual !== null });
   }
 
-  // Re-estimate remaining blocks based on what's left
+  // Re-estimate remaining blocks based on what's left. Two things this
+  // fixes vs. the old code:
+  // 1. Mat-schedule-aware: each block uses its OWN boutsPerHour (set in
+  //    buildHourlyBreakdown via matsAtTime()), not one flat constant —
+  //    so a mid-event mat count drop is reflected in future blocks.
+  // 2. Rate-aware: once actuals exist, re-estimate future blocks using
+  //    the MEASURED actual rate (same computation as syncTickerFromHourly)
+  //    rather than the original configured rate. Before this fix the
+  //    hourly table's "Remaining" column and the ticker's "Live Finish"
+  //    silently disagreed — the ticker measured real pace while this
+  //    table kept projecting at the pre-event guess. Falls back to each
+  //    block's own configured rate when there are no actuals yet.
+  const measuredRatePerHour = computeMeasuredBoutsPerHour();
   let reRemaining = remaining;
   for (let i = lastActualIndex + 1; i < hourlyBlocks.length; i++) {
     const block = hourlyBlocks[i];
-    const estimated = Math.min(reRemaining, Math.round(hourlyTotalBoutsPerHour * block.blockFraction));
+    const effectiveRate = measuredRatePerHour ?? block.boutsPerHour;
+    const estimated = Math.min(reRemaining, Math.round(effectiveRate * block.blockFraction));
     reRemaining -= estimated;
     cumulative += estimated;
 
@@ -986,9 +1287,15 @@ function renderHourlyTable() {
     const isLast = row.remaining <= 0;
     const rowClass = isLast ? "final-row" : "";
     const actualVal = hourlyBlocks[i].actual !== null ? hourlyBlocks[i].actual : "";
+    // Flag blocks where a mat-schedule change happened mid-hour (see
+    // boutCapacityForInterval) — the Estimated figure is still correct,
+    // this just tells Daniel why it isn't a clean mats×rate number.
+    const matChangeNote = row.matsChangedMidBlock
+      ? ` <span title="Mat count changed during this block" style="opacity:0.65; font-size:0.78em;">⚠ mat change</span>`
+      : "";
 
     html += `<tr class="${rowClass}">
-      <td>${row.timeLabel}</td>
+      <td>${row.timeLabel}${matChangeNote}</td>
       <td class="num">${row.bouts}</td>
       <td class="num actual-cell"><input type="number" class="actual-input" data-block="${i}" min="0" value="${actualVal}" placeholder="—"></td>
       <td class="num">${row.cumulative}</td>
@@ -1263,7 +1570,8 @@ function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, start
   section.classList.remove("hidden");
 
   const rounds = fmt.rounds;
-  const totalBoutsPerHour = boutsPerHourPerMat * mats;
+  const matsForLabel = matsAtTime(matSchedule, 1, timeToMinutes(startTime));
+  const totalBoutsPerHour = boutsPerHourPerMat * matsForLabel;
 
   // Sum bouts across all weights for each round
   const roundTotals = rounds.map((_, r) => {
@@ -1288,23 +1596,35 @@ function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, start
     return;
   }
 
-  label.textContent = `${mats} mat${mats > 1 ? "s" : ""} at ${boutsPerHourPerMat} bouts/hr/mat (${totalBoutsPerHour} bouts/hr total)`;
+  const matsSummary = matSchedule.length > 1
+    ? `${mats} mats (schedule changes mid-event — see Mat Status column)`
+    : `${mats} mat${mats > 1 ? "s" : ""}`;
+  label.textContent = `${matsSummary} at ${boutsPerHourPerMat} bouts/hr/mat`;
 
-  // Calculate timing for each round
+  // Calculate timing for each round. Mat-schedule-aware: each round's
+  // duration is computed with timeToCompleteBouts(), which correctly
+  // steps across a mid-round mat-count transition (e.g. a round that
+  // starts at 8 mats and runs long enough to hit a scheduled drop to 4)
+  // instead of assuming one constant rate for the whole schedule.
   let currentMin = timeToMinutes(startTime);
   let cumulativeBouts = 0;
   const totalBouts = activeRounds.reduce((sum, r) => sum + r.bouts, 0);
 
   let rowsHtml = "";
   for (const round of activeRounds) {
-    const roundMinutes = (round.bouts / totalBoutsPerHour) * 60;
+    const matsAtRoundStart = matsAtTime(matSchedule, 1, currentMin);
+    const roundMinutes = timeToCompleteBouts(matSchedule, 1, currentMin, round.bouts, boutsPerHourPerMat);
     const startMinForRound = currentMin;
     const endMinForRound = currentMin + roundMinutes;
+    const matsAtRoundEnd = matsAtTime(matSchedule, 1, Math.max(startMinForRound, endMinForRound - 1));
     cumulativeBouts += round.bouts;
     const remaining = totalBouts - cumulativeBouts;
+    const matChangeNote = matsAtRoundStart !== matsAtRoundEnd
+      ? ` <span title="Mat count changed during this round" style="opacity:0.65; font-size:0.78em;">⚠ mat change</span>`
+      : "";
 
     rowsHtml += `<tr>
-      <td>${round.name}</td>
+      <td>${round.name}${matChangeNote}</td>
       <td class="num">${round.bouts}</td>
       <td class="num">${formatDuration(roundMinutes)}</td>
       <td class="num">${minutesToTime(startMinForRound)}</td>
@@ -1371,11 +1691,20 @@ function buildRoundMap(weightData, placing) {
 
   section.classList.remove("hidden");
 
-  const rounds = fmt.rounds;
+  // Respect the Round Filter checkboxes — previously the Round Map
+  // ignored excludedRounds entirely and summed every round
+  // unconditionally, so its Total column could disagree with the
+  // headline "Total Bouts" figure (e.g. excluding Seventh dropped the
+  // headline total by 1 but the Round Map kept showing the old total).
+  const roundIndexes = fmt.rounds
+    .map((name, i) => ({ name, i }))
+    .filter(({ name }) => !excludedRounds.has(name));
+  const rounds = roundIndexes.map(({ name }) => name);
 
-  // Build grid: each weight → array of bouts per round
+  // Build grid: each weight → array of bouts per round (filtered)
   const grid = validWeights.map((w) => {
-    const roundBouts = fmt.data[w.wrestlers] || rounds.map(() => 0);
+    const fullRoundBouts = fmt.data[w.wrestlers] || fmt.rounds.map(() => 0);
+    const roundBouts = roundIndexes.map(({ i }) => fullRoundBouts[i]);
     return { name: w.name, wrestlers: w.wrestlers, roundBouts };
   });
 
