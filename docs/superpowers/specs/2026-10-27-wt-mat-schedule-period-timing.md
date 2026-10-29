@@ -306,10 +306,10 @@ Minimum coverage before shipping:
 
 ## Open questions for Daniel (flag at build time, don't guess)
 
-1. Youth folkstyle **consolation** periods — Daniel gave 60-60-60 for
-   youth generally; defaulting consolation to the same 60-60-60 absent
-   a separate number. Confirm or correct once the UI is in front of
-   him.
+1. ~~Youth folkstyle **consolation** periods~~ — **Resolved 2026-10-28**:
+   Daniel confirmed consolation is 60-60-60, identical to championship,
+   no change. `FOLKSTYLE_LEVEL_PRESETS.youth` in `wt-timing.mjs` reflects
+   this as a confirmed value, not a default/assumption.
 2. Hourly Breakdown round-awareness: weighted-average approximation
    (recommended, simpler) vs. full per-round block modeling (more
    accurate, bigger change) — this spec recommends the former for v1.

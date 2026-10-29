@@ -360,9 +360,8 @@ export function chunkBoutsByDay(segments) {
  */
 
 /** Level presets for Folkstyle, confirmed by Daniel 2026-10-27.
- * Youth has no separate consolation number from Daniel — defaults to
- * the same periods as championship; flagged in the UI as an assumption
- * (see spec §2, "Open questions"). */
+ * Youth: championship and consolation are BOTH 60-60-60, confirmed
+ * identical (not a default/assumption) by Daniel 2026-10-28. */
 export const FOLKSTYLE_LEVEL_PRESETS = {
   youth: {
     championship: { periods: [60, 60, 60], turnaroundSec: 90 },
