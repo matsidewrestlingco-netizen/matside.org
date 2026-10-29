@@ -124,6 +124,139 @@ export function defaultMatSchedule(startTimeDay1, numMats) {
 }
 
 /**
+ * Build the day-segment definitions (day, startMin, endMin) used by every
+ * day-aware scheduling calculation: the headline Estimate, the Hourly
+ * Breakdown, and the Round Schedule. ONE place that defines "what are the
+ * tournament's day windows" so all three features agree on day boundaries.
+ * Only a non-final day gets an endMin (the final day is open-ended) —
+ * matches the convention buildHourlyBreakdown already used internally.
+ *
+ * @param {1|2} numDays
+ * @param {string} startTimeDay1 - "HH:MM"
+ * @param {string} endTimeDay1 - "HH:MM", ignored if numDays === 1
+ * @param {string} startTimeDay2 - "HH:MM", ignored if numDays === 1
+ * @returns {{day:1|2, label:string|null, startMin:number, endMin:number|null}[]}
+ */
+export function buildDaySegments(numDays, startTimeDay1, endTimeDay1, startTimeDay2) {
+  if (numDays === 1) {
+    return [{ day: 1, label: null, startMin: timeToMinutesLocal(startTimeDay1), endMin: null }];
+  }
+  return [
+    { day: 1, label: 'Day 1', startMin: timeToMinutesLocal(startTimeDay1), endMin: timeToMinutesLocal(endTimeDay1) },
+    { day: 2, label: 'Day 2', startMin: timeToMinutesLocal(startTimeDay2), endMin: null },
+  ];
+}
+
+/**
+ * Walk a sequence of bout "chunks" (e.g. one chunk for the whole
+ * tournament's headline Estimated Finish, or one chunk per round for the
+ * Round Schedule) across one or more tournament days, respecting BOTH:
+ *  - day end-time boundaries: a chunk that would run past a day's endMin
+ *    is split — the part that fits stays on that day, the remainder
+ *    rolls over to the next day's startMin.
+ *  - the mat schedule: within a day, duration/capacity is computed via
+ *    timeToCompleteBouts()/boutCapacityForInterval(), so a mid-event mat
+ *    count change is still respected exactly as it already is elsewhere.
+ *
+ * This is the single engine behind the headline "Estimated Finish" card,
+ * the Hourly Breakdown, and the Round Schedule — before this function
+ * existed, the headline card used its own simplified flat-rate day-split
+ * math while the Hourly Breakdown had its own separate (correct, mat-
+ * schedule-aware) day-split logic, and the two could silently disagree.
+ * Round Schedule had NO day-boundary logic at all. Using one function
+ * for all three makes that class of bug structurally impossible.
+ *
+ * A chunk whose bouts span a day boundary produces TWO (or more, in a
+ * pathological >2-day-window sense, though this app only models up to
+ * 2 days) result rows, each flagged with crossesDayBoundary so callers
+ * can render a "Day 1 ends here / Day 2 resumes here" marker.
+ *
+ * @param {{day:1|2, label:string|null, startMin:number, endMin:number|null}[]} days
+ * @param {{label:string, bouts:number}[]} chunks
+ * @param {MatScheduleSegment[]} matSchedule
+ * @param {number} boutsPerHourPerMat
+ * @returns {Array<{
+ *   chunkLabel:string, chunkBouts:number, boutsThisSegment:number,
+ *   day:1|2, dayLabel:string|null, startMin:number, endMin:number,
+ *   crossesDayBoundary:boolean, isFirstSegmentOfChunk:boolean,
+ *   isLastSegmentOfChunk:boolean,
+ * }>}
+ */
+export function scheduleChunksAcrossDays(days, chunks, matSchedule, boutsPerHourPerMat) {
+  const results = [];
+  let dayIdx = 0;
+  let cursorMin = days.length > 0 ? days[0].startMin : 0;
+
+  for (const chunk of chunks) {
+    let boutsRemaining = chunk.bouts;
+    let firstPartOfChunk = true;
+
+    // Defensive: a zero-bout chunk (e.g. an excluded/empty round) still
+    // gets exactly one zero-length result row at the current cursor, so
+    // callers can render a row for every chunk without special-casing.
+    if (boutsRemaining <= 0) {
+      const day = days[Math.min(dayIdx, days.length - 1)];
+      results.push({
+        chunkLabel: chunk.label, chunkBouts: 0, boutsThisSegment: 0,
+        day: day.day, dayLabel: day.label, startMin: cursorMin, endMin: cursorMin,
+        crossesDayBoundary: false, isFirstSegmentOfChunk: true, isLastSegmentOfChunk: true,
+      });
+      continue;
+    }
+
+    while (boutsRemaining > 0) {
+      if (dayIdx >= days.length) dayIdx = days.length - 1; // out of days — pile onto the last one
+      const day = days[dayIdx];
+
+      // If we're sitting exactly at (or past) this day's end with another
+      // day available, roll over before computing anything for this day.
+      if (day.endMin !== null && cursorMin >= day.endMin && dayIdx < days.length - 1) {
+        dayIdx += 1;
+        cursorMin = days[dayIdx].startMin;
+        continue;
+      }
+
+      const minutesIfUnbounded = timeToCompleteBouts(matSchedule, day.day, cursorMin, boutsRemaining, boutsPerHourPerMat);
+      const endMinIfUnbounded = cursorMin + minutesIfUnbounded;
+      const fitsInDay = day.endMin === null || endMinIfUnbounded <= day.endMin;
+
+      if (fitsInDay) {
+        results.push({
+          chunkLabel: chunk.label, chunkBouts: chunk.bouts, boutsThisSegment: boutsRemaining,
+          day: day.day, dayLabel: day.label, startMin: cursorMin, endMin: endMinIfUnbounded,
+          crossesDayBoundary: !firstPartOfChunk, isFirstSegmentOfChunk: firstPartOfChunk, isLastSegmentOfChunk: true,
+        });
+        cursorMin = endMinIfUnbounded;
+        boutsRemaining = 0;
+      } else {
+        const capacity = boutCapacityForInterval(matSchedule, day.day, cursorMin, day.endMin, boutsPerHourPerMat);
+        const boutsThisDay = Math.max(0, Math.min(boutsRemaining, Math.floor(capacity)));
+        results.push({
+          chunkLabel: chunk.label, chunkBouts: chunk.bouts, boutsThisSegment: boutsThisDay,
+          day: day.day, dayLabel: day.label, startMin: cursorMin, endMin: day.endMin,
+          crossesDayBoundary: !firstPartOfChunk, isFirstSegmentOfChunk: firstPartOfChunk, isLastSegmentOfChunk: false,
+        });
+        boutsRemaining -= boutsThisDay;
+        firstPartOfChunk = false;
+
+        if (dayIdx < days.length - 1) {
+          dayIdx += 1;
+          cursorMin = days[dayIdx].startMin;
+        } else if (boutsThisDay <= 0) {
+          // No more days AND no progress possible (e.g. 0 mats active for
+          // the rest of the window) — bail out rather than spin forever.
+          boutsRemaining = 0;
+        } else {
+          cursorMin = day.endMin;
+        }
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
  * Inverse of boutCapacityForInterval: given a starting (day, minute) and
  * a number of bouts that need to run at boutsPerHourPerMat, find how
  * many minutes it takes — correctly stepping across any mat-schedule
@@ -194,6 +327,27 @@ const CONSOLATION_ROUND_RE = /^CR|^Third$|^Fifth$|^Seventh$/;
  */
 export function roundKind(roundName) {
   return CONSOLATION_ROUND_RE.test(roundName) ? 'consolation' : 'championship';
+}
+
+/**
+ * Reduce scheduleChunksAcrossDays() segments to per-chunk, per-day bout
+ * totals. Used by the Venue Splitter: it needs "how many of weight X's
+ * Round of 16 bouts happen on Day 1 vs Day 2" at ROUND granularity (the
+ * splitter then allocates each weight class's own per-round bout counts
+ * proportionally using these round-level day fractions) — see
+ * splitWeightBoutsByDay in script.js for the weight-class-level usage.
+ *
+ * @param {ReturnType<typeof scheduleChunksAcrossDays>} segments
+ * @returns {Map<string, {1?: number, 2?: number}>} chunkLabel -> bouts per day
+ */
+export function chunkBoutsByDay(segments) {
+  const result = new Map();
+  for (const seg of segments) {
+    if (!result.has(seg.chunkLabel)) result.set(seg.chunkLabel, {});
+    const entry = result.get(seg.chunkLabel);
+    entry[seg.day] = (entry[seg.day] || 0) + seg.boutsThisSegment;
+  }
+  return result;
 }
 
 /**
@@ -287,3 +441,135 @@ export function derivedBoutsPerHourPerMat(boutCountsByKind, periodConfig) {
   const avgSecPerBout = totalSec / totalBouts;
   return Math.round((3600 / avgSecPerBout) * 10) / 10;
 }
+
+// ============================================================
+// Venue Splitter — splitContiguousWeightRanges()
+// ============================================================
+
+/**
+ * Split an ORDERED list of weight classes into N contiguous ranges (one
+ * per location), e.g. weights 1–6 -> Gym A, 7–10 -> Gym B — never
+ * scattering individual weight classes (1,3,5,7 at one gym, 2,4,6,8 at
+ * another), because in practice that's hard to run and confusing to
+ * announce to parents (per Daniel, 2026-10-28).
+ *
+ * Chooses BOTH the cut points AND which location each resulting
+ * contiguous block goes to, to minimize the spread between the
+ * earliest- and latest-finishing location — locations with more mat
+ * capacity can and should get a larger contiguous block so everyone
+ * finishes around the same time (per Daniel: balance finish time is
+ * the priority, blocks can be uneven sizes).
+ *
+ * Brute-forces every way to place (locations.length - 1) cut points
+ * among the weight classes (compositions, allowing empty blocks when
+ * there are more locations than weight classes) combined with every
+ * permutation of which block goes to which location. Fine for the
+ * realistic sizes here (tens of weight classes, up to ~4 locations —
+ * worst case around a few thousand partition x permutation combinations,
+ * well under a millisecond-scale budget in a browser).
+ *
+ * @param {{name:string, bouts:number}[]} weights - in natural weight order (ascending)
+ * @param {number[]} locationBoutsPerHour - capacity per location, SAME order as the caller's location list
+ * @returns {{
+ *   assignments: number[],  // locationIndex for each weight index (length === weights.length)
+ *   groups: Array<{locationIndex:number, startIdx:number, endIdx:number, totalBouts:number, finishHours:number}>,
+ *   spreadHours: number,
+ * }|null} null if weights is empty or no location has positive capacity
+ */
+export function splitContiguousWeightRanges(weights, locationBoutsPerHour) {
+  const n = weights.length;
+  const k = locationBoutsPerHour.length;
+  if (n === 0 || k === 0) return null;
+  if (locationBoutsPerHour.every((c) => !c || c <= 0)) return null;
+
+  const prefix = [0];
+  for (const w of weights) prefix.push(prefix[prefix.length - 1] + (w.bouts || 0));
+
+  // Generate every composition of n items into k ordered (possibly
+  // empty) contiguous groups: boundaries 0 = b0 <= b1 <= ... <= bk = n.
+  const boundaries = [];
+  function genBoundaries(partial) {
+    if (partial.length === k - 1) {
+      boundaries.push([0, ...partial, n]);
+      return;
+    }
+    const lastBound = partial.length === 0 ? 0 : partial[partial.length - 1];
+    for (let b = lastBound; b <= n; b++) {
+      genBoundaries([...partial, b]);
+    }
+  }
+  genBoundaries([]);
+
+  // Every permutation of [0..k-1] — which location each ordered block maps to.
+  const permutations = [];
+  function genPerms(arr, used) {
+    if (arr.length === k) {
+      permutations.push([...arr]);
+      return;
+    }
+    for (let loc = 0; loc < k; loc++) {
+      if (used.has(loc)) continue;
+      used.add(loc);
+      genPerms([...arr, loc], used);
+      used.delete(loc);
+    }
+  }
+  genPerms([], new Set());
+
+  let best = null;
+
+  for (const bounds of boundaries) {
+    for (const perm of permutations) {
+      const groups = [];
+      let feasible = true;
+      for (let g = 0; g < k; g++) {
+        const startIdx = bounds[g];
+        const endIdx = bounds[g + 1]; // exclusive
+        const locationIndex = perm[g];
+        const capacity = locationBoutsPerHour[locationIndex];
+        const totalBouts = prefix[endIdx] - prefix[startIdx];
+        if (totalBouts > 0 && (!capacity || capacity <= 0)) { feasible = false; break; }
+        const finishHours = capacity > 0 ? totalBouts / capacity : 0;
+        groups.push({ locationIndex, startIdx, endIdx, totalBouts, finishHours });
+      }
+      if (!feasible) continue;
+
+      // Spread = max finish time across ALL locations with real capacity
+      // minus the min — including locations assigned ZERO bouts (they
+      // "finish" at time 0, so giving one location everything while
+      // another sits idle is correctly penalized with a large spread,
+      // rather than silently excluded from the comparison).
+      const finishesAtRealCapacity = groups
+        .filter((g) => locationBoutsPerHour[g.locationIndex] > 0)
+        .map((g) => g.finishHours);
+      const spreadHours = finishesAtRealCapacity.length > 0
+        ? Math.max(...finishesAtRealCapacity) - Math.min(...finishesAtRealCapacity)
+        : 0;
+      // Tie-break: prefer the permutation closest to "identity" (block g,
+      // in ascending weight order, maps to location g) — i.e. earlier
+      // weight classes go to the first-listed location by default. Without
+      // this, ties (equally-good spread) resolve arbitrarily by iteration
+      // order, which can flip which location gets the LOW weights vs the
+      // HIGH weights between otherwise-identical runs.
+      const identityDistance = perm.reduce((sum, locIdx, g) => sum + Math.abs(locIdx - g), 0);
+
+      if (
+        best === null ||
+        spreadHours < best.spreadHours - 1e-9 ||
+        (Math.abs(spreadHours - best.spreadHours) <= 1e-9 && identityDistance < best.identityDistance)
+      ) {
+        best = { bounds, groups, spreadHours, identityDistance };
+      }
+    }
+  }
+
+  if (best === null) return null;
+
+  const assignments = new Array(n);
+  for (const g of best.groups) {
+    for (let i = g.startIdx; i < g.endIdx; i++) assignments[i] = g.locationIndex;
+  }
+
+  return { assignments, groups: best.groups, spreadHours: best.spreadHours };
+}
+

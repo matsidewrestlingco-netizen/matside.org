@@ -645,6 +645,18 @@ input::placeholder {
   border-top: 2px solid var(--border-light);
 }
 
+.round-schedule-section tr.day-marker-row td {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85em;
+  letter-spacing: 0.02em;
+  padding: 0.5rem;
+  background: var(--bg-raised);
+  color: var(--accent-bright);
+  border-top: 2px solid var(--accent-bright);
+  border-bottom: 2px solid var(--accent-bright);
+}
+
 /* Round Map */
 .roundmap-section {
   margin-top: 2rem;

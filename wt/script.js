@@ -3,8 +3,10 @@
 // ============================================================
 import {
   sortMatSchedule, matsAtTime, boutCapacityForInterval, timeToCompleteBouts, defaultMatSchedule,
+  buildDaySegments, scheduleChunksAcrossDays, chunkBoutsByDay,
   roundKind, boutDurationSec, derivedBoutsPerHourPerMat,
   FOLKSTYLE_LEVEL_PRESETS,
+  splitContiguousWeightRanges,
 } from './wt-timing.mjs';
 
 const ROUND_DATA = {
@@ -973,9 +975,21 @@ form.addEventListener("submit", function (e) {
   lastWeightData = weightData;
   lastBoutsPerHourPerMat = boutsPerHourPerMat;
   lastStartDay1 = startDay1;
+  lastPlacing = placing;
+  lastNumDays = numDays;
+  lastEndDay1 = endDay1;
+  lastStartDay2 = startDay2;
 
   // Show splitter section
   document.getElementById("splitter-section").classList.remove("hidden");
+  const splitterDayGroup = document.getElementById("splitter-day-group");
+  const splitterDaySelect = document.getElementById("splitter-day");
+  if (numDays === 1) {
+    splitterDayGroup.classList.add("hidden");
+    splitterDaySelect.value = "1";
+  } else {
+    splitterDayGroup.classList.remove("hidden");
+  }
 
   // Total bouts per hour across all mats
   const totalBoutsPerHour = boutsPerHourPerMat * mats;
@@ -1026,11 +1040,27 @@ form.addEventListener("submit", function (e) {
   const dayBreakdown = document.getElementById("day-breakdown");
   const summaryEl = document.getElementById("summary-text");
 
+  // Per Daniel (2026-10-28): the headline "Estimated Finish" card and the
+  // Hourly Breakdown table were silently disagreeing. Root cause: this
+  // block used its own simplified flat-rate day-split math (just dividing
+  // totalBouts/totalBoutsPerHour and clamping at Day 1's end time) while
+  // buildHourlyBreakdown had its OWN separate, correct, mat-schedule-aware
+  // day-split logic — two independent calculations of "when does this
+  // finish" that could drift apart whenever mats changed mid-event or a
+  // round didn't divide evenly into clock hours. Fixed by routing this
+  // card through the exact same scheduleChunksAcrossDays() engine the
+  // Hourly Breakdown and Round Schedule now both use — one calculation,
+  // three displays, cannot disagree again.
+  const days = buildDaySegments(numDays, startDay1, endDay1, startDay2);
+  const headlineSegments = scheduleChunksAcrossDays(days, [{ label: "All bouts", bouts: totalBouts }], matSchedule, boutsPerHourPerMat);
+  const lastSegment = headlineSegments[headlineSegments.length - 1];
+  const finalEndMin = lastSegment.endMin;
+  const finishedOnDay2 = numDays === 2 && lastSegment.day === 2;
+
   if (numDays === 1) {
     const startMin = timeToMinutes(startDay1);
-    const endMin = startMin + totalMinutes;
 
-    document.getElementById("result-end-time").textContent = minutesToTime(endMin);
+    document.getElementById("result-end-time").textContent = minutesToTime(finalEndMin);
 
     dayBreakdown.classList.add("hidden");
 
@@ -1039,24 +1069,19 @@ form.addEventListener("submit", function (e) {
       `at <strong>${boutsPerHourPerMat} bouts/hr/mat</strong> = ` +
       `<strong>${totalBoutsPerHour} bouts/hr</strong> total.<br>` +
       `Starting at <strong>${minutesToTime(startMin)}</strong>, ` +
-      `estimated finish around <strong>${minutesToTime(endMin)}</strong>.`;
+      `estimated finish around <strong>${minutesToTime(finalEndMin)}</strong>.`;
   } else {
     const startDay1Min = timeToMinutes(startDay1);
     const endDay1Min = timeToMinutes(endDay1);
     const startDay2Min = timeToMinutes(startDay2);
 
-    const day1AvailableMin = endDay1Min - startDay1Min;
-    const day1AvailableHours = day1AvailableMin / 60;
-    const day1Bouts = Math.floor(day1AvailableHours * totalBoutsPerHour);
-    const day1ActualBouts = Math.min(day1Bouts, totalBouts);
-
+    const day1ActualBouts = headlineSegments
+      .filter((s) => s.day === 1)
+      .reduce((sum, s) => sum + s.boutsThisSegment, 0);
     const day2Bouts = totalBouts - day1ActualBouts;
-    const day2Hours = day2Bouts / totalBoutsPerHour;
-    const day2Minutes = day2Hours * 60;
-    const day2EndMin = startDay2Min + day2Minutes;
 
     document.getElementById("result-end-time").textContent =
-      minutesToTime(day2EndMin) + " (Day 2)";
+      finishedOnDay2 ? minutesToTime(finalEndMin) + " (Day 2)" : minutesToTime(finalEndMin) + " (Day 1)";
 
     dayBreakdown.classList.remove("hidden");
     dayBreakdown.innerHTML = `
@@ -1069,24 +1094,28 @@ form.addEventListener("submit", function (e) {
             <td><strong>Day 1</strong></td>
             <td>${day1ActualBouts}</td>
             <td>${minutesToTime(startDay1Min)}</td>
-            <td>${minutesToTime(endDay1Min)}</td>
+            <td>${finishedOnDay2 ? minutesToTime(endDay1Min) : minutesToTime(finalEndMin)}</td>
           </tr>
           <tr>
             <td><strong>Day 2</strong></td>
             <td>${day2Bouts}</td>
             <td>${minutesToTime(startDay2Min)}</td>
-            <td>${minutesToTime(day2EndMin)}</td>
+            <td>${finishedOnDay2 ? minutesToTime(finalEndMin) : "—"}</td>
           </tr>
         </tbody>
       </table>
     `;
 
-    summaryEl.innerHTML =
-      `<strong>${totalBouts} bouts</strong> across <strong>${mats} mat${mats > 1 ? "s" : ""}</strong> ` +
-      `at <strong>${boutsPerHourPerMat} bouts/hr/mat</strong>.<br>` +
-      `Day 1: ~<strong>${day1ActualBouts} bouts</strong> (${minutesToTime(startDay1Min)} – ${minutesToTime(endDay1Min)}).<br>` +
-      `Day 2: ~<strong>${day2Bouts} bouts</strong> remaining, ` +
-      `finishing around <strong>${minutesToTime(day2EndMin)}</strong>.`;
+    summaryEl.innerHTML = finishedOnDay2
+      ? (`<strong>${totalBouts} bouts</strong> across <strong>${mats} mat${mats > 1 ? "s" : ""}</strong> ` +
+         `at <strong>${boutsPerHourPerMat} bouts/hr/mat</strong>.<br>` +
+         `Day 1: ~<strong>${day1ActualBouts} bouts</strong> (${minutesToTime(startDay1Min)} – ${minutesToTime(endDay1Min)}).<br>` +
+         `Day 2: ~<strong>${day2Bouts} bouts</strong> remaining, ` +
+         `finishing around <strong>${minutesToTime(finalEndMin)}</strong>.`)
+      : (`<strong>${totalBouts} bouts</strong> across <strong>${mats} mat${mats > 1 ? "s" : ""}</strong> ` +
+         `at <strong>${boutsPerHourPerMat} bouts/hr/mat</strong>.<br>` +
+         `All bouts fit in Day 1 — estimated finish around <strong>${minutesToTime(finalEndMin)}</strong>. ` +
+         `Day 2 is not needed for this tournament size.`);
   }
 
   // ============================================================
@@ -1095,7 +1124,7 @@ form.addEventListener("submit", function (e) {
   buildHourlyBreakdown(totalBouts, mats, boutsPerHourPerMat, numDays, startDay1, endDay1, startDay2);
 
   // Round schedule
-  buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, startDay1);
+  buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, numDays, startDay1, endDay1, startDay2);
 
   // Round map
   buildRoundMap(weightData, placing);
@@ -1349,6 +1378,10 @@ const btnSplit = document.getElementById("btn-split");
 let lastWeightData = [];
 let lastBoutsPerHourPerMat = 10;
 let lastStartDay1 = "09:00";
+let lastPlacing = "top8";
+let lastNumDays = 1;
+let lastEndDay1 = "18:00";
+let lastStartDay2 = "09:00";
 
 function buildLocationInputs() {
   const count = parseInt(numLocationsSelect.value);
@@ -1398,6 +1431,90 @@ buildLocationInputs();
 // Persistent assignment: weightIndex → locationIndex
 let splitterAssignments = {};
 let splitterLocations = [];
+let lastSplitterDayWeights = []; // day-filtered {name,wrestlers,bouts,origIndex}[], set by btnSplit's handler
+let lastSplitterTargetDay = 1;
+
+function targetDayStartTime() {
+  return lastSplitterTargetDay === 2 ? lastStartDay2 : lastStartDay1;
+}
+
+/**
+ * For a given day (1 or 2), compute each weight class's bout count for
+ * JUST that day. A round's TOTAL bout count across all weight classes is
+ * one chronological chunk in the schedule (see buildRoundSchedule) — if
+ * that chunk straddles the day boundary, we don't know exactly WHICH
+ * weight classes' individual bouts happened before vs after midnight, so
+ * each weight class's contribution to that round is apportioned using
+ * the SAME day-fraction the round as a whole split at (e.g. if Round of
+ * 16 was 75% Day 1 / 25% Day 2 overall, every weight class's Round of 16
+ * bouts are split 75/25 too). This is an approximation where a round
+ * crosses days, and exact where it doesn't (the common case).
+ * @param {{name:string,wrestlers:number,bouts:number}[]} weightData
+ * @param {string} placing
+ * @param {number} numDays
+ * @param {string} startDay1
+ * @param {string} endDay1
+ * @param {string} startDay2
+ * @param {Array} matSchedule
+ * @param {number} boutsPerHourPerMat
+ * @param {Set<string>} excludedRoundsSet
+ * @param {1|2} targetDay
+ * @returns {{name:string, wrestlers:number, bouts:number}[]} same shape/order as weightData, bouts = this day's share
+ */
+function weightBoutsForDay(weightData, placing, numDays, startDay1, endDay1, startDay2, matSchedule, boutsPerHourPerMat, excludedRoundsSet, targetDay) {
+  if (numDays === 1 || targetDay == null) {
+    return weightData.map((w) => ({ name: w.name, wrestlers: w.wrestlers, bouts: w.bouts }));
+  }
+
+  const fmt = ROUND_DATA[placing];
+  if (!fmt) return weightData.map((w) => ({ name: w.name, wrestlers: w.wrestlers, bouts: 0 }));
+
+  const validWeights = weightData.filter((w) => w.wrestlers >= 6 && w.wrestlers <= 64);
+  const rounds = fmt.rounds;
+  const roundTotals = rounds.map((_, r) => {
+    let total = 0;
+    for (const w of validWeights) {
+      const roundBouts = fmt.data[w.wrestlers];
+      if (roundBouts) total += roundBouts[r];
+    }
+    return total;
+  });
+  const activeRoundNames = [];
+  const activeRoundBouts = [];
+  for (let r = 0; r < rounds.length; r++) {
+    if (roundTotals[r] > 0 && !excludedRoundsSet.has(rounds[r])) {
+      activeRoundNames.push(rounds[r]);
+      activeRoundBouts.push(roundTotals[r]);
+    }
+  }
+
+  const days = buildDaySegments(numDays, startDay1, endDay1, startDay2);
+  const chunks = activeRoundNames.map((name, i) => ({ label: name, bouts: activeRoundBouts[i] }));
+  const segments = scheduleChunksAcrossDays(days, chunks, matSchedule, boutsPerHourPerMat);
+  const byDay = chunkBoutsByDay(segments);
+
+  // dayFraction[roundIndex] = fraction of that round's total bouts that
+  // fall on targetDay (1 if the round doesn't cross days, else the
+  // proportional split computed above).
+  const dayFraction = activeRoundNames.map((name, i) => {
+    const entry = byDay.get(name) || {};
+    const onTargetDay = entry[targetDay] || 0;
+    const total = activeRoundBouts[i];
+    return total > 0 ? onTargetDay / total : 0;
+  });
+
+  return weightData.map((w) => {
+    if (w.wrestlers < 6 || w.wrestlers > 64) return { name: w.name, wrestlers: w.wrestlers, bouts: 0 };
+    const roundBouts = fmt.data[w.wrestlers];
+    if (!roundBouts) return { name: w.name, wrestlers: w.wrestlers, bouts: 0 };
+    let total = 0;
+    for (let i = 0; i < activeRoundNames.length; i++) {
+      const roundIndex = rounds.indexOf(activeRoundNames[i]);
+      total += (roundBouts[roundIndex] || 0) * dayFraction[i];
+    }
+    return { name: w.name, wrestlers: w.wrestlers, bouts: Math.round(total) };
+  });
+}
 
 btnSplit.addEventListener("click", function () {
   if (lastWeightData.length === 0) {
@@ -1407,32 +1524,48 @@ btnSplit.addEventListener("click", function () {
 
   readLocations();
 
-  // Filter to weight classes that have bouts
-  const weights = lastWeightData
-    .filter((w) => w.bouts > 0)
-    .map((w, i) => ({ ...w, origIndex: lastWeightData.indexOf(w) }));
+  const splitterDaySelect = document.getElementById("splitter-day");
+  const targetDay = lastNumDays === 2 ? parseInt(splitterDaySelect.value) : 1;
+  lastSplitterTargetDay = targetDay;
 
-  // Auto-assign using LPT algorithm
-  const locTotals = splitterLocations.map(() => 0);
+  // Day-filtered bout counts (per Daniel: splitting needs to look at
+  // ONE day's bouts at a time, not the whole tournament).
+  const dayFilteredWeights = weightBoutsForDay(
+    lastWeightData, lastPlacing, lastNumDays, lastStartDay1, lastEndDay1, lastStartDay2,
+    matSchedule, lastBoutsPerHourPerMat, excludedRounds, targetDay
+  );
 
-  // Sort by bouts descending
-  const sorted = [...weights].sort((a, b) => b.bouts - a.bouts);
+  // Keep natural weight-class ORDER (ascending, as entered) and original
+  // indices, filtering to weights that have bouts on this day.
+  const weights = dayFilteredWeights
+    .map((w, i) => ({ ...w, origIndex: i }))
+    .filter((w) => w.bouts > 0);
+
+  if (weights.length === 0) {
+    splitterAssignments = {};
+    lastSplitterDayWeights = [];
+    renderSplitterResults();
+    return;
+  }
+
+  // Per Daniel (2026-10-28): the old algorithm scattered weight classes
+  // (e.g. 2/4/6/8 at one gym, 1/3/5/7 at another) because it greedily
+  // load-balanced one weight class at a time with no regard for keeping
+  // runs contiguous — hard to run in practice and confusing to announce
+  // to parents. splitContiguousWeightRanges() instead only considers
+  // splits into CONTIGUOUS, ordered weight-class ranges (e.g. 1–6 at
+  // Gym A, 7–10 at Gym B), choosing the cut points AND which location
+  // gets which range to balance finish time (capacity-aware — a gym
+  // with more mats can and should get a bigger contiguous range).
+  const locationBoutsPerHour = splitterLocations.map((l) => l.boutsPerHour);
+  const splitResult = splitContiguousWeightRanges(weights, locationBoutsPerHour);
 
   splitterAssignments = {};
-  for (const w of sorted) {
-    let bestIdx = 0;
-    let bestTime = Infinity;
-
-    for (let i = 0; i < splitterLocations.length; i++) {
-      const time = locTotals[i] / splitterLocations[i].boutsPerHour;
-      if (time < bestTime) {
-        bestTime = time;
-        bestIdx = i;
-      }
-    }
-
-    splitterAssignments[w.origIndex] = bestIdx;
-    locTotals[bestIdx] += w.bouts;
+  lastSplitterDayWeights = weights;
+  if (splitResult) {
+    weights.forEach((w, i) => {
+      splitterAssignments[w.origIndex] = splitResult.assignments[i];
+    });
   }
 
   renderSplitterResults();
@@ -1453,7 +1586,7 @@ function renderSplitterResults() {
   const resultsDiv = document.getElementById("splitter-results");
   resultsDiv.classList.remove("hidden");
 
-  const startMin = timeToMinutes(lastStartDay1);
+  const startMin = timeToMinutes(targetDayStartTime());
 
   // Build location groups from assignments
   const groups = splitterLocations.map((loc) => ({
@@ -1464,7 +1597,7 @@ function renderSplitterResults() {
   }));
 
   for (const [wIdx, locIdx] of Object.entries(splitterAssignments)) {
-    const w = lastWeightData[parseInt(wIdx)];
+    const w = lastSplitterDayWeights.find((dw) => dw.origIndex === parseInt(wIdx));
     if (w && w.bouts > 0) {
       groups[locIdx].weights.push({ ...w, origIndex: parseInt(wIdx) });
       groups[locIdx].totalBouts += w.bouts;
@@ -1484,6 +1617,12 @@ function renderSplitterResults() {
     // Sort weights by name
     group.weights.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
+    const weightRangeLabel = group.weights.length > 0
+      ? (group.weights.length === 1
+          ? group.weights[0].name
+          : `${group.weights[0].name}–${group.weights[group.weights.length - 1].name}`)
+      : "no weights";
+
     let weightRows = group.weights
       .map((w) => {
         // Build select with current location pre-selected
@@ -1502,7 +1641,7 @@ function renderSplitterResults() {
     cardsHtml += `
       <div class="venue-card">
         <div class="venue-card-header">
-          <span>${group.name} (${group.mats} mat${group.mats > 1 ? "s" : ""})</span>
+          <span>${group.name} (${group.mats} mat${group.mats > 1 ? "s" : ""}) — ${weightRangeLabel}</span>
           <span class="venue-time">Finish ~${minutesToTime(finishMin)}</span>
         </div>
         <div class="venue-card-body">
@@ -1535,6 +1674,7 @@ function renderSplitterResults() {
       ${cardsHtml}
     </div>
     <div class="summary">
+      ${lastNumDays === 2 ? `<strong>Day ${lastSplitterTargetDay}</strong> bouts only.<br>` : ""}
       Estimated spread: <strong>${diffMin} minutes</strong> between earliest and latest venue finish.
     </div>
   `;
@@ -1553,7 +1693,7 @@ function renderSplitterResults() {
 // ============================================================
 // Round Schedule
 // ============================================================
-function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, startTime) {
+function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, numDays, startDay1, endDay1, startDay2) {
   const section = document.getElementById("round-schedule-section");
   const container = document.getElementById("round-schedule-container");
   const label = document.getElementById("round-schedule-label");
@@ -1570,7 +1710,7 @@ function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, start
   section.classList.remove("hidden");
 
   const rounds = fmt.rounds;
-  const matsForLabel = matsAtTime(matSchedule, 1, timeToMinutes(startTime));
+  const matsForLabel = matsAtTime(matSchedule, 1, timeToMinutes(startDay1));
   const totalBoutsPerHour = boutsPerHourPerMat * matsForLabel;
 
   // Sum bouts across all weights for each round
@@ -1599,42 +1739,65 @@ function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, start
   const matsSummary = matSchedule.length > 1
     ? `${mats} mats (schedule changes mid-event — see Mat Status column)`
     : `${mats} mat${mats > 1 ? "s" : ""}`;
-  label.textContent = `${matsSummary} at ${boutsPerHourPerMat} bouts/hr/mat`;
+  label.textContent = numDays === 2
+    ? `${matsSummary} at ${boutsPerHourPerMat} bouts/hr/mat — spans ${numDays} days`
+    : `${matsSummary} at ${boutsPerHourPerMat} bouts/hr/mat`;
 
-  // Calculate timing for each round. Mat-schedule-aware: each round's
-  // duration is computed with timeToCompleteBouts(), which correctly
-  // steps across a mid-round mat-count transition (e.g. a round that
-  // starts at 8 mats and runs long enough to hit a scheduled drop to 4)
-  // instead of assuming one constant rate for the whole schedule.
-  let currentMin = timeToMinutes(startTime);
-  let cumulativeBouts = 0;
+  // Per Daniel (2026-10-28): "It doesn't take into consideration the
+  // number of days or anything like that... I need this to be clear,
+  // work for the number of days that we are using, and then the start
+  // and stop times that are listed for the days we are using." Fixed by
+  // routing every round through scheduleChunksAcrossDays() — the SAME
+  // day-aware, mat-schedule-aware engine the headline Estimate and
+  // Hourly Breakdown use — instead of just running rounds back-to-back
+  // from Day 1's start time forever with no day-boundary awareness.
+  // A round that would run past the configured end time for the day
+  // (e.g. past Day 1's end time) now splits: the part that fits stays
+  // on that day, the remainder resumes at the next day's start time,
+  // with an explicit "— Day 2 begins —" marker row so Daniel's "what
+  // round are we wrestling through tonight / when will we finish"
+  // questions have one clear, correct answer to point to.
+  const days = buildDaySegments(numDays, startDay1, endDay1, startDay2);
+  const chunks = activeRounds.map((r) => ({ label: r.name, bouts: r.bouts }));
+  const segments = scheduleChunksAcrossDays(days, chunks, matSchedule, boutsPerHourPerMat);
+
   const totalBouts = activeRounds.reduce((sum, r) => sum + r.bouts, 0);
-
+  let cumulativeBouts = 0;
   let rowsHtml = "";
-  for (const round of activeRounds) {
-    const matsAtRoundStart = matsAtTime(matSchedule, 1, currentMin);
-    const roundMinutes = timeToCompleteBouts(matSchedule, 1, currentMin, round.bouts, boutsPerHourPerMat);
-    const startMinForRound = currentMin;
-    const endMinForRound = currentMin + roundMinutes;
-    const matsAtRoundEnd = matsAtTime(matSchedule, 1, Math.max(startMinForRound, endMinForRound - 1));
-    cumulativeBouts += round.bouts;
+  let lastDaySeen = null;
+
+  for (const seg of segments) {
+    if (numDays === 2 && seg.day !== lastDaySeen) {
+      rowsHtml += `<tr class="day-marker-row"><td colspan="7">— ${seg.dayLabel} begins at ${minutesToTime(seg.startMin)} —</td></tr>`;
+      lastDaySeen = seg.day;
+    }
+
+    const matsAtSegStart = matsAtTime(matSchedule, seg.day, seg.startMin);
+    const matsAtSegEnd = matsAtTime(matSchedule, seg.day, Math.max(seg.startMin, seg.endMin - 1));
+    cumulativeBouts += seg.boutsThisSegment;
     const remaining = totalBouts - cumulativeBouts;
-    const matChangeNote = matsAtRoundStart !== matsAtRoundEnd
-      ? ` <span title="Mat count changed during this round" style="opacity:0.65; font-size:0.78em;">⚠ mat change</span>`
+    const notes = [];
+    if (matsAtSegStart !== matsAtSegEnd) notes.push("mat change");
+    if (seg.crossesDayBoundary || !seg.isLastSegmentOfChunk) notes.push("continues next day");
+    const noteHtml = notes.length
+      ? ` <span title="${notes.join(', ')}" style="opacity:0.65; font-size:0.78em;">⚠ ${notes.join(' / ')}</span>`
       : "";
+    const roundLabel = seg.isLastSegmentOfChunk && seg.isFirstSegmentOfChunk
+      ? seg.chunkLabel
+      : (seg.isFirstSegmentOfChunk ? `${seg.chunkLabel} (part 1)` : `${seg.chunkLabel} (part 2)`);
 
     rowsHtml += `<tr>
-      <td>${round.name}${matChangeNote}</td>
-      <td class="num">${round.bouts}</td>
-      <td class="num">${formatDuration(roundMinutes)}</td>
-      <td class="num">${minutesToTime(startMinForRound)}</td>
-      <td class="num">${minutesToTime(endMinForRound)}</td>
+      <td>${roundLabel}${noteHtml}</td>
+      <td class="num">${seg.boutsThisSegment}</td>
+      <td class="num">${formatDuration(seg.endMin - seg.startMin)}</td>
+      <td class="num">${minutesToTime(seg.startMin)}</td>
+      <td class="num">${minutesToTime(seg.endMin)}</td>
       <td class="num">${cumulativeBouts}</td>
       <td class="num">${remaining}</td>
     </tr>`;
-
-    currentMin = endMinForRound;
   }
+
+  const finalEndMin = segments[segments.length - 1].endMin;
 
   container.innerHTML = `
     <table>
@@ -1655,8 +1818,8 @@ function buildRoundSchedule(weightData, placing, mats, boutsPerHourPerMat, start
           <td>Total</td>
           <td class="num">${totalBouts}</td>
           <td class="num">${formatDuration((totalBouts / totalBoutsPerHour) * 60)}</td>
-          <td class="num">${minutesToTime(timeToMinutes(startTime))}</td>
-          <td class="num">${minutesToTime(currentMin)}</td>
+          <td class="num">${minutesToTime(timeToMinutes(startDay1))}</td>
+          <td class="num">${minutesToTime(finalEndMin)}</td>
           <td class="num">${totalBouts}</td>
           <td class="num">0</td>
         </tr>
