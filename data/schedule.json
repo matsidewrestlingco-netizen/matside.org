@@ -17,7 +17,7 @@
         {
           "date": "2026-12-13",
           "name": "MSWA Future Champions #2",
-          "location": "Eastern Tech HS, MD"
+          "location": "Chesapeake HS (Baltimore County), MD"
         },
         {
           "date": "2026-12-19",
@@ -28,12 +28,17 @@
         {
           "date": "2026-12-20",
           "name": "MSWA Future Champions #3",
-          "location": "St. Andrew's Episcopal School, MD"
+          "location": "Poolesville HS, MD"
         },
         {
           "date": "2026-12-20",
           "name": "MSWA First Ever Girls-only Tournament",
           "location": "McDaniel College, MD"
+        },
+        {
+          "date": "2026-12-27",
+          "name": "MSWA Future Champions #4",
+          "location": "Queen Anne's County HS, MD"
         },
         {
           "date": "2027-01-02",
@@ -43,7 +48,7 @@
         },
         {
           "date": "2027-01-02",
-          "name": "MSWA Future Champions #4",
+          "name": "MSWA Future Champions #5",
           "location": "Huntingtown HS, MD"
         },
         {
@@ -59,6 +64,11 @@
           "location": "Shaler Area HS"
         },
         {
+          "date": "2027-01-09",
+          "name": "MSWA Future Champions #6",
+          "location": "South Carroll HS, MD"
+        },
+        {
           "date": "2027-01-10",
           "name": "Kurt J Nellis Memorial Tournament",
           "location": "Shaler Area HS",
@@ -72,13 +82,13 @@
         },
         {
           "date": "2027-01-17",
-          "name": "MSWA Future Champions #5",
+          "name": "MSWA Future Champions #7",
           "location": "C. Milton Wright HS, MD"
         },
         {
           "date": "2027-01-17",
           "name": "Mason Dixon Duals",
-          "location": "TBD"
+          "location": "McDonogh School, MD"
         },
         {
           "date": "2027-01-22",
@@ -92,7 +102,7 @@
         },
         {
           "date": "2027-01-24",
-          "name": "MSWA Future Champions #6",
+          "name": "MSWA Future Champions #8",
           "location": "Mount Saint Joseph HS, MD"
         },
         {
@@ -104,12 +114,12 @@
         },
         {
           "date": "2027-01-31",
-          "name": "MSWA Future Champions #7",
+          "name": "MSWA Future Champions #9",
           "location": "Howard HS, MD"
         },
         {
           "date": "2027-02-06",
-          "name": "MSWA Future Champions #8",
+          "name": "MSWA Future Champions #10",
           "location": "Kent Island HS, MD"
         },
         {
